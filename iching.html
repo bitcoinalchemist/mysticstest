@@ -698,20 +698,20 @@
       font-size: .875rem; color: var(--secondary); line-height: 1.82;
     }
     .ccard-footer {
-      padding: .9rem 1.75rem;
-      border-top: 1px solid var(--border);
-      background: var(--surface);
+      padding: 1rem 1.75rem;
+      background: var(--accent);
+      border-radius: 0 0 var(--r-lg) var(--r-lg);
       display: flex; justify-content: center; align-items: center;
     }
-    .ic-line-display { display: flex; align-items: center; gap: 7px; }
+    .ic-line-display { display: flex; align-items: center; gap: 8px; }
     .ic-line-seg {
-      height: 5px; border-radius: 2px;
-      background: var(--rule-strong);
+      height: 7px; border-radius: 2px;
+      background: rgba(255,255,255,.8);
       transition: background var(--ease);
     }
     .ic-line-seg.changing { background: var(--gold); }
-    .ic-yang-seg { width: 64px; }
-    .ic-yin-seg  { width: 26px; }
+    .ic-yang-seg { width: 72px; }
+    .ic-yin-seg  { width: 32px; }
     .spread-card.clickable { cursor: pointer; }
   </style>
 </head>
