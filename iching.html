@@ -638,14 +638,16 @@
     .ccard-close:hover { background: var(--rule); color: var(--text); }
     .ccard-nav {
       position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-      width: 2rem; height: 3.5rem;
+      width: 1.5rem; height: 3.5rem;
       display: flex; align-items: center; justify-content: center;
       color: var(--muted); font-size: 1rem;
-      opacity: 0; transition: opacity var(--ease), color var(--ease);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--ease), color var(--ease);
       cursor: pointer; border-radius: var(--r-sm);
     }
-    .ccard-nav-prev { left: .35rem; }
-    .ccard-nav-next { right: .35rem; }
+    .ccard-popup:hover .ccard-nav { pointer-events: auto; }
+    .ccard-nav-prev { left: 0; }
+    .ccard-nav-next { right: 0; }
     .ccard-popup:hover .ccard-nav { opacity: 1; }
     .ccard-nav:hover { color: var(--text); }
     .ccard-nav:focus { outline: none; }
