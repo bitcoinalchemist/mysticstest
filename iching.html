@@ -1397,7 +1397,6 @@
   });
 
   // ── Cast card popup ──────────────────────────────────────
-  function loadCardInFinder() { window.location.href = 'quadration.html'; }
   document.getElementById('ccardOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeCompareCard();
   });
@@ -1451,9 +1450,6 @@
     <div class="ccard-keywords" id="ccKws"></div>
     <div class="ccard-body">
       <div class="ccard-personality" id="ccPersonality"></div>
-    </div>
-    <div class="ccard-footer">
-      <button class="ccard-load-btn" onclick="event.stopPropagation(); loadCardInFinder()">Open full profile →</button>
     </div>
   </div>
 </div>
