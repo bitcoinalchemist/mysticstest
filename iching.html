@@ -1404,34 +1404,18 @@
     openCompareCard(findCardIdx(draws[idx]));
   }
 
-  function navigateCast(dir) {
+  // Exposed globally so HTML onclick and the post-DOM script can reach it
+  window.navigateCast = function(dir) {
     _castIdx = (_castIdx + dir + draws.length) % draws.length;
     openCompareCard(findCardIdx(draws[_castIdx]));
-  }
+  };
 
-  // Close on backdrop click
-  document.getElementById('ccardOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeCompareCard();
-  });
-
-  // Keyboard: Escape closes, arrows navigate
+  // Keyboard: Escape closes, arrows navigate (document exists at setup time)
   document.addEventListener('keydown', function(e) {
     if (!document.getElementById('ccardOverlay').classList.contains('open')) return;
-    if (e.key === 'Escape')     { closeCompareCard(); return; }
-    if (e.key === 'ArrowLeft')  { navigateCast(-1);   return; }
-    if (e.key === 'ArrowRight') { navigateCast(1);    return; }
-  });
-
-  // Touch swipe
-  var _touchStartX = null;
-  document.getElementById('ccardPopup').addEventListener('touchstart', function(e) {
-    _touchStartX = e.touches[0].clientX;
-  }, { passive: true });
-  document.getElementById('ccardPopup').addEventListener('touchend', function(e) {
-    if (_touchStartX === null) return;
-    var dx = e.changedTouches[0].clientX - _touchStartX;
-    _touchStartX = null;
-    if (Math.abs(dx) > 50) navigateCast(dx < 0 ? 1 : -1);
+    if (e.key === 'Escape')     { closeCompareCard();      return; }
+    if (e.key === 'ArrowLeft')  { window.navigateCast(-1); return; }
+    if (e.key === 'ArrowRight') { window.navigateCast(1);  return; }
   });
 
   // Restore last reading from a previous visit
@@ -1484,6 +1468,24 @@
   </div>
 </div>
 
+<script>
+// Popup backdrop click + touch swipe — runs after the overlay HTML exists
+(function(){
+  document.getElementById('ccardOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCompareCard();
+  });
+  var _tx = null;
+  document.getElementById('ccardPopup').addEventListener('touchstart', function(e) {
+    _tx = e.touches[0].clientX;
+  }, { passive: true });
+  document.getElementById('ccardPopup').addEventListener('touchend', function(e) {
+    if (_tx === null) return;
+    var dx = e.changedTouches[0].clientX - _tx;
+    _tx = null;
+    if (Math.abs(dx) > 50) window.navigateCast(dx < 0 ? 1 : -1);
+  });
+})();
+</script>
 <footer class="site-footer"><div class="sf-inner"></div></footer>
 </body>
 </html>
