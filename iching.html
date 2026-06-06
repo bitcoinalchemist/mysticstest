@@ -586,6 +586,44 @@
       .hex-ref-cell .mini-line.yin-seg-l { width: 7px; }
       .hex-ref-cell .mini-line.yin-seg-r { width: 7px; margin-left: 6px; }
     }
+
+    /* ── Cast card popup ── */
+    .ic-cov {
+      display: none; position: fixed; inset: 0; z-index: 400;
+      background: rgba(26,25,22,.52);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .ic-cov.open { display: flex; }
+    .ic-cpop {
+      background: var(--surface); border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
+      max-width: 220px; width: 100%; position: relative;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 1.75rem 1.5rem 1.5rem; gap: .85rem;
+      animation: hxIn .22s cubic-bezier(.23,1,.32,1);
+    }
+    .ic-cpop::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      border-radius: 14px 14px 0 0; background: var(--rule-strong);
+    }
+    .ic-cpop.hearts::before, .ic-cpop.diamonds::before { background: var(--red); }
+    .ic-cpop.clubs::before, .ic-cpop.spades::before { background: var(--accent); }
+    .ic-cpop-close {
+      position: absolute; top: .75rem; right: .75rem;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--surface-alt); border: 1px solid var(--rule);
+      font-size: .72rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all var(--ease);
+    }
+    .ic-cpop-close:hover { background: var(--rule); color: var(--text); }
+    .spread-card.ic-cpop-face { width: 90px; height: 126px; cursor: default; opacity: 1; transform: none; }
+    .ic-cpop-name { font-family: var(--serif); font-size: 1.25rem; text-align: center; line-height: 1.2; color: var(--text); }
+    .ic-cpop-line { font-family: var(--mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+    .ic-cpop-type { font-family: var(--sans); font-size: .72rem; color: var(--muted); font-weight: 500; }
+    .ic-cpop-type.changing { color: var(--gold); }
+    .spread-card.clickable { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -910,6 +948,8 @@
   var RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   var COURTS = ['J','Q','K'];
   var RED_SUITS = ['♥','♦'];
+  var RANK_NAMES = {A:'Ace',J:'Jack',Q:'Queen',K:'King','2':'Two','3':'Three','4':'Four','5':'Five','6':'Six','7':'Seven','8':'Eight','9':'Nine','10':'Ten'};
+  var SUIT_NAMES = {'♥':'Hearts','♦':'Diamonds','♣':'Clubs','♠':'Spades'};
 
   function buildDeck() {
     var deck = [];
@@ -1154,9 +1194,10 @@
     no.className = 'cl-no';
     no.textContent = idx + 1;
     var el = document.createElement('div');
-    el.className = 'spread-card ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '') + (visible ? ' visible' : '');
+    el.className = 'spread-card clickable ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '') + (visible ? ' visible' : '');
     el.title = 'Line ' + (idx + 1) + ' · ' + card.rank + card.suit;
     el.innerHTML = cardFaceHTML(card);
+    el.addEventListener('click', function() { openCardPopup(card, idx); });
     wrap.appendChild(no);
     wrap.appendChild(el);
     return { wrap: wrap, el: el };
@@ -1263,6 +1304,32 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); castAll(); }
   });
 
+  // ── Cast card popup ──────────────────────────────────────
+  function openCardPopup(card, lineIdx) {
+    var pop = document.getElementById('icCpop');
+    var face = document.getElementById('icCpopFace');
+    pop.className = 'ic-cpop ' + SUIT_CLASS[card.suit];
+    face.className = 'spread-card ic-cpop-face ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '');
+    face.innerHTML = cardFaceHTML(card);
+    document.getElementById('icCpopName').textContent = RANK_NAMES[card.rank] + ' of ' + SUIT_NAMES[card.suit];
+    document.getElementById('icCpopLine').textContent = 'Line ' + (lineIdx + 1);
+    var lt = card.court ? (card.red ? 'Old Yang · Changing' : 'Old Yin · Changing') : (card.red ? 'Young Yang' : 'Young Yin');
+    var typeEl = document.getElementById('icCpopType');
+    typeEl.textContent = lt;
+    typeEl.className = 'ic-cpop-type' + (card.court ? ' changing' : '');
+    document.getElementById('icCov').classList.add('open');
+  }
+  function closeCardPopup() {
+    document.getElementById('icCov').classList.remove('open');
+  }
+  document.getElementById('icCpopClose').addEventListener('click', closeCardPopup);
+  document.getElementById('icCov').addEventListener('click', function(e) {
+    if (e.target === this) closeCardPopup();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('icCov').classList.contains('open')) closeCardPopup();
+  });
+
   // Restore last reading from a previous visit
   try {
     var saved = JSON.parse(localStorage.getItem('iching_last') || 'null');
@@ -1291,6 +1358,17 @@
   document.addEventListener('click',function(){nav.classList.remove('open');});
 })();
 </script>
+<!-- ── Cast card popup ── -->
+<div class="ic-cov" id="icCov">
+  <div class="ic-cpop" id="icCpop">
+    <button class="ic-cpop-close" id="icCpopClose">✕</button>
+    <div class="spread-card ic-cpop-face" id="icCpopFace"></div>
+    <div class="ic-cpop-name" id="icCpopName"></div>
+    <div class="ic-cpop-line" id="icCpopLine"></div>
+    <div class="ic-cpop-type" id="icCpopType"></div>
+  </div>
+</div>
+
 <footer class="site-footer"><div class="sf-inner"></div></footer>
 </body>
 </html>
