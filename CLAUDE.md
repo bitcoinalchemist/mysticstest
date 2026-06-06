@@ -14,6 +14,8 @@ A hub site (`index.html`) linking to standalone tool pages. All files live toget
 
 ## File inventory
 
+**Site files (root — these are what gets deployed/pushed to GitHub):**
+
 | File | Purpose |
 |------|---------|
 | `index.html` | Hub — 2×2 grid of clickable cards linking to each tool |
@@ -25,6 +27,15 @@ A hub site (`index.html`) linking to standalone tool pages. All files live toget
 | `dozenal.js` | Calculator logic (exact rational arithmetic) |
 | `ichingdata.js` | `window.HEX_DATA` — 64 Sage-voice oracle answers (one per hexagram) |
 | `linedata.js` | `window.LINE_DATA` — 384 Sage-voice moving-line texts (6 lines × 64 hexagrams) |
+
+**Dev tooling (`dev/` — not deployed, just for local development):**
+
+| File | Purpose |
+|------|---------|
+| `dev/_template.html` | Boilerplate template for new pages |
+| `dev/check.sh` | Consistency checker — run with `bash dev/check.sh` |
+| `dev/serve.sh` | Local dev server — run with `bash dev/serve.sh` |
+| `dev/snapshot.sh` | Legacy snapshot script (superseded by git, kept for reference) |
 
 ---
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # check.sh — verify structural consistency across all site pages
-# Usage: bash check.sh
+# Usage: bash dev/check.sh  (run from Super root, or: bash check.sh from inside dev/)
 # Exits 0 if all checks pass, 1 if any fail.
 
-DIR="$(cd "$(dirname "$0")" && pwd)"
+# Site files live one level up from this script
+DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PAGES=(index.html iching.html bip39.html calculator.html quadration.html)
 NAV_LINKS=("quadration.html" "calculator.html" "iching.html" "bip39.html")
 

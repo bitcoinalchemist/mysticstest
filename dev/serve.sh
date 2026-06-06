@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # serve.sh — start a local dev server for the tools site
-# Usage: bash serve.sh [port]
+# Usage: bash dev/serve.sh [port]  (run from Super root, or: bash serve.sh from inside dev/)
 # Then open http://localhost:8080 (or your chosen port) in a browser.
 
 PORT="${1:-8080}"
-DIR="$(cd "$(dirname "$0")" && pwd)"
+# Site files live one level up from this script
+DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 echo ""
 echo "  mysticscards.space — local dev server"
