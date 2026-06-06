@@ -78,6 +78,8 @@ git commit -m "brief description of what changed"
 
 **Revert caveat:** The bash mount cannot overwrite existing files, so `git checkout -- <file>` will fail. To revert a file, use `git show <hash>:<file>` to read the old content, then write it back with the host Write/Edit tool.
 
+**Lock file caveat:** If a commit fails with `cannot lock ref 'HEAD'`, the `.git/HEAD.lock` file got stuck. Remove it with `rm /sessions/<session>/mnt/Super/.git/HEAD.lock`. If `rm` itself fails with Permission denied, use the `mcp__cowork__allow_cowork_file_delete` tool first.
+
 `snapshot.sh` and `versions/` are kept as pre-git history but are no longer used.
 
 ---
