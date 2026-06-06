@@ -1338,27 +1338,19 @@
   </style>
 </head>
 <body>
-
-<!-- ── Site header ───────────────────────────────────────────────── -->
-<header class="site-header" id="siteHeader">
-  <div class="sh-inner">
-    <a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>
-    <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
-    <nav class="sh-nav" id="shNav">
-      <a href="quadration.html" class="active mob-link">Playing Cards</a>
-      <a href="calculator.html" class="mob-link">Calculator</a>
-      <a href="iching.html" class="mob-link">I Ching</a>
-      <a href="bip39.html" class="mob-link">BIP39</a>
-      <hr>
-      <button class="tool-btn mob-link" onclick="openCompareModal()">Spirit &amp; Life Chart ↗</button>
-      <button class="tool-btn mob-link" onclick="openCalendarModal()">Year Calendar ↗</button>
-      <button class="tool-btn mob-link" onclick="openSVModal()">Solar Values ↗</button>
-      <button class="tool-btn mob-link" onclick="openSyncModal()">Synchronicities ↗</button>
-      <button class="tool-btn mob-link" onclick="openPlanetsModal()">Planets ↗</button>
-      <button class="tool-btn mob-link" onclick="openInfoModal()">Info ↗</button>
-    </nav>
-  </div>
-</header>
+<script src="site.js"></script>
+<script>
+// Append quadration-specific tool buttons to the shared nav
+document.getElementById('shNav').insertAdjacentHTML('beforeend',
+  '<hr>' +
+  '<button class="tool-btn" onclick="openCompareModal()">Spirit &amp; Life Chart ↗</button>' +
+  '<button class="tool-btn" onclick="openCalendarModal()">Year Calendar ↗</button>' +
+  '<button class="tool-btn" onclick="openSVModal()">Solar Values ↗</button>' +
+  '<button class="tool-btn" onclick="openSyncModal()">Synchronicities ↗</button>' +
+  '<button class="tool-btn" onclick="openPlanetsModal()">Planets ↗</button>' +
+  '<button class="tool-btn" onclick="openInfoModal()">Info ↗</button>'
+);
+</script>
 
 <!-- ── Unified Card Finder ───────────────────────────────────────── -->
 <section class="finder" id="finder" style="scroll-margin-top:64px">
@@ -2192,14 +2184,6 @@ window.addEventListener('scroll', () => {
 window.addEventListener('scroll', () => {
   document.getElementById('siteHeader').classList.toggle('scrolled', scrollY > 10);
 });
-(function(){
-  var btn=document.getElementById('burgerBtn'), nav=document.getElementById('shNav');
-  btn.addEventListener('click', function(e){ e.stopPropagation(); nav.classList.toggle('open'); });
-  document.querySelectorAll('.mob-link').forEach(function(l){
-    l.addEventListener('click', function(){ nav.classList.remove('open'); });
-  });
-  document.addEventListener('click', function(){ nav.classList.remove('open'); });
-})();
 
 
 

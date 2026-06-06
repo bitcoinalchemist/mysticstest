@@ -3,199 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>I Ching × BIP39</title>
+  <title>BIP39 — mysticscards.space</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="site.css" />
   <style>
-    /* ── Page content padding override ── */
-    .page-content { padding-top: 3rem; }
-
-    /* ── page nav ── */
-    .page-content nav {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      font-size: 0.8rem;
-      margin-bottom: 2.5rem;
-    }
-    .page-content nav a {
-      color: var(--muted);
-      text-decoration: none;
-      font-family: var(--mono);
-      letter-spacing: 0.02em;
-    }
-    .page-content nav a:hover { color: var(--accent); }
-
-    /* ── Bit diagrams ── */
-    .bit-diagram { display: flex; flex-direction: column; gap: 0.5rem; margin: 1.25rem 0; }
-    .bit-row { display: flex; align-items: center; gap: 0.75rem; }
-    .bit-label { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); width: 3.5rem; text-align: right; }
-    .bit-strip { display: flex; gap: 3px; }
-    .bit { width: 22px; height: 22px; border: 1.5px solid var(--rule); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.7rem; font-weight: 600; }
-    .bit.b1 { background: var(--yang); color: white; border-color: var(--yang); }
-    .bit.b0 { background: white; color: var(--muted); }
-    .bit.pad { background: var(--code-bg); color: var(--muted); border-style: dashed; }
-    .bit-desc { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
-
-    /* ── Example box ── */
-    .example-box { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; margin: 1.5rem 0; }
-    .ex-header { background: var(--code-bg); padding: 0.6rem 1.25rem; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; border-bottom: 1px solid var(--rule); }
-    .ex-body { padding: 1.25rem; background: white; display: flex; flex-direction: column; gap: 0.75rem; }
-    .ex-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .ex-label { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); width: 6rem; flex-shrink: 0; }
-    .ex-val { font-family: var(--mono); font-size: 0.82rem; }
-
-    /* ── Hex grid ── */
-    .hex-ref-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; background: #252a4a; border-radius: 16px; padding: 1rem; --yang: rgba(255,255,255,.9); }
-    .hex-ref-grid { display: grid; grid-template-columns: repeat(8, minmax(50px, 1fr)); gap: 0.25rem; min-width: 420px; }
-    .hex-ref-cell { display: flex; flex-direction: column; align-items: center; padding: 0.25rem 0.2rem; border: 1px solid rgba(255,255,255,.08); border-radius: 4px; background: rgba(255,255,255,.04); cursor: default; transition: background 0.15s, border-color 0.15s; }
-    .hex-ref-cell:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
-    .hex-ref-num { font-family: var(--mono); font-size: 0.5rem; color: rgba(255,255,255,.45); }
-    .hex-ref-bits { font-family: var(--mono); font-size: 0.5rem; color: rgba(181,134,74,.9); }
-
-    @media (max-width: 560px) { h1 { font-size: 1.6rem; } }
+    /* Page-specific styles go here */
   </style>
 </head>
 <body>
-
-<header class="site-header">
-  <div class="sh-inner">
-    <a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>
-    <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
-    <nav class="sh-nav" id="shNav">
-      <a href="quadration.html">Playing Cards</a>
-      <a href="calculator.html">Calculator</a>
-      <a href="iching.html">I Ching</a>
-      <a href="bip39.html" class="active">BIP39</a>
-    </nav>
-  </div>
-</header>
+<script src="site.js"></script>
 
 <div class="page-content">
 
-<header class="page-header">
-  <h1>I Ching × BIP39</h1>
-  <p class="subtitle">Binary encoding of the Book of Changes for Bitcoin mnemonics</p>
-</header>
-
-<nav>
-  <a href="#encoding">Encoding</a>
-  <a href="#example">Example</a>
-  <a href="#reference">Reference</a>
-</nav>
-
-<p class="lead">Each BIP39 word (index 0–2047) maps to a pair of hexagrams via its 11-bit binary index: upper 6 bits → primary gua (0–63), lower 5 bits → secondary gua (0–31). A 12-word seed becomes 24 hexagrams.</p>
-
-<h2 id="encoding">Encoding</h2>
-
-<p>A single hexagram carries 6 bits. Two hexagrams carry 12 bits — one more than the 11 bits required to index any BIP39 word. The secondary hexagram's top line is always fixed to <code>0</code>, giving 6 + 5 = 11 usable bits exactly.</p>
-
-<div class="bit-diagram">
-  <div class="bit-row">
-    <span class="bit-label">11-bit index</span>
-    <div class="bit-strip">
-      <div class="bit b1">b10</div><div class="bit b0">b9</div><div class="bit b1">b8</div><div class="bit b1">b7</div><div class="bit b0">b6</div><div class="bit b0">b5</div>
-      <div class="bit b1">b4</div><div class="bit b1">b3</div><div class="bit b0">b2</div><div class="bit b1">b1</div><div class="bit b0">b0</div>
-    </div>
-  </div>
-  <div class="bit-row">
-    <span class="bit-label">primary gua</span>
-    <div class="bit-strip">
-      <div class="bit b1">b10</div><div class="bit b0">b9</div><div class="bit b0">b8</div><div class="bit b0">b7</div><div class="bit b0">b6</div><div class="bit b0">b5</div>
-    </div>
-    <span class="bit-desc">lines 1–6 · values 0–63</span>
-  </div>
-  <div class="bit-row">
-    <span class="bit-label">secondary gua</span>
-    <div class="bit-strip">
-      <div class="bit pad">0</div><div class="bit b1">b4</div><div class="bit b1">b3</div><div class="bit b0">b2</div><div class="bit b1">b1</div><div class="bit b0">b0</div>
-    </div>
-    <span class="bit-desc">line 6 fixed yin · values 0–31</span>
-  </div>
 </div>
 
-<p>Bits are read left→right = lines 1→6 (bottom→top), so the rightmost bit maps to the top line.</p>
-<p><strong>Encode:</strong> index → 11-bit binary → split 6|5 → look up both hexagrams.<br>
-<strong>Decode:</strong> <code>index = primary × 32 + secondary</code>.</p>
-
-<h2 id="example">Example</h2>
-
-<div class="example-box">
-  <div class="ex-header">Encoding "legal" → BIP39 index 1039</div>
-  <div class="ex-body">
-    <div class="ex-row"><span class="ex-label">index</span><span class="ex-val">1039</span></div>
-    <div class="ex-row"><span class="ex-label">11-bit</span><span class="ex-val"><code>10000001111</code></span></div>
-    <div class="ex-row"><span class="ex-label">split 6 | 5</span><span class="ex-val"><code>100000</code> | <code>01111</code></span></div>
-    <div class="ex-row"><span class="ex-label">primary</span><span class="ex-val"><code>100000</code> = 32</span></div>
-    <div class="ex-row"><span class="ex-label">secondary</span><span class="ex-val"><code>01111</code> = 15</span></div>
-    <div style="margin-top:0.5rem; display:flex; gap:2rem; align-items:flex-end;" id="example-hexes"></div>
-  </div>
-</div>
-
-<pre>
-decode → 32 × 32 + 15 = 1039 ✓
-</pre>
-
-<h2 id="reference">64-Hexagram Reference</h2>
-
-<p>Fu Xi (binary) order 0–63. Primary slot: 0–63 · Secondary slot: 0–31 (top line always yin).</p>
-
-<div class="hex-ref-wrap"><div class="hex-ref-grid" id="hex-grid"></div></div>
-
-
-</div>
-
-<script>
-  function hexagramSVG(val, size) {
-    size = size || 1;
-    const lineH = 5*size, gap = 4*size, svgH = 6*lineH+5*gap;
-    const w = 36*size, segW = 14*size;
-    let paths = [];
-    for (let i = 0; i < 6; i++) {
-      const bit = (val >> (5-i)) & 1;
-      const y = svgH - lineH - i*(lineH+gap);
-      if (bit === 1) {
-        paths.push(`<rect x="0" y="${y}" width="${w}" height="${lineH}" rx="${1.5*size}" fill="var(--yang)"/>`);
-      } else {
-        paths.push(`<rect x="0" y="${y}" width="${segW}" height="${lineH}" rx="${1.5*size}" fill="var(--yang)"/>`);
-        paths.push(`<rect x="${w-segW}" y="${y}" width="${segW}" height="${lineH}" rx="${1.5*size}" fill="var(--yang)"/>`);
-      }
-    }
-    return `<svg width="${w}" height="${svgH}" viewBox="0 0 ${w} ${svgH}">${paths.join('')}</svg>`;
-  }
-
-  // 64-hexagram grid
-  const grid = document.getElementById('hex-grid');
-  for (let v = 0; v < 64; v++) {
-    const bits = v.toString(2).padStart(6,'0');
-    const cell = document.createElement('div');
-    cell.className = 'hex-ref-cell';
-    cell.title = `Binary: ${bits} | Decimal: ${v}`;
-    cell.innerHTML = hexagramSVG(v, 0.5) +
-      `<div class="hex-ref-num" style="margin-top:4px">${v}</div>` +
-      `<div class="hex-ref-bits">${bits}</div>`;
-    grid.appendChild(cell);
-  }
-
-  // Example hexagrams
-  const exEl = document.getElementById('example-hexes');
-  [[32,'primary · 32'],[15,'secondary · 15']].forEach(([v,label]) => {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:6px;';
-    wrap.innerHTML = hexagramSVG(v, 1.1) +
-      `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-align:center;">${label}</div>`;
-    exEl.appendChild(wrap);
-  });
-</script>
-<script>
-(function(){
-  var btn=document.getElementById('burgerBtn'),nav=document.getElementById('shNav');
-  btn.addEventListener('click',function(e){e.stopPropagation();nav.classList.toggle('open');});
-  document.addEventListener('click',function(){nav.classList.remove('open');});
-})();
-</script>
 <footer class="site-footer"><div class="sf-inner"></div></footer>
 </body>
 </html>

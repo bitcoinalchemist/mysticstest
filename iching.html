@@ -741,19 +741,7 @@
   </style>
 </head>
 <body>
-
-<header class="site-header">
-  <div class="sh-inner">
-    <a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>
-    <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
-    <nav class="sh-nav" id="shNav">
-      <a href="quadration.html">Playing Cards</a>
-      <a href="calculator.html">Calculator</a>
-      <a href="iching.html" class="active">I Ching</a>
-      <a href="bip39.html">BIP39</a>
-    </nav>
-  </div>
-</header>
+<script src="site.js"></script>
 
 <div class="page-content" style="padding: 2px 24px 12px">
 
@@ -1600,13 +1588,6 @@
   } catch (e) {}
 })();
 
-</script>
-<script>
-(function(){
-  var btn=document.getElementById('burgerBtn'),nav=document.getElementById('shNav');
-  btn.addEventListener('click',function(e){e.stopPropagation();nav.classList.toggle('open');});
-  document.addEventListener('click',function(){nav.classList.remove('open');});
-})();
 </script>
 <!-- ── Cast card popup ── -->
 <div class="ccard-overlay" id="ccardOverlay">

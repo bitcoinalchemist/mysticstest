@@ -48,18 +48,7 @@
 </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="sh-inner">
-      <a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>
-      <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
-      <nav class="sh-nav" id="shNav">
-        <a href="quadration.html">Playing Cards</a>
-        <a href="calculator.html">Calculator</a>
-        <a href="iching.html">I Ching</a>
-        <a href="bip39.html">BIP39</a>
-      </nav>
-    </div>
-  </header>
+<script src="site.js"></script>
   <div class="page">
   <main class="grid">
     <a class="card" href="quadration.html">Playing Cards</a>
@@ -68,13 +57,6 @@
     <a class="card" href="bip39.html">BIP39</a>
   </main>
   </div>
-<script>
-(function(){
-  var btn=document.getElementById('burgerBtn'),nav=document.getElementById('shNav');
-  btn.addEventListener('click',function(e){e.stopPropagation();nav.classList.toggle('open');});
-  document.addEventListener('click',function(){nav.classList.remove('open');});
-})();
-</script>
 <footer class="site-footer"><div class="sf-inner"></div></footer>
 </body>
 </html>
