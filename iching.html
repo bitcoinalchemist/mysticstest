@@ -1289,7 +1289,7 @@
     el.className = 'spread-card clickable ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '') + (visible ? ' visible' : '');
     el.title = 'Line ' + (idx + 1) + ' · ' + card.rank + card.suit;
     el.innerHTML = cardFaceHTML(card);
-    el.addEventListener('click', function() { openCompareCard(findCardIdx(card)); });
+    el.addEventListener('click', function() { openCastCardPopup(idx); });
     wrap.appendChild(no);
     wrap.appendChild(el);
     return { wrap: wrap, el: el };
@@ -1397,11 +1397,41 @@
   });
 
   // ── Cast card popup ──────────────────────────────────────
+  var _castIdx = 0;
+
+  function openCastCardPopup(idx) {
+    _castIdx = idx;
+    openCompareCard(findCardIdx(draws[idx]));
+  }
+
+  function navigateCast(dir) {
+    _castIdx = (_castIdx + dir + draws.length) % draws.length;
+    openCompareCard(findCardIdx(draws[_castIdx]));
+  }
+
+  // Close on backdrop click
   document.getElementById('ccardOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeCompareCard();
   });
+
+  // Keyboard: Escape closes, arrows navigate
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && document.getElementById('ccardOverlay').classList.contains('open')) closeCompareCard();
+    if (!document.getElementById('ccardOverlay').classList.contains('open')) return;
+    if (e.key === 'Escape')     { closeCompareCard(); return; }
+    if (e.key === 'ArrowLeft')  { navigateCast(-1);   return; }
+    if (e.key === 'ArrowRight') { navigateCast(1);    return; }
+  });
+
+  // Touch swipe
+  var _touchStartX = null;
+  document.getElementById('ccardPopup').addEventListener('touchstart', function(e) {
+    _touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  document.getElementById('ccardPopup').addEventListener('touchend', function(e) {
+    if (_touchStartX === null) return;
+    var dx = e.changedTouches[0].clientX - _touchStartX;
+    _touchStartX = null;
+    if (Math.abs(dx) > 50) navigateCast(dx < 0 ? 1 : -1);
   });
 
   // Restore last reading from a previous visit
@@ -1436,8 +1466,8 @@
 <div class="ccard-overlay" id="ccardOverlay">
   <div class="ccard-popup" id="ccardPopup">
     <button class="ccard-close" onclick="event.stopPropagation(); closeCompareCard()">✕</button>
-    <button class="ccard-nav ccard-nav-prev" onclick="event.stopPropagation(); openCompareCard((_ccardIdx - 1 + CARDS.length) % CARDS.length)">&#8249;</button>
-    <button class="ccard-nav ccard-nav-next" onclick="event.stopPropagation(); openCompareCard((_ccardIdx + 1) % CARDS.length)">&#8250;</button>
+    <button class="ccard-nav ccard-nav-prev" onclick="event.stopPropagation(); navigateCast(-1)">&#8249;</button>
+    <button class="ccard-nav ccard-nav-next" onclick="event.stopPropagation(); navigateCast(1)">&#8250;</button>
     <div class="ccard-header">
       <div class="spread-card" id="ccFace"></div>
       <div class="ccard-info">
