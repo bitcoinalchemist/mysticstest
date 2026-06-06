@@ -12,3 +12,7 @@ iching-oracle-384-lines.txt
 # Scratch / archives
 _wtest.txt
 mysticzip/
+
+# Dev tooling and project notes — local only, not deployed
+dev/
+CLAUDE.md
