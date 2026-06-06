@@ -59,15 +59,26 @@ A hub site (`index.html`) linking to standalone tool pages. All files live toget
 
 ## Versioning
 
-Before editing any site file, snapshot first:
+The repo is tracked with **git**. Before editing, stage and commit a checkpoint:
 
 ```bash
-bash snapshot.sh "brief description of upcoming change"
+cd /sessions/<session>/mnt/Super
+git add -A
+git commit -m "pre-edit snapshot: <description>"
 ```
 
-Then append the printed CHANGELOG line to `versions/CHANGELOG.txt` using the Edit tool (bash cannot append to existing files on this mount).
+After changes are done, commit them:
 
-Current version as of 2026-06-06: **v41**.
+```bash
+git add -A
+git commit -m "brief description of what changed"
+```
+
+`git log --oneline` shows history. `git diff` compares working tree to last commit.
+
+**Revert caveat:** The bash mount cannot overwrite existing files, so `git checkout -- <file>` will fail. To revert a file, use `git show <hash>:<file>` to read the old content, then write it back with the host Write/Edit tool.
+
+`snapshot.sh` and `versions/` are kept as pre-git history but are no longer used.
 
 ---
 
