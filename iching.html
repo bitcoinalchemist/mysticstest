@@ -31,6 +31,29 @@
     .cast-btn:disabled { opacity: 0.35; cursor: default; }
     .cast-btn-alt { background: transparent; color: var(--accent); border-color: var(--rule-strong); }
     .cast-btn-alt:hover { opacity: 1; background: var(--surface-alt); }
+    /* History row */
+    .history-row { display: flex; gap: .6rem; justify-content: center; margin-top: .5rem; position: relative; }
+    .hist-wrap { position: relative; }
+    .hist-panel {
+      position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 10px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.13); z-index: 300;
+      min-width: 300px; max-height: 340px; overflow-y: auto; display: none;
+    }
+    .hist-panel.open { display: block; }
+    .hist-item {
+      display: flex; align-items: flex-start; gap: .5rem;
+      padding: .7rem 1rem; border-bottom: 1px solid var(--rule); cursor: pointer;
+    }
+    .hist-item:last-child { border-bottom: none; }
+    .hist-item:hover { background: var(--surface-alt); }
+    .hist-item-body { flex: 1; min-width: 0; }
+    .hist-date { font-size: .64rem; color: var(--muted); letter-spacing: .05em; margin-bottom: .18rem; text-transform: uppercase; }
+    .hist-q { font-size: .84rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+    .hist-hex { font-size: .68rem; color: var(--gold); margin-top: .2rem; font-family: var(--mono); }
+    .hist-del { flex-shrink: 0; font-size: .72rem; color: var(--muted); padding: 3px 7px; border-radius: 5px; line-height: 1; }
+    .hist-del:hover { color: var(--text); background: var(--rule); }
+    .hist-empty { padding: 1.2rem; text-align: center; font-size: .84rem; color: var(--muted); font-style: italic; }
     .cast-stage { display: flex; flex-direction: column; gap: 1.5rem; align-items: center; width: 100%; }
     .cards-row {
       display: flex; flex-direction: row; gap: 0.5rem; flex-wrap: wrap;
@@ -107,8 +130,10 @@
       gap: 0.75rem;
       margin-bottom: 1.5rem;
       justify-content: center;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
     }
+    /* Footer trigrams — override sf-inner fixed height so wrapped rows aren't clipped */
+    .site-footer .sf-inner { height: auto; min-height: 56px; padding-top: .65rem; padding-bottom: .65rem; flex-wrap: wrap; gap: .5rem; }
 
     /* ── Hexagram SVG component ── */
     .hexagram {
@@ -405,9 +430,7 @@
     .hex-tile.active { box-shadow: 0 0 0 2px var(--gold); }
     .hex-tile .kw { font-family: var(--serif); font-size: 1rem; color: rgba(255,255,255,.92); line-height: 1; margin-bottom: .5rem; }
     .hex-tile svg { margin-bottom: .45rem; }
-    .hex-tile .dec { font-family: var(--mono); font-size: .55rem; color: rgba(255,255,255,.4); }
-    .hex-tile .bits { font-family: var(--mono); font-size: .55rem; color: rgba(181,134,74,.9); }
-    .hex-tile .chg { font-family: var(--mono); font-size: .55rem; color: var(--gold); margin-top: .3rem; letter-spacing: .05em; }
+.hex-tile .chg { font-family: var(--mono); font-size: .55rem; color: var(--gold); margin-top: .3rem; letter-spacing: .05em; }
 
     .asked {
       font-family: var(--serif); font-style: italic; font-size: 1.1rem;
@@ -457,6 +480,9 @@
     .gl-toggle:hover { background: var(--surface-alt); }
     .gl-lines { margin-top: 1rem; display: flex; flex-direction: column; gap: .95rem; text-align: left; }
     .ml-item { padding-left: .9rem; border-left: 2px solid var(--rule); }
+    .ml-item.still .ml-label { color: var(--muted); }
+    .ml-item.changing { border-left-color: rgba(181,134,74,.45); }
+    .ml-item.changing .ml-label { color: var(--secondary); }
     .ml-item.ruling { border-left-color: var(--gold); }
     .ml-label {
       font-family: var(--mono); font-size: .56rem; letter-spacing: .12em; text-transform: uppercase;
@@ -731,19 +757,22 @@
 
 <div class="page-content" style="padding: 2px 24px 12px">
 
-<header class="page-header" style="border-bottom: none; padding-bottom: 0;">
-  <div class="gua-row" id="header-trigrams" style="height: 60px; margin: 0px 0px 24px; justify-content: center; align-items: center; width: 100%; gap: 12px"></div>
-</header>
-
 <!-- ── Oracle ── -->
-<section class="oracle" id="oracle" style="margin: 0px">
-  <span class="section-label">QUESTION</span>
+<section class="oracle" id="oracle" style="margin: 0; padding-top: 1.75rem">
+  <span class="section-label">Inquiry</span>
   <div class="question-wrap">
     <textarea class="question-input" id="questionInput" rows="2"
       placeholder="Hold your question in mind…"></textarea>
     <div class="cast-actions">
       <button class="cast-btn" id="castOneBtn" style="width: 134px;">Single</button>
       <button class="cast-btn cast-btn-alt" id="castAllBtn">Cast all</button>
+    </div>
+    <div class="history-row">
+      <button class="cast-btn cast-btn-alt" id="saveReadingBtn" style="display:none; font-size:.72rem; padding:.55rem 1.2rem;">Save reading</button>
+      <div class="hist-wrap">
+        <button class="cast-btn cast-btn-alt" id="historyBtn" style="font-size:.72rem; padding:.55rem 1.2rem;">Past readings ▾</button>
+        <div class="hist-panel" id="histPanel"></div>
+      </div>
     </div>
   </div>
 
@@ -760,7 +789,6 @@
       </div>
     </div>
 
-    <div class="stage-hint" id="stageHint">Hold a question, then cast.</div>
   </div>
 
   <div class="oracle-text-placeholder" id="oracleText"></div>
@@ -1021,14 +1049,6 @@
     return `<svg width="${w}" height="${totalH}" viewBox="0 0 ${w} ${totalH}">${paths.join('')}</svg>`;
   }
 
-  const trigramNames = ['☷ Kun', '☶ Gen', '☵ Kan', '☴ Xun', '☳ Zhen', '☲ Li', '☱ Dui', '☰ Qian'];
-  const headerEl = document.getElementById('header-trigrams');
-  for (let v = 0; v < 8; v++) {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:4px; opacity:0.3;';
-    wrap.innerHTML = trigramSVG(v, 1);
-    headerEl.appendChild(wrap);
-  }
 
 </script>
 <script>
@@ -1082,13 +1102,10 @@
 
   function renderHexResult(el, val, role, changingLines) {
     var kw = (typeof VAL_TO_KW !== 'undefined') ? VAL_TO_KW[val] : '?';
-    var bits = val.toString(2).padStart(6, '0');
     el.className = 'hex-result hex-tile';
     el.innerHTML =
       '<div class="kw">' + kw + '</div>' +
-      hexagramSVG(val, 1.2, changingLines) +
-      '<div class="dec">' + val + '</div>' +
-      '<div class="bits">' + bits + '</div>';
+      hexagramSVG(val, 1.2, changingLines);
   }
 
   // ── Cast state ──
@@ -1107,8 +1124,125 @@
     } else { a.style.display = 'none'; }
   }
 
+  // ── Reading history (localStorage) ──────────────────────
+  var HISTORY_KEY = 'iching_readings';
+
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e) { return []; }
+  }
+
+  function saveHistory(list) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch(e) {}
+  }
+
+  function formatHistDate(ts) {
+    var d = new Date(ts);
+    var now = new Date();
+    var diffMs = now - d;
+    var diffDays = Math.floor(diffMs / 86400000);
+    if (diffDays === 0) return 'Today · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (diffDays === 1) return 'Yesterday · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) +
+           ' · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function hexLabel(drawsArr) {
+    var ls = drawsArr.map(lineType);
+    var primary = hexVal(ls);
+    var kwP = (typeof VAL_TO_KW !== 'undefined') ? VAL_TO_KW[primary] : '?';
+    var changingIdx = ls.reduce(function(a,l,i){ if(l.changing) a.push(i); return a; }, []);
+    if (!changingIdx.length) return 'KW ' + kwP;
+    var changedLs = ls.map(function(l){ return l.changing ? {yang:!l.yang,changing:false} : l; });
+    var secondary = hexVal(changedLs);
+    var kwS = (typeof VAL_TO_KW !== 'undefined') ? VAL_TO_KW[secondary] : '?';
+    return 'KW ' + kwP + ' → ' + kwS;
+  }
+
+  function renderHistPanel() {
+    var panel = document.getElementById('histPanel');
+    var list = loadHistory();
+    if (!list.length) {
+      panel.innerHTML = '<div class="hist-empty">No saved readings yet.</div>';
+      return;
+    }
+    panel.innerHTML = list.slice().reverse().map(function(r) {
+      var q = r.question ? r.question : '(no question)';
+      var qShort = q.length > 55 ? q.slice(0, 52) + '…' : q;
+      return '<div class="hist-item" data-id="' + r.id + '">' +
+        '<div class="hist-item-body">' +
+          '<div class="hist-date">' + formatHistDate(r.ts) + '</div>' +
+          '<div class="hist-q">' + escapeHtml(qShort) + '</div>' +
+          '<div class="hist-hex">' + hexLabel(r.draws) + '</div>' +
+        '</div>' +
+        '<button class="hist-del" data-del="' + r.id + '" title="Delete">✕</button>' +
+      '</div>';
+    }).join('');
+
+    panel.querySelectorAll('.hist-item').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        if (e.target.closest('[data-del]')) return; // handled below
+        var id = parseInt(item.getAttribute('data-id'));
+        var entry = loadHistory().find(function(r){ return r.id === id; });
+        if (entry) { restoreReading(entry); closeHistPanel(); }
+      });
+    });
+    panel.querySelectorAll('[data-del]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var id = parseInt(btn.getAttribute('data-del'));
+        saveHistory(loadHistory().filter(function(r){ return r.id !== id; }));
+        renderHistPanel();
+      });
+    });
+  }
+
+  function closeHistPanel() {
+    document.getElementById('histPanel').classList.remove('open');
+  }
+
   function saveReading() {
-    try { localStorage.setItem('iching_last', JSON.stringify({ cards: draws, q: _question })); } catch (e) {}
+    // (called internally after each cast — does NOT save to history)
+    // History saving is explicit via Save button.
+  }
+
+  function persistCurrentReading() {
+    if (draws.length < 6) return;
+    var list = loadHistory();
+    list.push({ id: Date.now(), ts: Date.now(), question: _question, draws: draws });
+    saveHistory(list);
+    var btn = document.getElementById('saveReadingBtn');
+    btn.textContent = 'Saved ✓';
+    btn.disabled = true;
+    setTimeout(function(){ btn.style.display = 'none'; btn.textContent = 'Save reading'; btn.disabled = false; }, 1400);
+  }
+
+  var _isRestoring = false;
+
+  function restoreReading(saved) {
+    _isRestoring = true;
+    draws = saved.draws.slice();
+    lines = draws.map(lineType);
+    _question = saved.question || '';
+
+    document.getElementById('questionInput').value = _question;
+    showAsked();
+
+    var cardsRow = document.getElementById('cardsRow');
+    cardsRow.innerHTML = '';
+    draws.forEach(function(card, idx) {
+      var m = cardWrapper(card, idx, true);
+      cardsRow.appendChild(m.wrap);
+    });
+
+    document.getElementById('resultWrap').style.display = 'none';
+    document.getElementById('governingLine').innerHTML = '';
+
+    showResult();
+    _isRestoring = false;
+
+    // Hide save btn (already saved)
+    document.getElementById('saveReadingBtn').style.display = 'none';
+    window.scrollTo({ top: document.getElementById('oracle').offsetTop - 80, behavior: 'smooth' });
   }
 
   function startRound() {
@@ -1119,8 +1253,8 @@
     showAsked();
     document.getElementById('cardsRow').innerHTML = '';
     document.getElementById('resultWrap').style.display = 'none';
-    document.getElementById('stageHint').style.display = 'none';
     document.getElementById('governingLine').innerHTML = '';
+    document.getElementById('saveReadingBtn').style.display = 'none';
   }
 
   // ── Ruling / governing line (Alfred Huang – Wilhelm system) ──────────────
@@ -1166,18 +1300,19 @@
   // Expandable list of every moving line, read in the cast (primary) hexagram.
   // rulingIdx = the line that governs, if it is one of these primary lines (else -1).
   function movingLinesHTML(changingIdx, primary, rulingIdx) {
-    if (changingIdx.length < 2) return '';
-    var items = changingIdx.map(function (i) {
+    var items = [5,4,3,2,1,0].map(function(i) {
+      var isChanging = changingIdx.indexOf(i) !== -1;
       var isRuling = (i === rulingIdx);
-      return '<div class="ml-item' + (isRuling ? ' ruling' : '') + '">' +
+      var cls = 'ml-item ' + (isChanging ? 'changing' : 'still') + (isRuling ? ' ruling' : '');
+      var txt = lineText(primary, i) ? '<div class="ml-text">' + escapeHtml(lineText(primary, i)) + '</div>' : '';
+      return '<div class="' + cls + '">' +
         '<div class="ml-label">' + lineName(primary, i) +
           (isRuling ? '<span class="ml-tag">rules</span>' : '') + '</div>' +
-        '<div class="ml-text">' + escapeHtml(lineText(primary, i)) + '</div>' +
+        txt +
       '</div>';
     }).join('');
     return '<div class="gl-more">' +
-      '<button type="button" class="gl-toggle" aria-expanded="false">Show all ' +
-        changingIdx.length + ' moving lines</button>' +
+      '<button type="button" class="gl-toggle" aria-expanded="false">Show all lines</button>' +
       '<div class="gl-lines" style="display:none">' + items + '</div>' +
     '</div>';
   }
@@ -1191,7 +1326,7 @@
       var open = list.style.display !== 'none';
       list.style.display = open ? 'none' : 'flex';
       btn.setAttribute('aria-expanded', open ? 'false' : 'true');
-      btn.textContent = (open ? 'Show all ' : 'Hide ') + list.children.length + ' moving lines';
+      btn.textContent = open ? 'Show all lines' : 'Hide all lines';
     });
   }
 
@@ -1321,7 +1456,6 @@
 
     _lastPrimary = primary; _lastSecondary = secondary; _lastChanging = changingIdx;
 
-    document.getElementById('stageHint').style.display = 'none';
     document.getElementById('resultWrap').style.display = 'flex';
     renderHexResult(document.getElementById('hexPrimary'), primary, 'Cast', changingIdx);
 
@@ -1345,7 +1479,12 @@
     renderGoverningLine(changingIdx, primary, secondary);
 
     if (window.setCastGlow) window.setCastGlow(hasChanging ? [primary, secondary] : [primary]);
-    saveReading();
+    if (!_isRestoring) {
+      var sBtn = document.getElementById('saveReadingBtn');
+      sBtn.textContent = 'Save reading';
+      sBtn.disabled = false;
+      sBtn.style.display = '';
+    }
   }
 
   // Both tiles are clickable; clicking one loads its reading below and marks it active
@@ -1392,6 +1531,17 @@
 
   document.getElementById('castOneBtn').addEventListener('click', castOne);
   document.getElementById('castAllBtn').addEventListener('click', castAll);
+  document.getElementById('saveReadingBtn').addEventListener('click', persistCurrentReading);
+  document.getElementById('historyBtn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var panel = document.getElementById('histPanel');
+    var opening = !panel.classList.contains('open');
+    if (opening) renderHistPanel();
+    panel.classList.toggle('open', opening);
+  });
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.hist-wrap')) closeHistPanel();
+  });
   document.getElementById('questionInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); castAll(); }
   });
@@ -1501,6 +1651,22 @@
   });
 })();
 </script>
-<footer class="site-footer"><div class="sf-inner"></div></footer>
+<footer class="site-footer" style="--yang: rgba(255,255,255,.9)">
+  <div class="sf-inner">
+    <div class="gua-row" id="footer-trigrams" style="margin: 0; gap: 16px; justify-content: center; align-items: center; width: 100%;"></div>
+  </div>
+</footer>
+<script>
+(function(){
+  var ft = document.getElementById('footer-trigrams');
+  if (!ft || typeof trigramSVG !== 'function') return;
+  for (var v = 0; v < 8; v++) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:4px; opacity:0.45;';
+    wrap.innerHTML = trigramSVG(v, 1);
+    ft.appendChild(wrap);
+  }
+})();
+</script>
 </body>
 </html>
