@@ -698,17 +698,20 @@
       font-size: .875rem; color: var(--secondary); line-height: 1.82;
     }
     .ccard-footer {
-      padding: .75rem 1.75rem;
+      padding: .9rem 1.75rem;
       border-top: 1px solid var(--border);
       background: var(--surface);
-      text-align: center;
+      display: flex; justify-content: center; align-items: center;
     }
-    .ic-line-type {
-      font-family: var(--sans); font-size: .7rem;
-      font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--muted);
+    .ic-line-display { display: flex; align-items: center; gap: 7px; }
+    .ic-line-seg {
+      height: 5px; border-radius: 2px;
+      background: var(--rule-strong);
+      transition: background var(--ease);
     }
-    .ic-line-type.changing { color: var(--gold); }
+    .ic-line-seg.changing { background: var(--gold); }
+    .ic-yang-seg { width: 64px; }
+    .ic-yin-seg  { width: 26px; }
     .spread-card.clickable { cursor: pointer; }
   </style>
 </head>
@@ -1400,12 +1403,12 @@
 
   function updateLineType() {
     var card = draws[_castIdx];
-    var label = card.court
-      ? (card.red ? 'Old Yang  ·  Changing' : 'Old Yin  ·  Changing')
-      : (card.red ? 'Young Yang' : 'Young Yin');
-    var el = document.getElementById('icLineType');
-    el.textContent = label;
-    el.className = 'ic-line-type' + (card.court ? ' changing' : '');
+    var cls = 'ic-line-seg' + (card.court ? ' changing' : '');
+    var inner = card.red
+      ? '<div class="' + cls + ' ic-yang-seg"></div>'
+      : '<div class="' + cls + ' ic-yin-seg"></div><div class="' + cls + ' ic-yin-seg"></div>';
+    document.getElementById('icLineType').innerHTML =
+      '<div class="ic-line-display">' + inner + '</div>';
   }
 
   function openCastCardPopup(idx) {
