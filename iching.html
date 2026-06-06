@@ -638,16 +638,14 @@
     .ccard-close:hover { background: var(--rule); color: var(--text); }
     .ccard-nav {
       position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-      width: 1.5rem; height: 3.5rem;
+      width: 2rem; height: 3.5rem;
       display: flex; align-items: center; justify-content: center;
       color: var(--muted); font-size: 1rem;
-      opacity: 0; pointer-events: none;
-      transition: opacity var(--ease), color var(--ease);
+      opacity: 0; transition: opacity var(--ease), color var(--ease);
       cursor: pointer; border-radius: var(--r-sm);
     }
-    .ccard-popup:hover .ccard-nav { pointer-events: auto; }
-    .ccard-nav-prev { left: 0; }
-    .ccard-nav-next { right: 0; }
+    .ccard-nav-prev { left: .35rem; }
+    .ccard-nav-next { right: .35rem; }
     .ccard-popup:hover .ccard-nav { opacity: 1; }
     .ccard-nav:hover { color: var(--text); }
     .ccard-nav:focus { outline: none; }
@@ -699,19 +697,17 @@
       font-size: .875rem; color: var(--secondary); line-height: 1.82;
     }
     .ccard-footer {
-      padding: .9rem 1.75rem;
+      padding: .75rem 1.75rem;
       border-top: 1px solid var(--border);
       background: var(--surface);
+      text-align: center;
     }
-    .ccard-load-btn {
-      display: block; width: 100%;
-      background: var(--accent); color: rgba(255,255,255,.92);
-      padding: .65rem; border-radius: var(--r-sm);
-      font-size: .72rem; font-weight: 500; letter-spacing: .1em;
-      text-transform: uppercase; cursor: pointer; border: none;
-      font-family: var(--sans); transition: background var(--ease);
+    .ic-line-type {
+      font-family: var(--sans); font-size: .7rem;
+      font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
     }
-    .ccard-load-btn:hover { background: #2e3356; }
+    .ic-line-type.changing { color: var(--gold); }
     .spread-card.clickable { cursor: pointer; }
   </style>
 </head>
@@ -1401,15 +1397,27 @@
   // ── Cast card popup ──────────────────────────────────────
   var _castIdx = 0;
 
+  function updateLineType() {
+    var card = draws[_castIdx];
+    var label = card.court
+      ? (card.red ? 'Old Yang  ·  Changing' : 'Old Yin  ·  Changing')
+      : (card.red ? 'Young Yang' : 'Young Yin');
+    var el = document.getElementById('icLineType');
+    el.textContent = label;
+    el.className = 'ic-line-type' + (card.court ? ' changing' : '');
+  }
+
   function openCastCardPopup(idx) {
     _castIdx = idx;
     openCompareCard(findCardIdx(draws[idx]));
+    updateLineType();
   }
 
   // Exposed globally so HTML onclick and the post-DOM script can reach it
   window.navigateCast = function(dir) {
     _castIdx = (_castIdx + dir + draws.length) % draws.length;
     openCompareCard(findCardIdx(draws[_castIdx]));
+    updateLineType();
   };
 
   // Keyboard: Escape closes, arrows navigate (document exists at setup time)
@@ -1450,7 +1458,7 @@
 </script>
 <!-- ── Cast card popup ── -->
 <div class="ccard-overlay" id="ccardOverlay">
-  <div class="ccard-popup" id="ccardPopup">
+  <div class="ccard-popup" id="ccardPopup" onclick="closeCompareCard()">
     <button class="ccard-close" onclick="event.stopPropagation(); closeCompareCard()">✕</button>
     <button class="ccard-nav ccard-nav-prev" onclick="event.stopPropagation(); navigateCast(-1)">&#8249;</button>
     <button class="ccard-nav ccard-nav-next" onclick="event.stopPropagation(); navigateCast(1)">&#8250;</button>
@@ -1464,8 +1472,11 @@
       </div>
     </div>
     <div class="ccard-keywords" id="ccKws"></div>
-    <div class="ccard-body">
+    <div class="ccard-body" onclick="event.stopPropagation()">
       <div class="ccard-personality" id="ccPersonality"></div>
+    </div>
+    <div class="ccard-footer">
+      <div class="ic-line-type" id="icLineType"></div>
     </div>
   </div>
 </div>
