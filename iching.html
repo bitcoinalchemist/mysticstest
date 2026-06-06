@@ -403,6 +403,7 @@
     }
     .hex-tile:hover { box-shadow: 0 0 0 1px var(--gold); }
     .hex-tile.active { box-shadow: 0 0 0 2px var(--gold); }
+    .hex-tile .kw { font-family: var(--serif); font-size: 1rem; color: rgba(255,255,255,.92); line-height: 1; margin-bottom: .5rem; }
     .hex-tile svg { margin-bottom: .45rem; }
     .hex-tile .dec { font-family: var(--mono); font-size: .55rem; color: rgba(255,255,255,.4); }
     .hex-tile .bits { font-family: var(--mono); font-size: .55rem; color: rgba(181,134,74,.9); }
@@ -1084,6 +1085,7 @@
     var bits = val.toString(2).padStart(6, '0');
     el.className = 'hex-result hex-tile';
     el.innerHTML =
+      '<div class="kw">' + kw + '</div>' +
       hexagramSVG(val, 1.2, changingLines) +
       '<div class="dec">' + val + '</div>' +
       '<div class="bits">' + bits + '</div>';
