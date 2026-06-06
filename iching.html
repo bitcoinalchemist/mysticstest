@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>I Ching × BIP39 — Binary Encoding of the Book of Changes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    /* ── Oracle ── */
+    .oracle { margin-bottom: 3rem; text-align: center; }
+    .question-wrap { margin-bottom: 1.5rem; }
+    .question-input {
+      width: 100%; padding: 0.85rem 1rem; font-family: var(--sans); font-size: 0.95rem;
+      background: var(--surface); border: 1px solid var(--rule); border-radius: 8px;
+      resize: none; outline: none; color: var(--text); line-height: 1.6;
+    }
+    .question-input:focus { border-color: var(--rule-strong); }
+    .question-input::placeholder { color: var(--muted); font-style: italic; }
+    .cast-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    .cast-btn {
+      padding: 0.7rem 1.8rem; background: var(--accent); color: white;
+      border: 1px solid var(--accent); border-radius: 8px; font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+      transition: opacity var(--ease), background var(--ease);
+    }
+    .cast-btn:hover { opacity: 0.82; }
+    .cast-btn:disabled { opacity: 0.35; cursor: default; }
+    .cast-btn-alt { background: transparent; color: var(--accent); border-color: var(--rule-strong); }
+    .cast-btn-alt:hover { opacity: 1; background: var(--surface-alt); }
+    .cast-stage { display: flex; flex-direction: column; gap: 1.5rem; align-items: center; width: 100%; }
+    .cards-row {
+      display: flex; flex-direction: row; gap: 0.5rem; flex-wrap: wrap;
+      align-items: flex-start; min-height: 0; justify-content: center;
+    }
+    .cast-figs { gap: 1.25rem; align-items: flex-start; justify-content: center; }
+    .fig-col { display: flex; flex-direction: column; align-items: center; gap: .65rem; }
+    .becomes-btn {
+      padding: .5rem 1rem; background: transparent; color: var(--accent);
+      border: 1px solid var(--rule-strong); border-radius: 8px;
+      font-size: .64rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+      cursor: pointer; transition: background var(--ease);
+    }
+    .becomes-btn:hover { background: var(--surface-alt); }
+    .stage-hint { color: var(--muted); font-family: var(--serif); font-style: italic; font-size: 1.05rem; align-self: center; }
+    .card-line { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+    .cl-no { font-family: var(--mono); font-size: .58rem; color: var(--muted); text-align: center; }
+
+    /* Cast cards — mysticscards style (matches quadration.html) */
+    .spread-card {
+      width: 58px; height: 81px; flex-shrink: 0;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      position: relative; overflow: hidden; container-type: inline-size;
+      cursor: default;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity .35s ease, transform .35s ease, box-shadow .18s ease;
+    }
+    .spread-card.visible { opacity: 1; transform: translateY(0); }
+    .spread-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 2; }
+    .spread-card.hearts::before, .spread-card.diamonds::before { background: var(--red); }
+    .spread-card.clubs::before, .spread-card.spades::before { background: var(--card-dark); }
+    .spread-card.hearts, .spread-card.diamonds { color: var(--red); }
+    .spread-card.clubs, .spread-card.spades { color: var(--card-dark); }
+    .spread-card.changing { box-shadow: 0 0 0 2px var(--gold); }
+    .card-corner { position: absolute; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1; }
+    .card-tl { top: 3px; left: 3px; }
+    .card-br { bottom: 3px; right: 3px; transform: rotate(180deg); }
+    .cc-rank { font-family: var(--serif); font-size: max(22cqw, 11px); font-weight: 500; line-height: 1; }
+    .card-pips { position: absolute; top: 11px; bottom: 11px; left: 5px; right: 5px; }
+    .pip { position: absolute; transform: translate(-50%, -50%); font-size: max(14cqw, 12px); line-height: 1; user-select: none; pointer-events: none; }
+    .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
+    .pip.ace { font-size: max(44cqw, 22px); }
+    .hex-result { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .hex-result-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-align: center; }
+    .hex-arrow { font-size: 1.5rem; color: var(--muted); align-self: center; padding-top: 1rem; }
+    .oracle-text-placeholder {
+      max-width: 65ch; margin: 2rem auto 0; padding: 1.6rem 1.9rem;
+      background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+      text-align: center;
+    }
+    .oracle-text-placeholder:empty { display: none; }
+    .oracle-text-placeholder p { font-family: var(--serif); font-size: 1.04rem; line-height: 1.8; color: var(--text); margin-bottom: 1rem; }
+    .cast-kw { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: .3rem; }
+    .cast-name { font-family: var(--serif); font-size: 1.5rem; line-height: 1.12; margin-bottom: .3rem; }
+    .cast-trig { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .cast-image { font-family: var(--serif); font-style: italic; font-size: 1.05rem; line-height: 1.5; color: var(--gold); margin-bottom: 1rem; }
+    .cast-image .il-1, .cast-image .il-2, .hx-image .il-1, .hx-image .il-2 { display: block; }
+    .section-title { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; margin-bottom: 1.1rem; }
+    .section-label { display: block; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; color: var(--gold); margin-bottom: .85rem; }
+    .grid-title { font-family: var(--serif); font-size: 1.45rem; font-weight: 400; color: rgba(255,255,255,.92); text-align: center; margin-bottom: .9rem; }
+    .changing-note { font-family: var(--sans); font-size: 0.68rem; color: var(--gold); margin-top: 0.35rem; letter-spacing: .06em; text-transform: uppercase; }
+
+    /* ── Page header ── */
+    .page-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    .gua-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+      flex-wrap: nowrap;
+    }
+
+    /* ── Hexagram SVG component ── */
+    .hexagram {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 0.5rem;
+    }
+    .hexagram .line {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      height: 6px;
+    }
+    .hexagram .line .seg {
+      height: 6px;
+      border-radius: 1px;
+      background: var(--yang);
+    }
+    .hexagram .line .seg.yang { width: 32px; }
+    .hexagram .line .seg.yin-l { width: 13px; }
+    .hexagram .line .seg.yin-r { width: 13px; }
+    .hexagram .line .seg.gap { width: 6px; background: transparent; }
+
+    .hex-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 4px;
+      text-align: center;
+    }
+    .hex-name {
+      font-family: var(--serif);
+      font-size: 0.78rem;
+      color: var(--text);
+      text-align: center;
+      margin-top: 2px;
+    }
+    .hex-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      background: white;
+      min-width: 80px;
+    }
+
+    /* ── Bit diagrams ── */
+    .bit-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1.25rem 0;
+    }
+    .bit-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .bit-label {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      width: 3.5rem;
+      text-align: right;
+    }
+    .bit-strip {
+      display: flex;
+      gap: 3px;
+    }
+    .bit {
+      width: 22px;
+      height: 22px;
+      border: 1.5px solid var(--rule);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .bit.b1 { background: var(--yang); color: white; border-color: var(--yang); }
+    .bit.b0 { background: white; color: var(--muted); }
+    .bit.pad { background: var(--code-bg); color: var(--muted); border-style: dashed; }
+    .bit-desc {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── Mapping table ── */
+    .mapping-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem;
+      margin: 1.25rem 0;
+    }
+    .map-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      background: white;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+    }
+    .map-cell .mini-hex { display: flex; flex-direction: column; gap: 2px; }
+    .map-cell .mini-line { height: 3px; border-radius: 1px; background: var(--yang); }
+    .map-cell .mini-line.yang { width: 18px; }
+    .map-cell .mini-line.yin { width: 7px; box-shadow: 9px 0 0 var(--yang); }
+    .map-cell .num { color: var(--muted); }
+    .map-cell .word { color: var(--accent); font-weight: 600; }
+
+    /* ── Workflow ── */
+    .workflow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1.5rem 0;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .wf-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--rule);
+      background: white;
+    }
+    .wf-step:last-child { border-bottom: none; }
+    .wf-num {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: white;
+      background: var(--accent);
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .wf-body { flex: 1; }
+    .wf-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.2rem;
+    }
+    .wf-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* ── Example block ── */
+    .example-box {
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+    .ex-header {
+      background: var(--code-bg);
+      padding: 0.6rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--rule);
+    }
+    .ex-body {
+      padding: 1.25rem;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .ex-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .ex-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      width: 6rem;
+      flex-shrink: 0;
+    }
+    .ex-val {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+    .arrow { color: var(--muted); font-size: 0.8rem; }
+
+    /* ── 64 hexagram reference ── */
+    .hex-ref-wrap {
+      background: #252a4a;
+      padding: 1rem 0.6rem 1.4rem;
+      margin-top: 3rem;
+      --yang: rgba(255,255,255,.9);
+    }
+    .hex-ref-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 0.1rem auto 0.7rem;
+      width: fit-content;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .hex-ref-toggle button {
+      font-family: var(--sans);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.6);
+      background: transparent;
+      border: none;
+      padding: 0.4rem 1.1rem;
+      cursor: pointer;
+      transition: background .18s, color .18s;
+    }
+    .hex-ref-toggle button.active {
+      background: var(--gold);
+      color: #fff;
+    }
+    .hex-ref-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 0.2rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .hex-ref-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.25rem 0.1rem;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 4px;
+      background: rgba(255,255,255,.04);
+      cursor: default;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .hex-ref-cell:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+    .hex-ref-cell .mini-hex { display: flex; flex-direction: column; gap: 2px; margin-bottom: 4px; }
+    .hex-ref-cell .mini-line { height: 4px; border-radius: 1px; background: var(--yang); }
+    .hex-ref-cell .mini-line.yang { width: 24px; }
+    .hex-ref-cell .mini-line.yin-seg-l { width: 9px; }
+    .hex-ref-cell .mini-line.yin-seg-r { width: 9px; margin-left: 6px; }
+    .hex-ref-kw {
+      font-family: var(--serif);
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1;
+      color: rgba(255,255,255,.92);
+      margin-bottom: 4px;
+    }
+    .hex-ref-num {
+      font-family: var(--mono);
+      font-size: 0.5rem;
+      color: rgba(255,255,255,.4);
+    }
+    .hex-ref-bits {
+      font-family: var(--mono);
+      font-size: 0.5rem;
+      color: rgba(181,134,74,.9);
+    }
+
+    /* ── Cast result tiles (match the chart) ── */
+    .hex-tile {
+      display: flex; flex-direction: column; align-items: center; gap: 0;
+      background: #252a4a; border-radius: 10px; padding: .7rem .85rem;
+      --yang: rgba(255,255,255,.9); cursor: pointer;
+      transition: box-shadow var(--ease);
+    }
+    .hex-tile:hover { box-shadow: 0 0 0 1px var(--gold); }
+    .hex-tile.active { box-shadow: 0 0 0 2px var(--gold); }
+    .hex-tile .role { font-family: var(--mono); font-size: .56rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: .4rem; }
+    .hex-tile .kw { font-family: var(--serif); font-size: 1rem; color: rgba(255,255,255,.92); line-height: 1; margin-bottom: .5rem; }
+    .hex-tile svg { margin-bottom: .45rem; }
+    .hex-tile .dec { font-family: var(--mono); font-size: .55rem; color: rgba(255,255,255,.4); }
+    .hex-tile .bits { font-family: var(--mono); font-size: .55rem; color: rgba(181,134,74,.9); }
+    .hex-tile .chg { font-family: var(--mono); font-size: .55rem; color: var(--gold); margin-top: .3rem; letter-spacing: .05em; }
+
+    .asked {
+      font-family: var(--serif); font-style: italic; font-size: 1.1rem;
+      color: var(--secondary); margin: 0 0 1.25rem; line-height: 1.5;
+    }
+    .asked span { color: var(--muted); font-style: normal; font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; display: block; margin-bottom: .3rem; }
+
+    .becomes-divider {
+      font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--gold); text-align: center; border-top: 1px solid var(--rule);
+      margin: 1.75rem 0 1.25rem; padding-top: 1.25rem;
+    }
+
+    .hex-ref-cell.cast-glow {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px var(--gold), 0 0 14px rgba(181,134,74,.45);
+      animation: castPulse .8s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes castPulse {
+      0%   { box-shadow: 0 0 0 2px var(--gold), 0 0 0 0 rgba(181,134,74,.6); }
+      100% { box-shadow: 0 0 0 2px var(--gold), 0 0 16px rgba(181,134,74,0); }
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .oracle-text-placeholder.fade { animation: fadeUp .55s ease; }
+
+    /* ── Governing (ruling) line ── */
+    .governing-line {
+      max-width: 65ch; margin: 1rem auto 0; padding: 1.25rem 1.6rem;
+      background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
+      text-align: center;
+    }
+    .governing-line:empty { display: none; }
+    .gl-label { font-family: var(--mono); font-size: .58rem; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; color: var(--gold); margin-bottom: .55rem; }
+    .gl-name { font-family: var(--serif); font-size: 1.4rem; line-height: 1.15; color: var(--text); margin-bottom: .35rem; }
+    .gl-src { font-family: var(--mono); font-size: .56rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .9rem; }
+    .gl-desc { font-family: var(--serif); font-style: italic; font-size: 1.02rem; line-height: 1.7; color: var(--secondary); }
+    .gl-desc.placeholder { color: var(--muted); font-size: .82rem; letter-spacing: .04em; }
+    .gl-rule { font-family: var(--sans); font-size: .68rem; line-height: 1.5; color: var(--muted); margin-top: .85rem; padding-top: .8rem; border-top: 1px solid var(--rule); }
+    .gl-note { font-family: var(--serif); font-style: italic; font-size: 1.04rem; line-height: 1.65; color: var(--secondary); }
+    /* ── All moving lines (expandable) ── */
+    .gl-more { margin-top: .9rem; padding-top: .85rem; border-top: 1px solid var(--rule); }
+    .gl-toggle {
+      font-family: var(--mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--gold); background: transparent; border: 1px solid var(--rule-strong);
+      border-radius: 999px; padding: .38rem .95rem; cursor: pointer; transition: background var(--ease);
+    }
+    .gl-toggle:hover { background: var(--surface-alt); }
+    .gl-lines { margin-top: 1rem; display: flex; flex-direction: column; gap: .95rem; text-align: left; }
+    .ml-item { padding-left: .9rem; border-left: 2px solid var(--rule); }
+    .ml-item.ruling { border-left-color: var(--gold); }
+    .ml-label {
+      font-family: var(--mono); font-size: .56rem; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .32rem; display: flex; align-items: center; gap: .5rem;
+    }
+    .ml-item.ruling .ml-label { color: var(--gold); }
+    .ml-tag {
+      font-family: var(--mono); font-size: .5rem; letter-spacing: .1em; text-transform: uppercase;
+      color: #fff; background: var(--gold); border-radius: 999px; padding: .08rem .45rem;
+    }
+    .ml-text { font-family: var(--serif); font-style: italic; font-size: 1rem; line-height: 1.62; color: var(--secondary); }
+
+    /* ── Hexagram popup ── */
+    .hx-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(26,25,22,.52);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .hx-overlay.open { display: flex; }
+    .hx-popup {
+      background: var(--surface); border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      max-width: 440px; width: 100%; position: relative;
+      display: flex; flex-direction: column;
+      height: 620px; max-height: 92vh; overflow: hidden;
+      animation: hxIn .25s cubic-bezier(.23,1,.32,1);
+    }
+    @keyframes hxIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+    .hx-popup::before { content: ''; display: block; height: 4px; background: var(--gold); }
+    .hx-close {
+      position: absolute; top: .9rem; right: .9rem; z-index: 2;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface-alt); border: 1px solid var(--rule);
+      font-size: .78rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all var(--ease);
+    }
+    .hx-close:hover { background: var(--rule); color: var(--text); }
+    .hx-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+      width: 2rem; height: 3.5rem; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 1.5rem; opacity: .45; cursor: pointer;
+      background: none; border: none; transition: opacity var(--ease), color var(--ease);
+    }
+    .hx-nav:hover { opacity: 1; color: var(--text); }
+    .hx-prev { left: .15rem; } .hx-next { right: .15rem; }
+    .hx-header {
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      padding: 12px 28px 5px; border-bottom: none;
+    }
+    .hx-fig { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+    .hx-fig-svg { background: #252a4a; border-radius: 8px; padding: .65rem .75rem; --yang: rgba(255,255,255,.9); }
+    .hx-fig-num { font-family: var(--mono); font-size: .58rem; color: var(--muted); letter-spacing: .05em; }
+    .hx-id { flex: 1; min-width: 0; padding-top: .15rem; }
+    .hx-kw { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: .35rem; }
+    .hx-name { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; line-height: 1.12; margin-bottom: .35rem; }
+    .hx-trig { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .hx-image { font-family: var(--serif); font-style: italic; font-size: 1.05rem; line-height: 1.45; color: var(--gold); padding: 1px 28px 0; text-align: center; }
+    .hx-body { flex: 1; overflow-y: auto; min-height: 0; padding: 1px 28px 2px; }
+    .hx-body p { font-family: var(--serif); font-size: 16px; line-height: 1.8; color: var(--text); margin-bottom: 10px; }
+    .hx-shadow { font-size: .92rem; line-height: 1.7; color: var(--secondary); font-style: italic; margin: 0; text-align: center; }
+    .hx-keynote { font-family: var(--serif); font-style: italic; font-size: 20px; line-height: 1.55; color: var(--gold); text-align: center; padding: 5px 0; border-top: none; margin: 1px 0 0; }
+    .hex-ref-cell { cursor: pointer; }
+    .hex-result .hexagram-clickable, .hex-result svg { cursor: pointer; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* ── Inline hexagram for prose ── */
+    .inline-hex {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+    .inline-hex .il { height: 3px; border-radius: 1px; background: var(--yang); }
+    .inline-hex .il.y { width: 20px; }
+    .inline-hex .il.n-l { width: 7px; }
+    .inline-hex .il.n-r { width: 7px; margin-left: 6px; }
+
+    .callout {
+      background: white;
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 6px 6px 0;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      font-size: 0.88rem;
+      line-height: 1.65;
+    }
+    .callout strong { color: var(--accent); }
+
+    /* ── Page nav (scoped so it doesn't affect site header) ── */
+    .page-content nav {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      margin-bottom: 3rem;
+    }
+    .page-content nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-family: var(--mono);
+      letter-spacing: 0.02em;
+    }
+    .page-content nav a:hover { color: var(--accent); }
+
+    @media (max-width: 560px) {
+      h1 { font-size: 1.6rem; }
+      .mapping-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 400px) {
+      .hex-ref-cell .mini-line.yang { width: 20px; }
+      .hex-ref-cell .mini-line.yin-seg-l { width: 7px; }
+      .hex-ref-cell .mini-line.yin-seg-r { width: 7px; margin-left: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="sh-inner">
+    <a href="index.html" class="sh-logo">mysticscards<span class="suit">.space</span></a>
+    <button class="burger" id="burgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+    <nav class="sh-nav" id="shNav">
+      <a href="quadration.html">Playing Cards</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="iching.html" class="active">I Ching</a>
+      <a href="bip39.html">BIP39</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page-content" style="padding: 2px 24px 12px">
+
+<header class="page-header" style="border-bottom: none; padding-bottom: 0;">
+  <div class="gua-row" id="header-trigrams" style="height: 60px; margin: 0px 0px 24px; justify-content: center; align-items: center; width: 732px; gap: 12px"></div>
+</header>
+
+<!-- ── Oracle ── -->
+<section class="oracle" id="oracle" style="margin: 0px">
+  <span class="section-label">QUESTION</span>
+  <div class="question-wrap">
+    <textarea class="question-input" id="questionInput" rows="2"
+      placeholder="Hold your question in mind…"></textarea>
+    <div class="cast-actions">
+      <button class="cast-btn" id="castOneBtn" style="width: 134px;">Single</button>
+      <button class="cast-btn cast-btn-alt" id="castAllBtn">Cast all</button>
+    </div>
+  </div>
+
+  <div class="asked" id="askedLine" style="display:none"></div>
+
+  <div class="cast-stage">
+    <div class="cards-row" id="cardsRow"></div>
+
+    <div class="cast-figs" id="resultWrap" style="display:none">
+      <div class="hex-result" id="hexPrimary"></div>
+      <div class="hex-arrow" id="hexArrow" style="display:none">→</div>
+      <div class="fig-col" id="becomesCol" style="display:none">
+        <div class="hex-result" id="hexSecondary"></div>
+      </div>
+    </div>
+
+    <div class="stage-hint" id="stageHint">Hold a question, then cast.</div>
+  </div>
+
+  <div class="oracle-text-placeholder" id="oracleText"></div>
+  <div class="governing-line" id="governingLine"></div>
+</section>
+
+</div><!-- /.page-content -->
+
+<!-- ── Reference grid (full-bleed) ── -->
+<section class="hex-ref-wrap">
+  <div class="hex-ref-toggle" id="seqToggle">
+    <button data-seq="fuxi" class="active">Fu Xi</button>
+    <button data-seq="kingwen">King Wen</button>
+  </div>
+  <div class="hex-ref-grid" id="hex-grid"></div>
+</section>
+
+<!-- ── Hexagram popup ── -->
+<div class="hx-overlay" id="hxOverlay">
+  <div class="hx-popup" id="hxPopup">
+    <button class="hx-close" id="hxClose" aria-label="Close">✕</button>
+    <button class="hx-nav hx-prev" id="hxPrev" aria-label="Previous hexagram">‹</button>
+    <button class="hx-nav hx-next" id="hxNext" aria-label="Next hexagram">›</button>
+    <div class="hx-header">
+      <div class="hx-fig">
+        <div class="hx-fig-svg" id="hxFig"></div>
+        <div class="hx-fig-num" id="hxFigNum"></div>
+      </div>
+      <div class="hx-id">
+        <div class="hx-kw" id="hxKw"></div>
+        <div class="hx-name" id="hxName"></div>
+        <div class="hx-trig" id="hxTrig"></div>
+      </div>
+    </div>
+    <div class="hx-image" id="hxImage"></div>
+    <div class="hx-body" id="hxContent"></div>
+  </div>
+</div>
+
+<!-- 64 hexagram oracle answers (Sage voice) -->
+<script src="ichingdata.js"></script>
+<!-- 384 moving-line texts (Sage voice) -->
+<script src="linedata.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT — render hexagrams
+════════════════════════════════════════════════════════ -->
+<script>
+  // NOTE: Hexagrams here are identified strictly by their 6-bit binary value (0–63),
+  // which is the value the encoding actually uses. This is NOT the same as the
+  // traditional King Wen number — that is a separate philosophical ordering. We avoid
+  // labelling by King Wen name to prevent conflating the two. A verified
+  // binary-value → King Wen mapping can be added later if desired.
+
+  // Render a hexagram as SVG given a 6-bit value (0-63)
+  // Bit order: bit5=line6(top), bit0=line1(bottom)
+  function hexagramSVG(val, size = 1, changing) {
+    const lineH = 5 * size;
+    const gap = 4 * size;
+    const totalH = 6 * lineH + 5 * gap;
+    const w = 36 * size;
+    const segW = 14 * size;
+    const breakW = 8 * size;
+    const svgH = totalH;
+    let paths = [];
+    for (let i = 0; i < 6; i++) {
+      // i=0 = bottom (line 1), i=5 = top (line 6)
+      // bits string read left→right = lines 1→6, so bit0(LSB) = top, bit5(MSB) = bottom
+      const bit = (val >> (5 - i)) & 1;
+      const y = svgH - lineH - i * (lineH + gap);
+      const isChanging = changing && changing.indexOf(i) !== -1;
+      const fill = isChanging ? 'var(--gold)' : 'var(--yang)';
+      if (bit === 1) {
+        // Yang: solid bar
+        paths.push(`<rect x="0" y="${y}" width="${w}" height="${lineH}" rx="${1.5*size}" fill="${fill}"/>`);
+      } else {
+        // Yin: broken bar
+        paths.push(`<rect x="0" y="${y}" width="${segW}" height="${lineH}" rx="${1.5*size}" fill="${fill}"/>`);
+        paths.push(`<rect x="${w - segW}" y="${y}" width="${segW}" height="${lineH}" rx="${1.5*size}" fill="${fill}"/>`);
+      }
+    }
+    return `<svg width="${w}" height="${svgH}" viewBox="0 0 ${w} ${svgH}">${paths.join('')}</svg>`;
+  }
+
+  // Binary value (0-63, bit5=line1/bottom … bit0=line6/top) → King Wen number (1-64).
+  // Derived from the trigram pairs of all 64 hexagrams; verified to be a bijection over 0-63.
+  const VAL_TO_KW = [2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56, 31, 33,
+                     7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44,
+                     24, 27, 3, 42, 51, 21, 17, 25, 36, 22, 63, 37, 55, 30, 49, 13,
+                     19, 41, 60, 61, 54, 38, 58, 10, 11, 26, 5, 9, 34, 14, 43, 1];
+
+  // King Wen number → binary value (inverse of the above)
+  const KW_TO_VAL = [];
+  VAL_TO_KW.forEach(function (kw, v) { KW_TO_VAL[kw] = v; });
+
+  // Build the 64-hexagram reference grid in the chosen sequence
+  const grid = document.getElementById('hex-grid');
+  function buildGrid(seq) {
+    grid.innerHTML = '';
+    const order = [];
+    if (seq === 'kingwen') {
+      for (let kw = 1; kw <= 64; kw++) order.push(KW_TO_VAL[kw]);
+    } else {
+      for (let v = 0; v < 64; v++) order.push(v);
+    }
+    order.forEach(function (v) {
+      const bits = v.toString(2).padStart(6, '0');
+      const kw = VAL_TO_KW[v];
+      const cell = document.createElement('div');
+      cell.className = 'hex-ref-cell';
+      cell.title = `King Wen ${kw} · Decimal ${v} · Binary ${bits}`;
+      cell.dataset.val = v;
+      cell.setAttribute('role', 'button');
+      cell.tabIndex = 0;
+      cell.setAttribute('aria-label', 'Hexagram, King Wen ' + kw);
+      cell.innerHTML = `
+        <div class="hex-ref-kw">${kw}</div>
+        ${hexagramSVG(v, 0.5)}
+        <div class="hex-ref-num" style="margin-top:4px">${v}</div>
+        <div class="hex-ref-bits">${bits}</div>
+      `;
+      cell.addEventListener('click', function () { openHexPopup(v); });
+      cell.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHexPopup(v); }
+      });
+      grid.appendChild(cell);
+    });
+    applyGlow();
+  }
+  buildGrid('fuxi');
+
+  // Sequence toggle
+  const seqToggle = document.getElementById('seqToggle');
+  seqToggle.addEventListener('click', function (e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    seqToggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    buildGrid(btn.dataset.seq);
+  });
+
+  // ── Hexagram popup ──────────────────────────────────────
+  var _hxKw = null;
+  function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  // Split an image line into two balanced lines: prefer a clause break (comma/period/
+  // semicolon/em-dash) closest to the middle; otherwise the space closest to the middle.
+  // Punctuation stays at the end of the first line; words after it begin the second.
+  function splitImageLine(text) {
+    text = String(text).trim();
+    var mid = text.length / 2, best = -1, bestDist = Infinity, i, d;
+    for (i = 0; i < text.length; i++) {
+      if (',.;\u2014'.indexOf(text[i]) !== -1) {
+        var at = i + 1;
+        if (at < 6 || at > text.length - 4) continue; // skip trivial end splits
+        d = Math.abs(at - mid);
+        if (d < bestDist) { bestDist = d; best = at; }
+      }
+    }
+    if (best === -1) {
+      for (i = 0; i < text.length; i++) {
+        if (text[i] === ' ') { d = Math.abs(i - mid); if (d < bestDist) { bestDist = d; best = i; } }
+      }
+    }
+    if (best === -1) return [text, ''];
+    return [text.slice(0, best).trim(), text.slice(best).trim()];
+  }
+  function imageLineHTML(text) {
+    var p = splitImageLine(text);
+    return '<span class="il-1">' + escapeHtml(p[0]) + '</span>' +
+           (p[1] ? '<span class="il-2">' + escapeHtml(p[1]) + '</span>' : '');
+  }
+  function openHexPopup(val) {
+    var kw = VAL_TO_KW[val];
+    var d = (typeof HEX_DATA !== 'undefined') ? HEX_DATA[kw] : null;
+    if (!d) return;
+    _hxKw = kw;
+    document.getElementById('hxFig').innerHTML = hexagramSVG(val, 1.1);
+    document.getElementById('hxFigNum').textContent = val.toString(2).padStart(6, '0');
+    document.getElementById('hxKw').textContent = 'King Wen ' + kw;
+    document.getElementById('hxName').textContent = d.name;
+    document.getElementById('hxTrig').textContent = d.trig;
+    document.getElementById('hxImage').innerHTML = imageLineHTML(d.image);
+    var html = d.paras.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join('') +
+      '<div class="hx-shadow">' + escapeHtml(d.shadow) + '</div>' +
+      '<div class="hx-keynote">' + escapeHtml(d.keynote) + '</div>';
+    document.getElementById('hxContent').innerHTML = html;
+    document.getElementById('hxContent').scrollTop = 0;
+    document.getElementById('hxOverlay').classList.add('open');
+  }
+  function closeHexPopup() {
+    document.getElementById('hxOverlay').classList.remove('open');
+  }
+  function stepHex(delta) {
+    if (_hxKw == null) return;
+    var nk = ((_hxKw - 1 + delta + 64) % 64) + 1; // wrap 1..64
+    openHexPopup(KW_TO_VAL[nk]);
+  }
+  // expose for handlers in the other script (cast results)
+  window.openHexPopup = openHexPopup;
+
+  // Glow the cast hexagram(s) in the reference grid (reapplied after each rebuild)
+  var _castGlow = [];
+  function applyGlow() {
+    document.querySelectorAll('.hex-ref-cell.cast-glow').forEach(function (c) { c.classList.remove('cast-glow'); });
+    (_castGlow || []).forEach(function (v) {
+      var c = document.querySelector('.hex-ref-cell[data-val="' + v + '"]');
+      if (c) { void c.offsetWidth; c.classList.add('cast-glow'); }
+    });
+  }
+  window.setCastGlow = function (vals) { _castGlow = vals || []; applyGlow(); };
+
+  // Inline answer HTML for the cast result panel (no popup)
+  window.hexAnswerHTML = function (val) {
+    var kw = VAL_TO_KW[val];
+    var d = (typeof HEX_DATA !== 'undefined') ? HEX_DATA[kw] : null;
+    if (!d) return '';
+    return '<div class="cast-kw">King Wen ' + kw + '</div>' +
+      '<div class="cast-name">' + escapeHtml(d.name) + '</div>' +
+      '<div class="cast-trig">' + escapeHtml(d.trig) + '</div>' +
+      '<div class="cast-image">' + imageLineHTML(d.image) + '</div>' +
+      d.paras.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join('') +
+      '<div class="hx-shadow">' + escapeHtml(d.shadow) + '</div>' +
+      '<div class="hx-keynote">' + escapeHtml(d.keynote) + '</div>';
+  };
+
+  document.getElementById('hxClose').addEventListener('click', closeHexPopup);
+  document.getElementById('hxPrev').addEventListener('click', function () { stepHex(-1); });
+  document.getElementById('hxNext').addEventListener('click', function () { stepHex(1); });
+  document.getElementById('hxOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeHexPopup();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!document.getElementById('hxOverlay').classList.contains('open')) return;
+    if (e.key === 'Escape') closeHexPopup();
+    else if (e.key === 'ArrowLeft') stepHex(-1);
+    else if (e.key === 'ArrowRight') stepHex(1);
+  });
+
+  // Header — 8 trigrams (3-line figures), Fu Xi binary order 0–7
+  function trigramSVG(val, size = 1) {
+    const lineH = 5 * size, gap = 4 * size, w = 30 * size, segW = 11 * size;
+    const totalH = 3 * lineH + 2 * gap;
+    let paths = [];
+    for (let i = 0; i < 3; i++) {
+      const bit = (val >> (2 - i)) & 1;
+      const y = totalH - lineH - i * (lineH + gap);
+      if (bit === 1) {
+        paths.push(`<rect x="0" y="${y}" width="${w}" height="${lineH}" rx="${1.5*size}" fill="var(--yang)"/>`);
+      } else {
+        paths.push(`<rect x="0" y="${y}" width="${segW}" height="${lineH}" rx="${1.5*size}" fill="var(--yang)"/>`);
+        paths.push(`<rect x="${w - segW}" y="${y}" width="${segW}" height="${lineH}" rx="${1.5*size}" fill="var(--yang)"/>`);
+      }
+    }
+    return `<svg width="${w}" height="${totalH}" viewBox="0 0 ${w} ${totalH}">${paths.join('')}</svg>`;
+  }
+
+  const trigramNames = ['☷ Kun', '☶ Gen', '☵ Kan', '☴ Xun', '☳ Zhen', '☲ Li', '☱ Dui', '☰ Qian'];
+  const headerEl = document.getElementById('header-trigrams');
+  for (let v = 0; v < 8; v++) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:4px; opacity:0.3;';
+    wrap.innerHTML = trigramSVG(v, 1);
+    headerEl.appendChild(wrap);
+  }
+
+</script>
+<script>
+// ── Oracle ──────────────────────────────────────────────
+(function () {
+  var SUITS = ['♠','♣','♥','♦'];
+  var RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  var COURTS = ['J','Q','K'];
+  var RED_SUITS = ['♥','♦'];
+
+  function buildDeck() {
+    var deck = [];
+    SUITS.forEach(function(s) {
+      RANKS.forEach(function(r) {
+        deck.push({ suit: s, rank: r, red: RED_SUITS.includes(s), court: COURTS.includes(r) });
+      });
+    });
+    return deck;
+  }
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // Returns { yang: bool, changing: bool }
+  function lineType(card) {
+    if (card.court && !card.red) return { yang: false, changing: true };  // black court = old yin
+    if (card.court && card.red)  return { yang: true,  changing: true };  // red court  = old yang
+    if (!card.red)               return { yang: false, changing: false }; // black pip  = young yin
+    return                              { yang: true,  changing: false }; // red pip    = young yang
+  }
+
+  // Build 6-bit hexagram value from 6 lines (index 0 = line 1 / bottom)
+  // bit5=line1(bottom) … bit0=line6(top) matching hexagramSVG convention
+  function hexVal(lines) {
+    var v = 0;
+    lines.forEach(function(l, i) {
+      if (l.yang) v |= (1 << (5 - i));
+    });
+    return v;
+  }
+
+  function renderHexResult(el, val, role, changingLines) {
+    var kw = (typeof VAL_TO_KW !== 'undefined') ? VAL_TO_KW[val] : '?';
+    var bits = val.toString(2).padStart(6, '0');
+    el.className = 'hex-result hex-tile';
+    el.innerHTML =
+      '<div class="role">' + role + '</div>' +
+      '<div class="kw">King Wen ' + kw + '</div>' +
+      hexagramSVG(val, 1.2, changingLines) +
+      '<div class="dec">' + val + '</div>' +
+      '<div class="bits">' + bits + '</div>';
+  }
+
+  // ── Cast state ──
+  var deck = null;
+  var draws = [];   // cards drawn this round, index 0 = line 1 (bottom)
+  var lines = [];
+  var _question = '';
+  var _lastPrimary = null, _lastSecondary = null, _lastChanging = null;
+
+  function showAsked() {
+    var a = document.getElementById('askedLine');
+    if (_question) {
+      a.innerHTML = '<span>You asked</span>';
+      a.appendChild(document.createTextNode(_question));
+      a.style.display = 'block';
+    } else { a.style.display = 'none'; }
+  }
+
+  function saveReading() {
+    try { localStorage.setItem('iching_last', JSON.stringify({ cards: draws, q: _question })); } catch (e) {}
+  }
+
+  function startRound() {
+    deck = shuffle(buildDeck());
+    draws = [];
+    lines = [];
+    _question = document.getElementById('questionInput').value.trim();
+    showAsked();
+    document.getElementById('cardsRow').innerHTML = '';
+    document.getElementById('resultWrap').style.display = 'none';
+    document.getElementById('stageHint').style.display = 'none';
+    document.getElementById('governingLine').innerHTML = '';
+  }
+
+  // ── Ruling / governing line (Alfred Huang – Wilhelm system) ──────────────
+  // changingIdx: sorted indices 0–5, where 0 = bottom (line 1) … 5 = top (line 6).
+  // Returns which single line governs and in which hexagram its text is read.
+  // For 1–3 moving lines the text is read in the Cast hexagram; for 4–5 in the
+  // “Becomes” hexagram. 0 or 6 moving lines fall back to the Judgment.
+  function governingLine(changingIdx, primary, secondary) {
+    var n = changingIdx.length;
+    var parity = function (i) { return (primary >> (5 - i)) & 1; }; // 1 = yang, 0 = yin
+    var still = [0,1,2,3,4,5].filter(function (i) { return changingIdx.indexOf(i) === -1; });
+    if (n === 0) return { mode: 'judgment', src: 'primary' };
+    if (n === 1) return { mode: 'line', line: changingIdx[0], src: 'primary' };
+    if (n === 2) {
+      var a = changingIdx[0], b = changingIdx[1], line;
+      if (parity(a) !== parity(b)) line = (parity(a) === 0) ? a : b; // the yin line
+      else line = a;                                                 // both alike → lower
+      return { mode: 'line', line: line, src: 'primary' };
+    }
+    if (n === 3) return { mode: 'line', line: changingIdx[1], src: 'primary' };       // middle
+    if (n === 4) return { mode: 'line', line: still[still.length - 1], src: 'relating' }; // upper still line
+    if (n === 5) return { mode: 'line', line: still[0], src: 'relating' };            // sole still line
+    // n === 6
+    if (primary === 63) return { mode: 'special', text: 'Use Nine', src: 'primary' }; // Qian
+    if (primary === 0)  return { mode: 'special', text: 'Use Six',  src: 'primary' }; // Kun
+    return { mode: 'judgment', src: 'relating' };
+  }
+
+  function lineName(val, i) {
+    var bit = (val >> (5 - i)) & 1;
+    var pos = ['at the beginning','in the second place','in the third place',
+               'in the fourth place','in the fifth place','at the top'][i];
+    return (bit ? 'Nine' : 'Six') + ' ' + pos;
+  }
+
+  // Moving-line text for a hexagram value + line index (0 = bottom / line 1).
+  function lineText(val, i) {
+    var kw = (typeof VAL_TO_KW !== 'undefined') ? VAL_TO_KW[val] : null;
+    var arr = (kw && typeof LINE_DATA !== 'undefined') ? LINE_DATA[kw] : null;
+    return (arr && arr[i]) ? arr[i] : '';
+  }
+
+  // Expandable list of every moving line, read in the cast (primary) hexagram.
+  // rulingIdx = the line that governs, if it is one of these primary lines (else -1).
+  function movingLinesHTML(changingIdx, primary, rulingIdx) {
+    if (changingIdx.length < 2) return '';
+    var items = changingIdx.map(function (i) {
+      var isRuling = (i === rulingIdx);
+      return '<div class="ml-item' + (isRuling ? ' ruling' : '') + '">' +
+        '<div class="ml-label">' + lineName(primary, i) +
+          (isRuling ? '<span class="ml-tag">rules</span>' : '') + '</div>' +
+        '<div class="ml-text">' + escapeHtml(lineText(primary, i)) + '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="gl-more">' +
+      '<button type="button" class="gl-toggle" aria-expanded="false">Show all ' +
+        changingIdx.length + ' moving lines</button>' +
+      '<div class="gl-lines" style="display:none">' + items + '</div>' +
+    '</div>';
+  }
+
+  function wireGlToggle(el) {
+    var btn = el.querySelector('.gl-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var list = el.querySelector('.gl-lines');
+      if (!list) return;
+      var open = list.style.display !== 'none';
+      list.style.display = open ? 'none' : 'flex';
+      btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+      btn.textContent = (open ? 'Show all ' : 'Hide ') + list.children.length + ' moving lines';
+    });
+  }
+
+  var GL_RULE = {
+    1: 'One moving line — it speaks directly.',
+    2: 'Two moving lines — the yin line leads; if both are alike, the lower leads.',
+    3: 'Three moving lines — the middle one rules.',
+    4: 'Four moving lines — the upper of the two still lines rules, read in the “Becomes” hexagram.',
+    5: 'Five moving lines — the single still line rules, read in the “Becomes” hexagram.'
+  };
+
+  function renderGoverningLine(changingIdx, primary, secondary) {
+    var el = document.getElementById('governingLine');
+    var n = changingIdx.length;
+    var g = governingLine(changingIdx, primary, secondary);
+
+    // Index (0-5) of the governing line within the cast hexagram, or -1 when it
+    // is read in the relating hexagram (n=4,5) or is not a single line.
+    var rulingIdx = (g.mode === 'line' && g.src === 'primary') ? g.line : -1;
+    var moreHTML = movingLinesHTML(changingIdx, primary, rulingIdx);
+
+    if (g.mode === 'judgment') {
+      var msg = (g.src === 'primary')
+        ? 'No moving lines — the reading rests on the hexagram’s Judgment as a whole.'
+        : 'All six lines moving — the reading passes to the Judgment of the “Becomes” hexagram.';
+      el.innerHTML = '<div class="gl-label">Ruling Line</div><div class="gl-note">' + msg + '</div>' + moreHTML;
+      wireGlToggle(el);
+      return;
+    }
+    if (g.mode === 'special') {
+      el.innerHTML =
+        '<div class="gl-label">Ruling Line</div>' +
+        '<div class="gl-name">' + g.text + '</div>' +
+        '<div class="gl-src">All lines moving · ' + (primary === 63 ? 'The Creative' : 'The Receptive') + '</div>' +
+        '<div class="gl-note">Every line is moving, so the whole figure turns over; read it in the Judgment, then in what it becomes. The six lines below speak in turn.</div>' +
+        moreHTML;
+      wireGlToggle(el);
+      return;
+    }
+    var srcVal = (g.src === 'relating') ? secondary : primary;
+    var txt = lineText(srcVal, g.line);
+    el.innerHTML =
+      '<div class="gl-label">Ruling Line</div>' +
+      '<div class="gl-name">' + lineName(srcVal, g.line) + '</div>' +
+      '<div class="gl-src">Line ' + (g.line + 1) + ' · ' +
+        (g.src === 'relating' ? '“Becomes” hexagram' : 'Cast hexagram') +
+        ' · King Wen ' + VAL_TO_KW[srcVal] + '</div>' +
+      '<div class="gl-desc' + (txt ? '' : ' placeholder') + '">' +
+        (txt ? escapeHtml(txt) : 'Line text unavailable.') + '</div>' +
+      '<div class="gl-rule">' + (GL_RULE[n] || '') + '</div>' +
+      moreHTML;
+    wireGlToggle(el);
+  }
+
+  // Card face rendering — matches quadration.html (pip layouts, serif corner ranks)
+  var SUIT_CLASS = { '♥':'hearts', '♦':'diamonds', '♣':'clubs', '♠':'spades' };
+  var PIP_LAYOUTS = {
+    'A':  [[50,50,0]],
+    '2':  [[50,14,0],[50,86,1]],
+    '3':  [[50,14,0],[50,50,0],[50,86,1]],
+    '4':  [[25,20,0],[75,20,0],[25,80,1],[75,80,1]],
+    '5':  [[25,20,0],[75,20,0],[50,50,0],[25,80,1],[75,80,1]],
+    '6':  [[25,20,0],[75,20,0],[25,50,0],[75,50,0],[25,80,1],[75,80,1]],
+    '7':  [[25,17,0],[75,17,0],[50,34,0],[25,50,0],[75,50,0],[25,83,1],[75,83,1]],
+    '8':  [[25,17,0],[75,17,0],[50,31,0],[25,50,0],[75,50,0],[50,69,1],[25,83,1],[75,83,1]],
+    '9':  [[25,14,0],[75,14,0],[25,35,0],[75,35,0],[50,50,0],[25,65,1],[75,65,1],[25,86,1],[75,86,1]],
+    '10': [[25,12,0],[75,12,0],[50,27,0],[25,38,0],[75,38,0],[25,62,1],[75,62,1],[50,73,1],[25,88,1],[75,88,1]]
+  };
+
+  function cardFaceHTML(card) {
+    var rank = card.rank, sym = card.suit;
+    var corners =
+      '<div class="card-corner card-tl"><span class="cc-rank">' + rank + '</span></div>' +
+      '<div class="card-corner card-br"><span class="cc-rank">' + rank + '</span></div>';
+    if (['J','Q','K'].indexOf(rank) !== -1) {
+      return corners + '<div class="card-pips"><span class="pip ace" style="left:50%;top:50%">' + sym + '</span></div>';
+    }
+    var layout = PIP_LAYOUTS[rank];
+    if (!layout) return corners;
+    var ace = rank === 'A';
+    return corners + '<div class="card-pips">' +
+      layout.map(function (p) {
+        return '<span class="pip' + (p[2] ? ' inv' : '') + (ace ? ' ace' : '') +
+               '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + sym + '</span>';
+      }).join('') + '</div>';
+  }
+
+  function cardWrapper(card, idx, visible) {
+    var wrap = document.createElement('div');
+    wrap.className = 'card-line';
+    var no = document.createElement('div');
+    no.className = 'cl-no';
+    no.textContent = idx + 1;
+    var el = document.createElement('div');
+    el.className = 'spread-card ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '') + (visible ? ' visible' : '');
+    el.title = 'Line ' + (idx + 1) + ' · ' + card.rank + card.suit;
+    el.innerHTML = cardFaceHTML(card);
+    wrap.appendChild(no);
+    wrap.appendChild(el);
+    return { wrap: wrap, el: el };
+  }
+
+  function renderCard(card, idx) {
+    var row = document.getElementById('cardsRow');
+    var m = cardWrapper(card, idx, false);
+    // column-reverse: first card sits at the bottom (line 1), each new card pops above it
+    row.appendChild(m.wrap);
+    requestAnimationFrame(function(){ m.el.classList.add('visible'); });
+  }
+
+  function drawOne() {
+    var card = deck[draws.length];
+    draws.push(card);
+    lines.push(lineType(card));
+    renderCard(card, draws.length - 1);
+  }
+
+  function showResult() {
+    var primary = hexVal(lines);
+    var changingIdx = lines.reduce(function(a, l, i){ if(l.changing) a.push(i); return a; }, []);
+    var hasChanging = changingIdx.length > 0;
+    var changedLines = lines.map(function(l) {
+      return l.changing ? { yang: !l.yang, changing: false } : l;
+    });
+    var secondary = hexVal(changedLines);
+
+    _lastPrimary = primary; _lastSecondary = secondary; _lastChanging = changingIdx;
+
+    document.getElementById('stageHint').style.display = 'none';
+    document.getElementById('resultWrap').style.display = 'flex';
+    renderHexResult(document.getElementById('hexPrimary'), primary, 'Cast', changingIdx);
+
+    var prim = document.getElementById('hexPrimary');
+    prim.onclick = function () { selectReading('primary'); };
+
+    var sec = document.getElementById('hexSecondary');
+    if (hasChanging) {
+      document.getElementById('hexArrow').style.display = 'block';
+      document.getElementById('becomesCol').style.display = 'flex';
+      renderHexResult(sec, secondary, 'Becomes', null);
+      sec.onclick = function () { selectReading('secondary'); };
+    } else {
+      document.getElementById('hexArrow').style.display = 'none';
+      document.getElementById('becomesCol').style.display = 'none';
+      sec.onclick = null;
+    }
+
+    selectReading('primary');
+
+    renderGoverningLine(changingIdx, primary, secondary);
+
+    if (window.setCastGlow) window.setCastGlow(hasChanging ? [primary, secondary] : [primary]);
+    saveReading();
+  }
+
+  // Both tiles are clickable; clicking one loads its reading below and marks it active
+  function selectReading(which) {
+    var val = (which === 'secondary') ? _lastSecondary : _lastPrimary;
+    if (val == null) return;
+    var ot = document.getElementById('oracleText');
+    ot.innerHTML = (window.hexAnswerHTML ? window.hexAnswerHTML(val) : '');
+    ot.classList.remove('fade'); void ot.offsetWidth; ot.classList.add('fade');
+    document.getElementById('hexPrimary').classList.toggle('active', which === 'primary');
+    document.getElementById('hexSecondary').classList.toggle('active', which === 'secondary');
+  }
+
+  function updateButtons() {
+    document.getElementById('castOneBtn').textContent =
+      (!deck || draws.length >= 6 || draws.length === 0) ? 'Single' : 'Next';
+  }
+
+  function castOne() {
+    if (!deck || draws.length >= 6) startRound();
+    drawOne();
+    if (draws.length === 6) { setTimeout(showResult, 360); }
+    updateButtons();
+  }
+
+  function castAll() {
+    if (!deck || draws.length >= 6) startRound();
+    var oneBtn = document.getElementById('castOneBtn');
+    var allBtn = document.getElementById('castAllBtn');
+    oneBtn.disabled = true; allBtn.disabled = true;
+    (function next(){
+      if (draws.length >= 6) {
+        setTimeout(function(){
+          showResult();
+          oneBtn.disabled = false; allBtn.disabled = false;
+          updateButtons();
+        }, 240);
+        return;
+      }
+      drawOne();
+      setTimeout(next, 150);
+    })();
+  }
+
+  document.getElementById('castOneBtn').addEventListener('click', castOne);
+  document.getElementById('castAllBtn').addEventListener('click', castAll);
+  document.getElementById('questionInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); castAll(); }
+  });
+
+  // Restore last reading from a previous visit
+  try {
+    var saved = JSON.parse(localStorage.getItem('iching_last') || 'null');
+    if (saved && saved.cards && saved.cards.length === 6) {
+      draws = saved.cards;
+      lines = draws.map(lineType);
+      _question = saved.q || '';
+      document.getElementById('questionInput').value = _question;
+      showAsked();
+      var row = document.getElementById('cardsRow');
+      row.innerHTML = '';
+      draws.forEach(function (card, idx) {
+        row.appendChild(cardWrapper(card, idx, true).wrap);
+      });
+      showResult();
+      updateButtons();
+    }
+  } catch (e) {}
+})();
+
+</script>
+<script>
+(function(){
+  var btn=document.getElementById('burgerBtn'),nav=document.getElementById('shNav');
+  btn.addEventListener('click',function(e){e.stopPropagation();nav.classList.toggle('open');});
+  document.addEventListener('click',function(){nav.classList.remove('open');});
+})();
+</script>
+<footer class="site-footer"><div class="sf-inner"></div></footer>
+</body>
+</html>

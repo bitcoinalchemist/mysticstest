@@ -1,0 +1,14 @@
+.DS_Store
+*.swp
+*.swo
+
+# Pre-git version snapshots (historical; superseded by git history)
+versions/
+
+# Raw source data files (content lives in ichingdata.js / linedata.js)
+iching-oracle-64-hexagrams.md
+iching-oracle-384-lines.txt
+
+# Scratch / archives
+_wtest.txt
+mysticzip/
