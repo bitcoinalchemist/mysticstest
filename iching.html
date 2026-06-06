@@ -588,41 +588,128 @@
     }
 
     /* ── Cast card popup ── */
-    .ic-cov {
+    @keyframes cardFlip {
+      from { opacity: 0; transform: perspective(600px) rotateY(-75deg) scale(.97); }
+      to   { opacity: 1; transform: perspective(600px) rotateY(0deg)   scale(1);  }
+    }
+    @keyframes cardFlipOut {
+      from { opacity: 1; transform: perspective(600px) rotateY(0deg)   scale(1);  }
+      to   { opacity: 0; transform: perspective(600px) rotateY(75deg)  scale(.97); }
+    }
+    .ccard-popup.closing { animation: cardFlipOut .2s cubic-bezier(.55,0,.68,.07) forwards; }
+    .card-vow {
+      font-family: var(--serif); font-style: italic;
+      font-size: .88rem; color: var(--gold);
+      line-height: 1.5; margin-top: .3rem;
+    }
+    .ccard-overlay {
       display: none; position: fixed; inset: 0; z-index: 400;
       background: rgba(26,25,22,.52);
       backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
       align-items: center; justify-content: center; padding: 1rem;
     }
-    .ic-cov.open { display: flex; }
-    .ic-cpop {
-      background: var(--surface); border-radius: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.28);
-      max-width: 220px; width: 100%; position: relative;
-      display: flex; flex-direction: column; align-items: center;
-      padding: 1.75rem 1.5rem 1.5rem; gap: .85rem;
-      animation: hxIn .22s cubic-bezier(.23,1,.32,1);
+    .ccard-overlay.open { display: flex; }
+    .ccard-popup {
+      background: var(--surface); border-radius: var(--r-lg);
+      box-shadow: var(--sh-lg); max-width: 420px; width: 100%;
+      position: relative;
+      animation: cardFlip .25s cubic-bezier(.23,1,.32,1);
+      display: flex; flex-direction: column;
+      height: 480px; max-height: 88vh; overflow: hidden;
     }
-    .ic-cpop::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-      border-radius: 14px 14px 0 0; background: var(--rule-strong);
+    .ccard-popup::before {
+      content: ''; display: block; height: 4px;
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      background: var(--rule-strong);
     }
-    .ic-cpop.hearts::before, .ic-cpop.diamonds::before { background: var(--red); }
-    .ic-cpop.clubs::before, .ic-cpop.spades::before { background: var(--accent); }
-    .ic-cpop-close {
-      position: absolute; top: .75rem; right: .75rem;
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--surface-alt); border: 1px solid var(--rule);
-      font-size: .72rem; color: var(--muted);
+    .ccard-popup.suit-hearts::before,
+    .ccard-popup.suit-diamonds::before { background: var(--red); }
+    .ccard-popup.suit-clubs::before    { background: var(--card-dark); }
+    .ccard-popup.suit-spades::before   { background: var(--card-dark); }
+    .ccard-popup.suit-joker::before    { background: var(--gold); }
+    .ccard-close {
+      position: absolute; top: .9rem; right: .9rem; z-index: 2;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface-alt); border: 1px solid var(--border);
+      font-size: .78rem; color: var(--muted);
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; transition: all var(--ease);
     }
-    .ic-cpop-close:hover { background: var(--rule); color: var(--text); }
-    .spread-card.ic-cpop-face { width: 90px; height: 126px; cursor: default; opacity: 1; transform: none; }
-    .ic-cpop-name { font-family: var(--serif); font-size: 1.25rem; text-align: center; line-height: 1.2; color: var(--text); }
-    .ic-cpop-line { font-family: var(--mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-    .ic-cpop-type { font-family: var(--sans); font-size: .72rem; color: var(--muted); font-weight: 500; }
-    .ic-cpop-type.changing { color: var(--gold); }
+    .ccard-close:hover { background: var(--rule); color: var(--text); }
+    .ccard-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+      width: 2rem; height: 3.5rem;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 1rem;
+      opacity: 0; transition: opacity var(--ease), color var(--ease);
+      cursor: pointer; border-radius: var(--r-sm);
+    }
+    .ccard-nav-prev { left: .35rem; }
+    .ccard-nav-next { right: .35rem; }
+    .ccard-popup:hover .ccard-nav { opacity: 1; }
+    .ccard-nav:hover { color: var(--text); }
+    .ccard-nav:focus { outline: none; }
+    .ccard-header {
+      display: flex; gap: 1.35rem; align-items: flex-start;
+      padding: 1.35rem 1.75rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    #ccFace {
+      width: 90px; height: 126px; flex-shrink: 0; cursor: default;
+      opacity: 1; transform: none;
+    }
+    #ccFace:hover { transform: none; box-shadow: none; }
+    .ccard-info { flex: 1; min-width: 0; padding-top: .1rem; }
+    .ccard-name {
+      font-family: var(--serif); font-size: 1.45rem; font-weight: 400;
+      line-height: 1.15; margin-bottom: .18rem;
+    }
+    .ccard-subtitle {
+      font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .ccard-keywords {
+      padding: .55rem 1.75rem;
+      border-top: 1px solid var(--border);
+      font-size: .72rem; color: var(--gold);
+      letter-spacing: .03em; line-height: 1.55;
+      text-align: center;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    .ccard-planets {
+      font-size: .62rem; letter-spacing: .08em;
+      color: var(--muted); margin-top: .25rem;
+    }
+    #ccVow {
+      font-size: 1.15rem;
+      min-height: 3em;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    #ccPlanets { min-height: 1.6em; }
+    .ccard-body {
+      flex: 1; overflow-y: auto; min-height: 0;
+      padding: 1.2rem 1.75rem;
+    }
+    .ccard-personality {
+      font-family: var(--serif);
+      font-size: .875rem; color: var(--secondary); line-height: 1.82;
+    }
+    .ccard-footer {
+      padding: .9rem 1.75rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .ccard-load-btn {
+      display: block; width: 100%;
+      background: var(--accent); color: rgba(255,255,255,.92);
+      padding: .65rem; border-radius: var(--r-sm);
+      font-size: .72rem; font-weight: 500; letter-spacing: .1em;
+      text-transform: uppercase; cursor: pointer; border: none;
+      font-family: var(--sans); transition: background var(--ease);
+    }
+    .ccard-load-btn:hover { background: #2e3356; }
     .spread-card.clickable { cursor: pointer; }
   </style>
 </head>
@@ -712,6 +799,8 @@
   </div>
 </div>
 
+<!-- Shared card data + popup logic -->
+<script src="cardsdata.js"></script>
 <!-- 64 hexagram oracle answers (Sage voice) -->
 <script src="ichingdata.js"></script>
 <!-- 384 moving-line texts (Sage voice) -->
@@ -948,8 +1037,11 @@
   var RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   var COURTS = ['J','Q','K'];
   var RED_SUITS = ['♥','♦'];
-  var RANK_NAMES = {A:'Ace',J:'Jack',Q:'Queen',K:'King','2':'Two','3':'Three','4':'Four','5':'Five','6':'Six','7':'Seven','8':'Eight','9':'Nine','10':'Ten'};
-  var SUIT_NAMES = {'♥':'Hearts','♦':'Diamonds','♣':'Clubs','♠':'Spades'};
+  var SYM_TO_SUIT = {'♥':'hearts','♦':'diamonds','♣':'clubs','♠':'spades'};
+  function findCardIdx(castCard) {
+    var suit = SYM_TO_SUIT[castCard.suit];
+    return CARDS.findIndex(function(c) { return c.rank === castCard.rank && c.suit === suit; });
+  }
 
   function buildDeck() {
     var deck = [];
@@ -1197,7 +1289,7 @@
     el.className = 'spread-card clickable ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '') + (visible ? ' visible' : '');
     el.title = 'Line ' + (idx + 1) + ' · ' + card.rank + card.suit;
     el.innerHTML = cardFaceHTML(card);
-    el.addEventListener('click', function() { openCardPopup(card, idx); });
+    el.addEventListener('click', function() { openCompareCard(findCardIdx(card)); });
     wrap.appendChild(no);
     wrap.appendChild(el);
     return { wrap: wrap, el: el };
@@ -1305,29 +1397,12 @@
   });
 
   // ── Cast card popup ──────────────────────────────────────
-  function openCardPopup(card, lineIdx) {
-    var pop = document.getElementById('icCpop');
-    var face = document.getElementById('icCpopFace');
-    pop.className = 'ic-cpop ' + SUIT_CLASS[card.suit];
-    face.className = 'spread-card ic-cpop-face ' + SUIT_CLASS[card.suit] + (card.court ? ' changing' : '');
-    face.innerHTML = cardFaceHTML(card);
-    document.getElementById('icCpopName').textContent = RANK_NAMES[card.rank] + ' of ' + SUIT_NAMES[card.suit];
-    document.getElementById('icCpopLine').textContent = 'Line ' + (lineIdx + 1);
-    var lt = card.court ? (card.red ? 'Old Yang · Changing' : 'Old Yin · Changing') : (card.red ? 'Young Yang' : 'Young Yin');
-    var typeEl = document.getElementById('icCpopType');
-    typeEl.textContent = lt;
-    typeEl.className = 'ic-cpop-type' + (card.court ? ' changing' : '');
-    document.getElementById('icCov').classList.add('open');
-  }
-  function closeCardPopup() {
-    document.getElementById('icCov').classList.remove('open');
-  }
-  document.getElementById('icCpopClose').addEventListener('click', closeCardPopup);
-  document.getElementById('icCov').addEventListener('click', function(e) {
-    if (e.target === this) closeCardPopup();
+  function loadCardInFinder() { window.location.href = 'quadration.html'; }
+  document.getElementById('ccardOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCompareCard();
   });
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && document.getElementById('icCov').classList.contains('open')) closeCardPopup();
+    if (e.key === 'Escape' && document.getElementById('ccardOverlay').classList.contains('open')) closeCompareCard();
   });
 
   // Restore last reading from a previous visit
@@ -1359,13 +1434,27 @@
 })();
 </script>
 <!-- ── Cast card popup ── -->
-<div class="ic-cov" id="icCov">
-  <div class="ic-cpop" id="icCpop">
-    <button class="ic-cpop-close" id="icCpopClose">✕</button>
-    <div class="spread-card ic-cpop-face" id="icCpopFace"></div>
-    <div class="ic-cpop-name" id="icCpopName"></div>
-    <div class="ic-cpop-line" id="icCpopLine"></div>
-    <div class="ic-cpop-type" id="icCpopType"></div>
+<div class="ccard-overlay" id="ccardOverlay">
+  <div class="ccard-popup" id="ccardPopup">
+    <button class="ccard-close" onclick="event.stopPropagation(); closeCompareCard()">✕</button>
+    <button class="ccard-nav ccard-nav-prev" onclick="event.stopPropagation(); openCompareCard((_ccardIdx - 1 + CARDS.length) % CARDS.length)">&#8249;</button>
+    <button class="ccard-nav ccard-nav-next" onclick="event.stopPropagation(); openCompareCard((_ccardIdx + 1) % CARDS.length)">&#8250;</button>
+    <div class="ccard-header">
+      <div class="spread-card" id="ccFace"></div>
+      <div class="ccard-info">
+        <div class="ccard-name"     id="ccName"></div>
+        <div class="ccard-subtitle" id="ccSubtitle"></div>
+        <div class="card-vow"       id="ccVow"></div>
+        <div class="ccard-planets"  id="ccPlanets"></div>
+      </div>
+    </div>
+    <div class="ccard-keywords" id="ccKws"></div>
+    <div class="ccard-body">
+      <div class="ccard-personality" id="ccPersonality"></div>
+    </div>
+    <div class="ccard-footer">
+      <button class="ccard-load-btn" onclick="event.stopPropagation(); loadCardInFinder()">Open full profile →</button>
+    </div>
   </div>
 </div>
 
