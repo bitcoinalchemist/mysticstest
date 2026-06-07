@@ -163,18 +163,21 @@
       position: relative;
     }
     .result-toggle {
-      position: absolute; top: 0; right: 2rem; z-index: 3;
-      width: 30px; height: 30px; border-radius: 999px;
+      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      margin: .6rem auto .1rem;
+      padding: .35rem 1.1rem;
+      border-radius: 999px;
       background: none; border: 1px solid rgba(255,255,255,.22);
-      color: var(--gold); cursor: pointer; font-size: .8rem; line-height: 1;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform .25s ease, background .2s, border-color .2s;
+      color: var(--gold); cursor: pointer;
+      font-family: var(--sans); font-size: .7rem; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase;
+      transition: background .2s, border-color .2s;
     }
-    .result-toggle:hover { background: var(--gold-light); border-color: var(--gold); color: var(--gold); }
-    .finder-result.collapsed .result-toggle { transform: rotate(180deg); }
+    .result-toggle::after { content: '▾'; font-size: .75rem; transition: transform .25s ease; display: inline-block; }
+    .result-toggle:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.45); }
+    .finder-result.collapsed .result-toggle::after { transform: rotate(180deg); }
     .finder-result.collapsed .result-dates,
     .finder-result.collapsed .result-body { display: none; }
-    @media (max-width: 600px) { .result-toggle { right: 1rem; } }
     .result-card-row {
       display: flex; flex-direction: column; align-items: center;
       text-align: center; gap: .65rem; margin: 0 auto 1rem;
@@ -1393,7 +1396,6 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
 
   <div class="finder-result" id="finderResult">
     <div class="finder-result-inner">
-      <button type="button" class="result-toggle" id="rToggle" onclick="toggleFinderDetail()" title="Minimise details" aria-label="Minimise details">▾</button>
       <div class="result-card-row">
         <div class="spread-card result-pip-card" id="rFace"></div>
         <div class="result-head-text">
@@ -1404,6 +1406,7 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
         <div class="result-kws" id="rKws"></div>
         <div class="ccard-planets" id="rPlanets"></div>
       </div>
+      <button type="button" class="result-toggle" id="rToggle" onclick="toggleFinderDetail()" title="Minimise details" aria-label="Minimise details">Minimise</button>
       <div class="result-dates" id="rDates" style="text-align:center; margin: .5rem 0 .75rem;"></div>
       <div class="result-body">
         <div class="result-left">
@@ -2237,6 +2240,7 @@ function toggleFinderDetail() {
   const collapsed = r.classList.toggle('collapsed');
   const btn = document.getElementById('rToggle');
   const label = collapsed ? 'Show details' : 'Minimise details';
+  btn.textContent = collapsed ? 'Show' : 'Minimise';
   btn.setAttribute('title', label);
   btn.setAttribute('aria-label', label);
 }
