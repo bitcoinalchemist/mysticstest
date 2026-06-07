@@ -558,7 +558,20 @@ function spreadCardPips(c) {
     `<div class="card-corner card-tl"><span class="cc-rank">${rank}</span></div>` +
     `<div class="card-corner card-br"><span class="cc-rank">${rank}</span></div>`;
   if (['J','Q','K'].includes(rank)) {
-    // Court: suit centred between the corner indices
+    // Check for illustrated court card SVG
+    const courtKey = rank + (c.suit === 'hearts' ? 'H' : c.suit === 'diamonds' ? 'D' : c.suit === 'clubs' ? 'C' : 'S');
+    const courtSvgs = {
+      JC: 'Court%20Cards/JC.svg', JD: 'Court%20Cards/JD.svg',
+      JH: 'Court%20Cards/JH.svg', JS: 'Court%20Cards/JS.svg',
+      QC: 'Court%20Cards/QC.svg', QD: 'Court%20Cards/QD.svg',
+      QH: 'Court%20Cards/QH.svg', QS: 'Court%20Cards/QS.svg',
+      KC: 'Court%20Cards/KC.svg', KD: 'Court%20Cards/KD.svg',
+      KH: 'Court%20Cards/KH.svg', KS: 'Court%20Cards/KS.svg',
+    };
+    if (courtSvgs[courtKey]) {
+      return corners + `<img class="court-art" src="${courtSvgs[courtKey]}" alt="${rank} of ${c.suit}">`;
+    }
+    // Fallback: suit centred between the corner indices
     return corners + `<div class="card-pips"><span class="pip ace" style="left:50%;top:50%">${sym}</span></div>`;
   }
   const layout = PIP_LAYOUTS[rank];
