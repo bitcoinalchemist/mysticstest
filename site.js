@@ -8,6 +8,7 @@
     { href: 'quadration.html', label: 'Card of Life'  },
     { href: 'calculator.html', label: 'Calculator'    },
     { href: 'iching.html',     label: 'I Ching'       },
+    { href: 'hexagrams.html',  label: 'Hexagrams'     },
   ];
   // ────────────────────────────────────────────────────────────────
 

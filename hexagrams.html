@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hexagrams — mysticscards.space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Reference grid ── */
+    .hex-ref-wrap {
+      flex: 1;
+      background: #252a4a;
+      padding: 1.25rem 0.6rem 2rem;
+      --yang: rgba(255,255,255,.9);
+    }
+    .hex-ref-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 0 auto 0.9rem;
+      width: fit-content;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .hex-ref-toggle button {
+      font-family: var(--sans);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.6);
+      background: transparent;
+      border: none;
+      padding: 0.4rem 1.1rem;
+      cursor: pointer;
+      transition: background .18s, color .18s;
+    }
+    .hex-ref-toggle button.active {
+      background: var(--gold);
+      color: #fff;
+    }
+    .hex-ref-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 0.2rem;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .hex-ref-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.25rem 0.1rem;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 4px;
+      background: rgba(255,255,255,.04);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .hex-ref-cell:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+    .hex-ref-kw {
+      font-family: var(--serif);
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1;
+      color: rgba(255,255,255,.92);
+      margin-bottom: 4px;
+    }
+    .hex-ref-num {
+      font-family: var(--mono);
+      font-size: 0.5rem;
+      color: rgba(255,255,255,.4);
+    }
+    .hex-ref-bits {
+      font-family: var(--mono);
+      font-size: 0.5rem;
+      color: rgba(181,134,74,.9);
+    }
+
+    /* ── Hexagram popup ── */
+    .hx-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(26,25,22,.52);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .hx-overlay.open { display: flex; }
+    .hx-popup {
+      background: var(--surface); border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      max-width: 440px; width: 100%; position: relative;
+      display: flex; flex-direction: column;
+      height: 620px; max-height: 92vh; overflow: hidden;
+      animation: hxIn .25s cubic-bezier(.23,1,.32,1);
+    }
+    @keyframes hxIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+    .hx-popup::before { content: ''; display: block; height: 4px; background: var(--gold); }
+    .hx-close {
+      position: absolute; top: .9rem; right: .9rem; z-index: 2;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface-alt); border: 1px solid var(--rule);
+      font-size: .78rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all var(--ease);
+    }
+    .hx-close:hover { background: var(--rule); color: var(--text); }
+    .hx-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+      width: 2rem; height: 3.5rem; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 1.5rem; opacity: .45; cursor: pointer;
+      background: none; border: none; transition: opacity var(--ease), color var(--ease);
+    }
+    .hx-nav:hover { opacity: 1; color: var(--text); }
+    .hx-prev { left: .15rem; } .hx-next { right: .15rem; }
+    .hx-header {
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      padding: 12px 28px 5px;
+    }
+    .hx-fig { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+    .hx-fig-svg { background: #252a4a; border-radius: 8px; padding: .65rem .75rem; --yang: rgba(255,255,255,.9); }
+    .hx-fig-num { font-family: var(--mono); font-size: .58rem; color: var(--muted); letter-spacing: .05em; }
+    .hx-id { flex: 1; min-width: 0; padding-top: .15rem; }
+    .hx-kw { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: .35rem; }
+    .hx-name { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; line-height: 1.12; margin-bottom: .35rem; }
+    .hx-trig { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .hx-image { font-family: var(--serif); font-style: italic; font-size: 1.05rem; line-height: 1.45; color: var(--gold); padding: 1px 28px 0; text-align: center; }
+    .hx-body { flex: 1; overflow-y: auto; min-height: 0; padding: 1px 28px 2px; }
+    .hx-body p { font-family: var(--serif); font-size: 16px; line-height: 1.8; color: var(--text); margin-bottom: 10px; }
+    .hx-shadow { font-size: .92rem; line-height: 1.7; color: var(--secondary); font-style: italic; margin: 0; text-align: center; }
+    .hx-keynote { font-family: var(--serif); font-style: italic; font-size: 20px; line-height: 1.55; color: var(--gold); text-align: center; padding: 5px 0; margin: 1px 0 0; }
+
+    @media (max-width: 400px) {
+      .hex-ref-cell .mini-line.yang { width: 20px; }
+    }
+  </style>
+</head>
+<body>
+<script src="site.js"></script>
+
+<!-- ── Reference grid ── -->
+<section class="hex-ref-wrap">
+  <div class="hex-ref-toggle" id="seqToggle">
+    <button data-seq="fuxi" class="active">Fu Xi</button>
+    <button data-seq="kingwen">King Wen</button>
+  </div>
+  <div class="hex-ref-grid" id="hex-grid"></div>
+</section>
+
+<!-- ── Hexagram popup ── -->
+<div class="hx-overlay" id="hxOverlay">
+  <div class="hx-popup" id="hxPopup">
+    <button class="hx-close" id="hxClose" aria-label="Close">✕</button>
+    <button class="hx-nav hx-prev" id="hxPrev" aria-label="Previous hexagram">‹</button>
+    <button class="hx-nav hx-next" id="hxNext" aria-label="Next hexagram">›</button>
+    <div class="hx-header">
+      <div class="hx-fig">
+        <div class="hx-fig-svg" id="hxFig"></div>
+        <div class="hx-fig-num" id="hxFigNum"></div>
+      </div>
+      <div class="hx-id">
+        <div class="hx-kw" id="hxKw"></div>
+        <div class="hx-name" id="hxName"></div>
+        <div class="hx-trig" id="hxTrig"></div>
+      </div>
+    </div>
+    <div class="hx-image" id="hxImage"></div>
+    <div class="hx-body" id="hxContent"></div>
+  </div>
+</div>
+
+<!-- 64 hexagram oracle answers -->
+<script src="ichingdata.js"></script>
+
+<script>
+  function hexagramSVG(val, size) {
+    size = size || 1;
+    var lineH = 5 * size, gap = 4 * size, totalH = 6 * lineH + 5 * gap;
+    var w = 36 * size, segW = 14 * size;
+    var paths = [];
+    for (var i = 0; i < 6; i++) {
+      var bit = (val >> (5 - i)) & 1;
+      var y = totalH - lineH - i * (lineH + gap);
+      if (bit === 1) {
+        paths.push('<rect x="0" y="' + y + '" width="' + w + '" height="' + lineH + '" rx="' + (1.5 * size) + '" fill="var(--yang)"/>');
+      } else {
+        paths.push('<rect x="0" y="' + y + '" width="' + segW + '" height="' + lineH + '" rx="' + (1.5 * size) + '" fill="var(--yang)"/>');
+        paths.push('<rect x="' + (w - segW) + '" y="' + y + '" width="' + segW + '" height="' + lineH + '" rx="' + (1.5 * size) + '" fill="var(--yang)"/>');
+      }
+    }
+    return '<svg width="' + w + '" height="' + totalH + '" viewBox="0 0 ' + w + ' ' + totalH + '">' + paths.join('') + '</svg>';
+  }
+
+  var VAL_TO_KW = [2, 23, 8, 20, 16, 35, 45, 12, 15, 52, 39, 53, 62, 56, 31, 33,
+                   7, 4, 29, 59, 40, 64, 47, 6, 46, 18, 48, 57, 32, 50, 28, 44,
+                   24, 27, 3, 42, 51, 21, 17, 25, 36, 22, 63, 37, 55, 30, 49, 13,
+                   19, 41, 60, 61, 54, 38, 58, 10, 11, 26, 5, 9, 34, 14, 43, 1];
+
+  var KW_TO_VAL = [];
+  VAL_TO_KW.forEach(function (kw, v) { KW_TO_VAL[kw] = v; });
+
+  var grid = document.getElementById('hex-grid');
+  function buildGrid(seq) {
+    grid.innerHTML = '';
+    var order = [];
+    if (seq === 'kingwen') {
+      for (var kw = 1; kw <= 64; kw++) order.push(KW_TO_VAL[kw]);
+    } else {
+      for (var v = 0; v < 64; v++) order.push(v);
+    }
+    order.forEach(function (v) {
+      var bits = v.toString(2).padStart(6, '0');
+      var kw = VAL_TO_KW[v];
+      var cell = document.createElement('div');
+      cell.className = 'hex-ref-cell';
+      cell.title = 'King Wen ' + kw + ' · Decimal ' + v + ' · Binary ' + bits;
+      cell.dataset.val = v;
+      cell.setAttribute('role', 'button');
+      cell.tabIndex = 0;
+      cell.setAttribute('aria-label', 'Hexagram, King Wen ' + kw);
+      cell.innerHTML =
+        '<div class="hex-ref-kw">' + kw + '</div>' +
+        hexagramSVG(v, 0.5) +
+        '<div class="hex-ref-num" style="margin-top:4px">' + v + '</div>' +
+        '<div class="hex-ref-bits">' + bits + '</div>';
+      cell.addEventListener('click', function () { openHexPopup(v); });
+      cell.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHexPopup(v); }
+      });
+      grid.appendChild(cell);
+    });
+  }
+  buildGrid('fuxi');
+
+  // Sequence toggle — buttons switch ordering (no collapse on this page)
+  document.getElementById('seqToggle').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn || btn.classList.contains('active')) return;
+    this.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    buildGrid(btn.dataset.seq);
+  });
+
+  // ── Hexagram popup ──
+  var _hxKw = null;
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function splitImageLine(text) {
+    text = String(text).trim();
+    var mid = text.length / 2, best = -1, bestDist = Infinity, i, d;
+    for (i = 0; i < text.length; i++) {
+      if (',.;—'.indexOf(text[i]) !== -1) {
+        var at = i + 1;
+        if (at < 6 || at > text.length - 4) continue;
+        d = Math.abs(at - mid);
+        if (d < bestDist) { bestDist = d; best = at; }
+      }
+    }
+    if (best === -1) {
+      for (i = 0; i < text.length; i++) {
+        if (text[i] === ' ') { d = Math.abs(i - mid); if (d < bestDist) { bestDist = d; best = i; } }
+      }
+    }
+    if (best === -1) return [text, ''];
+    return [text.slice(0, best).trim(), text.slice(best).trim()];
+  }
+
+  function imageLineHTML(text) {
+    var p = splitImageLine(text);
+    return '<span style="display:block">' + escapeHtml(p[0]) + '</span>' +
+           (p[1] ? '<span style="display:block">' + escapeHtml(p[1]) + '</span>' : '');
+  }
+
+  function openHexPopup(val) {
+    var kw = VAL_TO_KW[val];
+    var d = (typeof HEX_DATA !== 'undefined') ? HEX_DATA[kw] : null;
+    if (!d) return;
+    _hxKw = kw;
+    document.getElementById('hxFig').innerHTML = hexagramSVG(val, 1.1);
+    document.getElementById('hxFigNum').textContent = val.toString(2).padStart(6, '0');
+    document.getElementById('hxKw').textContent = 'King Wen ' + kw;
+    document.getElementById('hxName').textContent = d.name;
+    document.getElementById('hxTrig').textContent = d.trig;
+    document.getElementById('hxImage').innerHTML = imageLineHTML(d.image);
+    var html = d.paras.map(function (p) { return '<p>' + escapeHtml(p) + '</p>'; }).join('') +
+      '<div class="hx-shadow">' + escapeHtml(d.shadow) + '</div>' +
+      '<div class="hx-keynote">' + escapeHtml(d.keynote) + '</div>';
+    document.getElementById('hxContent').innerHTML = html;
+    document.getElementById('hxContent').scrollTop = 0;
+    document.getElementById('hxOverlay').classList.add('open');
+  }
+
+  function closeHexPopup() {
+    document.getElementById('hxOverlay').classList.remove('open');
+  }
+
+  function stepHex(delta) {
+    if (_hxKw == null) return;
+    var nk = ((_hxKw - 1 + delta + 64) % 64) + 1;
+    openHexPopup(KW_TO_VAL[nk]);
+  }
+
+  document.getElementById('hxClose').addEventListener('click', closeHexPopup);
+  document.getElementById('hxPrev').addEventListener('click', function () { stepHex(-1); });
+  document.getElementById('hxNext').addEventListener('click', function () { stepHex(1); });
+  document.getElementById('hxOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeHexPopup();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!document.getElementById('hxOverlay').classList.contains('open')) return;
+    if (e.key === 'Escape') closeHexPopup();
+    else if (e.key === 'ArrowLeft') stepHex(-1);
+    else if (e.key === 'ArrowRight') stepHex(1);
+  });
+</script>
+
+<footer class="site-footer"><div class="sf-inner"></div></footer>
+</body>
+</html>
