@@ -569,7 +569,8 @@ function spreadCardPips(c) {
       KH: 'Court%20Cards/KH.svg', KS: 'Court%20Cards/KS.svg',
     };
     if (courtSvgs[courtKey]) {
-      return corners + `<img class="court-art" src="${courtSvgs[courtKey]}" alt="${rank} of ${c.suit}">`;
+      // Full-card art already carries its own rank+suit indices — don't add ours (avoids doubling).
+      return `<img class="court-art" src="${courtSvgs[courtKey]}" alt="${rank} of ${c.suit}">`;
     }
     // Fallback: suit centred between the corner indices
     return corners + `<div class="card-pips"><span class="pip ace" style="left:50%;top:50%">${sym}</span></div>`;
