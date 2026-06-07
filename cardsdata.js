@@ -551,7 +551,7 @@ const PIP_LAYOUTS = {
 function spreadCardPips(c) {
   const { rank, sym } = c;
   if (c.suit === 'joker') {
-    return `<div class="card-face"><span class="card-face-letter">✦</span></div>`;
+    return `<img class="court-art" src="Court%20Cards/JOKER-3.svg" alt="Joker">`;
   }
   // Corner indices on every card: rank+suit top-left (upright) and bottom-right (rotated)
   const corners =
