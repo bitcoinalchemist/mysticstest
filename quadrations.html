@@ -44,13 +44,15 @@
       padding: 1.5rem 0 2.5rem;
       background: #252a4a;
     }
+    .spreads-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1.25rem;
+    }
     .spreads .section-label {
       display: block;
       font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
-      font-weight: 600; color: var(--gold); margin-bottom: .85rem;
-      text-align: center;
+      font-weight: 600; color: var(--gold);
     }
-    .spreads .age-selector { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
     .spreads .age-btn { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
     .spreads .age-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
     .spreads .age-input { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
@@ -61,17 +63,8 @@
       display: flex; gap: 1.25rem; align-items: flex-start;
       justify-content: center;
     }
-    .spread-stack { position: relative; display: inline-block; }
-    .age-selector {
-      position: absolute; top: 0; left: 0;
-      width: calc(52px * 2 + .35rem); height: 74px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--border); border-radius: var(--r-md);
-    }
-    .age-selector .age-controls { gap: .25rem; }
-    .age-selector .age-btn { width: 26px; height: 26px; font-size: 1rem; }
-    .age-selector .age-input { width: 38px; height: 26px; font-size: .8rem; }
-    .age-selector .age-mobile-label { margin-bottom: .15rem; font-size: .55rem; }
+    .spread-stack { display: inline-block; }
+    .age-selector { display: flex; align-items: center; justify-content: center; }
     .age-controls { display: flex; align-items: center; gap: .5rem; }
     .age-btn {
       width: 32px; height: 32px; border-radius: 50%;
@@ -280,16 +273,9 @@
 
     /* ── Responsive ── */
     @media (max-width: 700px) {
+      .spreads-top { flex-direction: column; align-items: flex-start; gap: .75rem; }
       .spread-layout { flex-direction: column; align-items: center; }
       .spread-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
-      .age-selector {
-        position: static; order: -1; width: auto; height: auto;
-        margin-bottom: 1rem; padding: .5rem .9rem;
-      }
-      .age-selector .age-controls { gap: .5rem; }
-      .age-selector .age-btn { width: 32px; height: 32px; font-size: 1.1rem; }
-      .age-selector .age-input { width: 60px; height: 32px; font-size: .9rem; }
-      .age-selector .age-mobile-label { font-size: .62rem; margin-bottom: .3rem; }
       .spread-wrap { justify-content: center; width: 100%; overflow-x: visible; }
       .spread-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .35rem; min-width: 0; width: 100%; }
       .spread-card { min-width: 0; min-height: 0; aspect-ratio: 5/7; }
@@ -307,21 +293,23 @@
 <!-- ── Annual Spreads ── -->
 <section class="spreads">
   <div style="max-width:600px; margin:0 auto; padding:0 1rem;">
-    <span class="section-label">Quadrations</span>
+    <div class="spreads-top">
+      <span class="section-label">Quadrations</span>
+      <div class="age-selector">
+        <div class="age-controls-wrap">
+          <span class="age-mobile-label">Age</span>
+          <div class="age-controls">
+            <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
+            <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
+            <button class="age-btn" id="ageUp" aria-label="Next age">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="spread-layout">
       <div class="spread-wrap">
         <div class="spread-stack">
           <div id="annualGrid" class="spread-grid"></div>
-          <div class="age-selector">
-            <div class="age-controls-wrap">
-              <span class="age-mobile-label">Age</span>
-              <div class="age-controls">
-                <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
-                <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
-                <button class="age-btn" id="ageUp" aria-label="Next age">+</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
