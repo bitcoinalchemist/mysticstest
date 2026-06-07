@@ -377,12 +377,13 @@
       color: #fff;
     }
     .hex-ref-grid {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(8, minmax(0, 1fr));
       gap: 0.2rem;
       max-width: 820px;
       margin: 0 auto;
     }
+    .hex-ref-grid.open { display: grid; }
     .hex-ref-cell {
       display: flex;
       flex-direction: column;
@@ -788,7 +789,7 @@
 <!-- ── Reference grid (full-bleed) ── -->
 <section class="hex-ref-wrap">
   <div class="hex-ref-toggle" id="seqToggle">
-    <button data-seq="fuxi" class="active">Fu Xi</button>
+    <button data-seq="fuxi">Fu Xi</button>
     <button data-seq="kingwen">King Wen</button>
   </div>
   <div class="hex-ref-grid" id="hex-grid"></div>
@@ -910,14 +911,21 @@
   }
   buildGrid('fuxi');
 
-  // Sequence toggle
+  // Sequence toggle — clicking opens the grid in that order; clicking the active button again closes it
   const seqToggle = document.getElementById('seqToggle');
   seqToggle.addEventListener('click', function (e) {
-    const btn = e.target.closest('button');
+    var btn = e.target.closest('button');
     if (!btn) return;
-    seqToggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    buildGrid(btn.dataset.seq);
+    var hexGrid = document.getElementById('hex-grid');
+    if (btn.classList.contains('active')) {
+      btn.classList.remove('active');
+      hexGrid.classList.remove('open');
+    } else {
+      seqToggle.querySelectorAll('button').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      buildGrid(btn.dataset.seq);
+      hexGrid.classList.add('open');
+    }
   });
 
   // ── Hexagram popup ──────────────────────────────────────
@@ -1568,24 +1576,6 @@
     if (e.key === 'ArrowRight') { window.navigateCast(1);  return; }
   });
 
-  // Restore last reading from a previous visit
-  try {
-    var saved = JSON.parse(localStorage.getItem('iching_last') || 'null');
-    if (saved && saved.cards && saved.cards.length === 6) {
-      draws = saved.cards;
-      lines = draws.map(lineType);
-      _question = saved.q || '';
-      document.getElementById('questionInput').value = _question;
-      showAsked();
-      var row = document.getElementById('cardsRow');
-      row.innerHTML = '';
-      draws.forEach(function (card, idx) {
-        row.appendChild(cardWrapper(card, idx, true).wrap);
-      });
-      showResult();
-      updateButtons();
-    }
-  } catch (e) {}
 })();
 
 </script>

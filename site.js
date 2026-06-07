@@ -5,10 +5,9 @@
 
   // ── Nav links — edit here to add/rename pages ────────────────────
   var NAV = [
-    { href: 'quadration.html', label: 'Playing Cards' },
+    { href: 'quadration.html', label: 'Card of Life'  },
     { href: 'calculator.html', label: 'Calculator'    },
     { href: 'iching.html',     label: 'I Ching'       },
-    { href: 'bip39.html',      label: 'BIP39'         },
   ];
   // ────────────────────────────────────────────────────────────────
 
