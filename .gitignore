@@ -7,7 +7,7 @@ versions/
 
 # Raw source data files (content lives in ichingdata.js / linedata.js)
 iching-oracle-64-hexagrams.md
-iching-oracle-384-lines.txt
+iching-oracle-384-lines.md
 
 # Scratch / archives
 _wtest.txt

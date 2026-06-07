@@ -32,7 +32,7 @@ A hub site (`index.html`) linking to standalone tool pages. All files live toget
 | `ichingdata.js` | `window.HEX_DATA` — 64 Sage-voice oracle answers (keyed by King Wen number 1–64) |
 | `linedata.js` | `window.LINE_DATA` — 384 Sage-voice moving-line texts (keyed by King Wen number; each has keys `1`–`6`) |
 | `iching-oracle-64-hexagrams.md` | Source text for all 64 hexagram answers (King Wen order). If edited, regenerate `ichingdata.js`. |
-| `iching-oracle-384-lines.txt` | Source text for all 384 moving-line answers. If edited, regenerate `linedata.js`. |
+| `iching-oracle-384-lines.md` | Source text for all 384 moving-line answers. If edited, regenerate `linedata.js`. |
 
 **Dev tooling (`dev/` — not deployed):**
 

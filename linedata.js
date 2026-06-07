@@ -1,4 +1,4 @@
-// I Ching moving-line texts (Sage voice). Generated from iching-oracle-384-lines.txt.
+// I Ching moving-line texts (Sage voice). Generated from iching-oracle-384-lines.md.
 // LINE_DATA[kingWenNumber] = [line1(bottom) ... line6(top)]; 384 lines total.
 window.LINE_DATA = {
 "1": [
