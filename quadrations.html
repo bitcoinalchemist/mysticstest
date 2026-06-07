@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quadrations — mysticscards.space</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    /* ── Extra tokens (not in site.css) ── */
+    :root {
+      --text-primary:  #1a1916;
+      --text-secondary:#5a5750;
+      --text-muted:    #9a9690;
+      --gold-light:    #f5eddf;
+      --red:           #b53030;
+      --green:         #1a1916;
+      --navy:          #1a1916;
+      --r-sm:  6px;
+      --r-md:  12px;
+      --r-lg:  20px;
+      --sh-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+      --sh-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+      --sh-lg: 0 16px 48px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.06);
+      --ease: .18s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    button { cursor: pointer; border: none; background: none; font: inherit; }
+
+    /* ── Annual Spreads ── */
+    .spreads {
+      flex: 1;
+      padding: 1.5rem 0 2.5rem;
+      background: #252a4a;
+    }
+    .spreads .section-label {
+      display: block;
+      font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+      font-weight: 600; color: var(--gold); margin-bottom: .85rem;
+      text-align: center;
+    }
+    .spreads .age-selector { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
+    .spreads .age-btn { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
+    .spreads .age-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
+    .spreads .age-input { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
+    .spreads .age-input:focus { border-color: var(--gold); }
+    .spreads .planet-col-label { color: rgba(255,255,255,.38); }
+
+    .spread-layout {
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      justify-content: center;
+    }
+    .spread-stack { position: relative; display: inline-block; }
+    .age-selector {
+      position: absolute; top: 0; left: 0;
+      width: calc(52px * 2 + .35rem); height: 74px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); border-radius: var(--r-md);
+    }
+    .age-selector .age-controls { gap: .25rem; }
+    .age-selector .age-btn { width: 26px; height: 26px; font-size: 1rem; }
+    .age-selector .age-input { width: 38px; height: 26px; font-size: .8rem; }
+    .age-selector .age-mobile-label { margin-bottom: .15rem; font-size: .55rem; }
+    .age-controls { display: flex; align-items: center; gap: .5rem; }
+    .age-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 1.1rem; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--ease);
+    }
+    .age-btn:hover { background: var(--border); color: var(--text-primary); }
+    .age-input {
+      width: 60px; height: 32px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      background: var(--surface); color: var(--text-primary);
+      font-family: var(--sans); font-size: .9rem; font-weight: 500;
+      text-align: center; padding: 0 .4rem;
+      -moz-appearance: textfield;
+    }
+    .age-input::-webkit-inner-spin-button,
+    .age-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .age-input:focus { outline: none; border-color: var(--gold); }
+    .age-controls-wrap { display: flex; flex-direction: column; align-items: center; }
+    .age-mobile-label {
+      display: block; font-size: .62rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .3rem; text-align: center;
+    }
+
+    /* Spread grid */
+    .spread-wrap { overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; flex: 1; min-width: 0; display: flex; justify-content: center; }
+    .spread-grid {
+      display: inline-grid;
+      grid-template-columns: repeat(7, 52px);
+      gap: .45rem .35rem;
+      align-items: center;
+    }
+    .planet-col-label {
+      text-align: center; font-size: 1.5rem;
+      color: var(--text-muted); padding-top: .4rem; line-height: 1;
+    }
+    .crown-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: .45rem; }
+
+    /* Pip cards */
+    .spread-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md); cursor: pointer;
+      transition: box-shadow var(--ease), transform var(--ease), border-color var(--ease);
+      position: relative; overflow: hidden;
+      container-type: inline-size;
+      min-width: 52px; min-height: 74px;
+    }
+    .spread-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 2;
+    }
+    .spread-card.hearts::before,  .spread-card.diamonds::before { background: var(--red); }
+    .spread-card.clubs::before    { background: var(--green); }
+    .spread-card.spades::before   { background: var(--navy); }
+    .spread-card.joker::before    { background: var(--gold); }
+    .spread-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); border-color: var(--border-strong); }
+    .spread-card.hearts,  .spread-card.diamonds { color: var(--red); }
+    .spread-card.clubs    { color: var(--green); }
+    .spread-card.spades   { color: var(--navy); }
+    .spread-card.joker    { color: var(--gold); }
+
+    .card-corner {
+      position: absolute; z-index: 1;
+      display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1;
+    }
+    .card-tl { top: 3px; left: 3px; }
+    .card-br { bottom: 3px; right: 3px; transform: rotate(180deg); }
+    .cc-rank { font-family: var(--serif); font-size: max(22cqw, 11px); font-weight: 500; line-height: 1; }
+    .cc-suit { font-size: max(14cqw, 7px); line-height: 1; }
+    .card-pips { position: absolute; top: 11px; bottom: 11px; left: 5px; right: 5px; }
+    .pip {
+      position: absolute; transform: translate(-50%, -50%);
+      font-size: max(14cqw, 12px); line-height: 1; user-select: none; pointer-events: none;
+    }
+    .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
+    .pip.ace { font-size: max(44cqw, 22px); }
+    .card-face {
+      position: absolute; inset: 6px 4px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    }
+    .card-face-letter { font-family: var(--serif); font-size: max(42cqw, 21px); font-weight: 400; line-height: 1; }
+    .card-face-sym    { font-size: max(24cqw, 12px); opacity: .75; }
+
+    /* ── Compare Card Popup ── */
+    @keyframes cardFlip {
+      from { opacity: 0; transform: perspective(600px) rotateY(75deg) scale(.97); }
+      to   { opacity: 1; transform: perspective(600px) rotateY(0deg)  scale(1); }
+    }
+    @keyframes cardFlipOut {
+      from { opacity: 1; transform: perspective(600px) rotateY(0deg)  scale(1); }
+      to   { opacity: 0; transform: perspective(600px) rotateY(75deg) scale(.97); }
+    }
+    .ccard-popup.closing { animation: cardFlipOut .2s cubic-bezier(.55,0,.68,.07) forwards; }
+    .ccard-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(26,25,22,.52);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .ccard-overlay.open { display: flex; }
+    .ccard-popup {
+      background: var(--surface); border-radius: var(--r-lg);
+      box-shadow: var(--sh-lg); max-width: 420px; width: 100%;
+      position: relative;
+      animation: cardFlip .25s cubic-bezier(.23,1,.32,1);
+      display: flex; flex-direction: column;
+      height: 480px; max-height: 88vh; overflow: hidden;
+    }
+    .ccard-popup::before {
+      content: ''; display: block; height: 4px;
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      background: var(--border-strong);
+    }
+    .ccard-popup.suit-hearts::before,
+    .ccard-popup.suit-diamonds::before { background: var(--red); }
+    .ccard-popup.suit-clubs::before    { background: var(--green); }
+    .ccard-popup.suit-spades::before   { background: var(--navy); }
+    .ccard-popup.suit-joker::before    { background: var(--gold); }
+    .ccard-close {
+      position: absolute; top: .9rem; right: .9rem; z-index: 2;
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--surface-alt); border: 1px solid var(--border);
+      font-size: .78rem; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all var(--ease);
+    }
+    .ccard-close:hover { background: var(--border); color: var(--text-primary); }
+    .ccard-nav {
+      position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+      width: 2rem; height: 3.5rem;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); font-size: 1rem;
+      opacity: 0; transition: opacity var(--ease), color var(--ease);
+      cursor: pointer; border-radius: var(--r-sm);
+    }
+    .ccard-nav-prev { left: .35rem; }
+    .ccard-nav-next { right: .35rem; }
+    .ccard-popup:hover .ccard-nav { opacity: 1; }
+    .ccard-nav:hover { color: var(--text-primary); }
+    .ccard-nav:focus { outline: none; }
+    .ccard-header {
+      display: flex; gap: 1.35rem; align-items: flex-start;
+      padding: 1.35rem 1.75rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    #ccFace { width: 90px; height: 126px; flex-shrink: 0; cursor: default; }
+    #ccFace:hover { transform: none; box-shadow: none; }
+    .ccard-info { flex: 1; min-width: 0; padding-top: .1rem; }
+    .ccard-name {
+      font-family: var(--serif); font-size: 1.45rem; font-weight: 400;
+      line-height: 1.15; margin-bottom: .18rem;
+    }
+    .ccard-subtitle {
+      font-size: .62rem; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .card-vow {
+      font-family: var(--serif); font-style: italic;
+      font-size: .88rem; color: var(--gold);
+      line-height: 1.5; margin-top: .3rem;
+    }
+    .ccard-planets { font-size: .62rem; letter-spacing: .08em; color: var(--text-muted); margin-top: .25rem; }
+    .ccard-keywords {
+      padding: .55rem 1.75rem;
+      border-top: 1px solid var(--border);
+      font-size: .72rem; color: var(--gold);
+      letter-spacing: .03em; line-height: 1.55;
+      text-align: center;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    #ccVow {
+      font-size: 1.15rem; min-height: 3em;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+    #ccPlanets { min-height: 1.6em; }
+    .ccard-body { flex: 1; overflow-y: auto; min-height: 0; padding: 1.2rem 1.75rem; }
+    .ccard-personality {
+      font-family: 'Lora', Georgia, serif;
+      font-size: .875rem; color: var(--text-secondary); line-height: 1.82;
+    }
+    .ccard-footer {
+      padding: .9rem 1.75rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .ccard-load-btn {
+      display: block; width: 100%;
+      background: var(--accent); color: rgba(255,255,255,.92);
+      padding: .65rem; border-radius: var(--r-sm);
+      font-size: .72rem; font-weight: 500; letter-spacing: .1em;
+      text-transform: uppercase; cursor: pointer; border: none;
+      font-family: var(--sans); transition: background var(--ease);
+    }
+    .ccard-load-btn:hover { background: #2e3356; }
+
+    /* ── Life Script in popup ── */
+    .ls-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .4rem; align-items: end; }
+    .ls-col  { display: flex; flex-direction: column; align-items: center; gap: .35rem; min-width: 0; }
+    .ls-planet { font-size: .95rem; color: var(--text-muted); line-height: 1; }
+    .ls-planet-name { font-size: .52rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); line-height: 1; }
+    .ls-card { width: 100%; aspect-ratio: 5/7; min-width: 0 !important; min-height: 0 !important; }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .spread-layout { flex-direction: column; align-items: center; }
+      .spread-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
+      .age-selector {
+        position: static; order: -1; width: auto; height: auto;
+        margin-bottom: 1rem; padding: .5rem .9rem;
+      }
+      .age-selector .age-controls { gap: .5rem; }
+      .age-selector .age-btn { width: 32px; height: 32px; font-size: 1.1rem; }
+      .age-selector .age-input { width: 60px; height: 32px; font-size: .9rem; }
+      .age-selector .age-mobile-label { font-size: .62rem; margin-bottom: .3rem; }
+      .spread-wrap { justify-content: center; width: 100%; overflow-x: visible; }
+      .spread-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .35rem; min-width: 0; width: 100%; }
+      .spread-card { min-width: 0; min-height: 0; aspect-ratio: 5/7; }
+    }
+    @media (max-width: 500px) {
+      .spread-grid { gap: .22rem; }
+      .planet-col-label { font-size: 1.2rem; }
+      .crown-row { gap: .35rem; }
+    }
+  </style>
+</head>
+<body>
+<script src="site.js"></script>
+
+<!-- ── Annual Spreads ── -->
+<section class="spreads">
+  <div style="max-width:600px; margin:0 auto; padding:0 1rem;">
+    <span class="section-label">Quadrations</span>
+    <div class="spread-layout">
+      <div class="spread-wrap">
+        <div class="spread-stack">
+          <div id="annualGrid" class="spread-grid"></div>
+          <div class="age-selector">
+            <div class="age-controls-wrap">
+              <span class="age-mobile-label">Age</span>
+              <div class="age-controls">
+                <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
+                <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
+                <button class="age-btn" id="ageUp" aria-label="Next age">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Card Popup ── -->
+<div class="ccard-overlay" id="ccardOverlay">
+  <div class="ccard-popup" id="ccardPopup">
+    <button class="ccard-close" onclick="event.stopPropagation(); closeCompareCard()">✕</button>
+    <button class="ccard-nav ccard-nav-prev" onclick="event.stopPropagation(); openCompareCard((_ccardIdx - 1 + CARDS.length) % CARDS.length)">&#8249;</button>
+    <button class="ccard-nav ccard-nav-next" onclick="event.stopPropagation(); openCompareCard((_ccardIdx + 1) % CARDS.length)">&#8250;</button>
+    <div class="ccard-header">
+      <div class="spread-card" id="ccFace"></div>
+      <div class="ccard-info">
+        <div class="ccard-name"     id="ccName"></div>
+        <div class="ccard-subtitle" id="ccSubtitle"></div>
+        <div class="card-vow"       id="ccVow"></div>
+        <div class="ccard-planets"  id="ccPlanets"></div>
+      </div>
+    </div>
+    <div class="ccard-keywords" id="ccKws"></div>
+    <div class="ccard-body">
+      <div class="ccard-personality" id="ccPersonality"></div>
+    </div>
+    <div class="ccard-footer">
+      <button class="ccard-load-btn" onclick="event.stopPropagation(); window.location.href='quadration.html'">Open full profile →</button>
+    </div>
+  </div>
+</div>
+
+<script src="cardsdata.js"></script>
+<script>
+  // Required globals for cardsdata.js popup functions
+  var _ccardIdx = -1;
+  var _finderPick = null; // no finder on this page
+
+  // Build birth dates (same as quadration.html)
+  var MONTH_NAMES   = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var DAYS_IN_MONTH = [0,31,29,31,30,31,30,31,31,30,31,30,31];
+  function solarValue(month, day) { return 55 - (2 * month + day); }
+
+  (function buildDates() {
+    var lists = Array.from({length: 52}, function() { return []; });
+    for (var m = 1; m <= 12; m++) {
+      for (var d = 1; d <= DAYS_IN_MONTH[m]; d++) {
+        var sv = solarValue(m, d);
+        if (sv >= 1 && sv <= 52) lists[sv - 1].push(MONTH_NAMES[m] + ' ' + d);
+      }
+    }
+    CARDS.forEach(function(c, i) { c.dates = lists[i].join(', '); });
+  })();
+
+  // Joker
+  CARDS.push({
+    rank:'✦', suit:'joker', sym:'✦', name:'The Joker', dates:'Dec 31',
+    teaser:'Alpha and Omega, valued at zero, pure potential standing between the Ace of Hearts and the King of Spades and belonging to no suit at all. The whole task of a life lived here is discovering which card you are truly choosing to play, and why.',
+    kws:['Wild card','5th element','Fool'],
+    personality:'Alpha and Omega, the Joker carries the numeric value of zero — pure potential, and in a sense the highest card of all, its influence lying beyond what the system can contain. Standing at the midpoint between the Ace of Hearts and the King of Spades, you belong to no suit and no system: a shapeshifter who can be all things to all people.\n\nAn inventor, a healer, and a powerful agent of change, you are fascinating to others and a mystery even unto yourself. In the deck\'s calendar the Joker is the remainder, the one day the system needs but cannot hold; you exist above the Sun Line, beholden to no single planetary influence. The life task is to discover which card you are truly choosing to play, and why, embodying the open heart of the Ace alongside the disciplined mastery of the King.',
+    strengths:['Extraordinary adaptability, genuinely able to inhabit any role, field, or environment','Remarkable creative potential, with a natural affinity for performance, music, and art','Personal magnetism that draws people in across every context and culture','Unconstrained by the fixed path of any single card; the full deck is available to you'],
+    challenges:['The absence of a fixed identity can make sustained commitment feel genuinely elusive','Chameleon energy, when unconscious, can shade into dishonesty or shape-shifting for approval','Prestige and control are shadow poles worth examining honestly when they arise','Emotional insecurity, reflected in the 3 of Hearts, can cloud judgement and create mistrust','The freedom of this card is also its greatest responsibility: choose your card deliberately']
+  });
+
+  // ── Grid ──
+  function spreadCardCell(c, position, cardsIdx) {
+    var pick = (_finderPick && _finderPick.rank === c.rank && _finderPick.suit === c.suit) ? ' finder-pick' : '';
+    return '<div class="spread-card ' + c.suit + pick + '" title="' + position + '" onclick="openCompareCard(' + cardsIdx + ')">' +
+      spreadCardPips(c) + '</div>';
+  }
+
+  function buildAnnualGrid(age) {
+    var deck = deckAtAge(age);
+    var html = '';
+    html += '<div class="crown-row">';
+    html += '<div></div><div></div>';
+    for (var i = 51; i >= 49; i--) html += spreadCardCell(SPREAD_CARDS[deck[i]], 'Crown · ' + (52 - i), deck[i]);
+    html += '<div></div><div></div>';
+    html += '</div>';
+    for (var row = 0; row < 7; row++) {
+      var planet = SPREAD_PLANETS[row];
+      var base = row * 7;
+      for (var col = 6; col >= 0; col--) html += spreadCardCell(SPREAD_CARDS[deck[base + col]], planet + ' · ' + SPREAD_PLANETS[col], deck[base + col]);
+    }
+    [6,5,4,3,2,1,0].forEach(function(col) {
+      html += '<div class="planet-col-label">' + SPREAD_PLANET_SYM[SPREAD_PLANETS[col]] + '</div>';
+    });
+    document.getElementById('annualGrid').innerHTML = html;
+  }
+
+  var currentAge = 0;
+  function setAge(age) {
+    age = Math.max(0, Math.min(89, Math.round(+age) || 0));
+    currentAge = age;
+    document.getElementById('ageInput').value = age;
+    buildAnnualGrid(age + 1);
+  }
+  function changeAge(d) {
+    var a = currentAge + d;
+    if (a > 89) a = 0;
+    if (a < 0)  a = 89;
+    setAge(a);
+  }
+
+  document.getElementById('ageDown').addEventListener('click', function() { changeAge(-1); });
+  document.getElementById('ageUp').addEventListener('click',   function() { changeAge(+1); });
+  document.getElementById('ageInput').addEventListener('change', function() { setAge(this.value); });
+  document.getElementById('ageInput').addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp')   { e.preventDefault(); changeAge(+1); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); changeAge(-1); }
+  });
+
+  buildAnnualGrid(1);
+
+  // ── Popup wiring ──
+  document.getElementById('ccardOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeCompareCard();
+  });
+  document.getElementById('ccardPopup').addEventListener('click', function() {
+    closeCompareCard();
+  });
+
+  var _popupTouchX = 0;
+  document.getElementById('ccardPopup').addEventListener('touchstart', function(e) {
+    _popupTouchX = e.touches[0].clientX;
+  }, { passive: true });
+  document.getElementById('ccardPopup').addEventListener('touchend', function(e) {
+    var dx = e.changedTouches[0].clientX - _popupTouchX;
+    if (Math.abs(dx) > 48) openCompareCard((_ccardIdx + (dx > 0 ? -1 : 1) + CARDS.length) % CARDS.length);
+  }, { passive: true });
+
+  document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('ccardOverlay').classList.contains('open')) return;
+    if (e.key === 'Escape') closeCompareCard();
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); openCompareCard((_ccardIdx + 1) % CARDS.length); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); openCompareCard((_ccardIdx - 1 + CARDS.length) % CARDS.length); }
+  });
+</script>
+
+<footer class="site-footer"><div class="sf-inner"></div></footer>
+</body>
+</html>
