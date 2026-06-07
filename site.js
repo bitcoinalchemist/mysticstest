@@ -6,16 +6,20 @@
   // ── Nav links — edit here to add/rename pages ────────────────────
   var NAV = [
     { href: 'cardsoflife.html', label: 'Card of Life'  },
-    { href: 'calculator.html', label: 'Calculator'    },
-    { href: 'iching.html',     label: 'I Ching'       },
-    { href: 'hexagrams.html',   label: 'Hexagrams'     },
+    { href: 'iching.html',      label: 'I Ching'       },
+    { heading: 'Tools' },
+    { href: 'calculator.html',  label: 'Calculator'    },
     { href: 'quadrations.html', label: 'Quadrations'   },
+    { href: 'hexagrams.html',   label: 'Hexagrams'     },
   ];
   // ────────────────────────────────────────────────────────────────
 
   var page = window.location.pathname.split('/').pop() || 'index.html';
 
   var navHtml = NAV.map(function (l) {
+    if (l.heading) {
+      return '<span class="nav-heading">' + l.heading + '</span>';
+    }
     return '<a href="' + l.href + '"' +
       (page === l.href ? ' class="active"' : '') + '>' +
       l.label + '</a>';

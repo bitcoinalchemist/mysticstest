@@ -135,23 +135,23 @@
       position: absolute; z-index: 1;
       display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1;
     }
-    .card-tl { top: 3px; left: 3px; }
-    .card-br { bottom: 3px; right: 3px; transform: rotate(180deg); }
-    .cc-rank { font-family: var(--serif); font-size: max(22cqw, 11px); font-weight: 500; line-height: 1; }
-    .cc-suit { font-size: max(14cqw, 7px); line-height: 1; }
-    .card-pips { position: absolute; top: 11px; bottom: 11px; left: 5px; right: 5px; }
+    .card-tl { top: 2.5%; left: 4%; }
+    .card-br { bottom: 2.5%; right: 4%; transform: rotate(180deg); }
+    .cc-rank { font-family: var(--serif); font-size: 22cqw; font-weight: 500; line-height: 1; }
+    .cc-suit { font-size: 14cqw; line-height: 1; }
+    .card-pips { position: absolute; top: 18%; bottom: 18%; left: 12%; right: 12%; }
     .pip {
       position: absolute; transform: translate(-50%, -50%);
-      font-size: max(14cqw, 12px); line-height: 1; user-select: none; pointer-events: none;
+      font-size: 20cqw; line-height: 1; user-select: none; pointer-events: none;
     }
     .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
-    .pip.ace { font-size: max(44cqw, 22px); }
+    .pip.ace { font-size: 44cqw; }
     .card-face {
-      position: absolute; inset: 6px 4px;
+      position: absolute; inset: 5%;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
     }
-    .card-face-letter { font-family: var(--serif); font-size: max(42cqw, 21px); font-weight: 400; line-height: 1; }
-    .card-face-sym    { font-size: max(24cqw, 12px); opacity: .75; }
+    .card-face-letter { font-family: var(--serif); font-size: 42cqw; font-weight: 400; line-height: 1; }
+    .card-face-sym    { font-size: 24cqw; opacity: .75; }
 
     /* ── Compare Card Popup ── */
     @keyframes cardFlip {
