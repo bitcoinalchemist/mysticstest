@@ -110,6 +110,16 @@ These apply to all I Ching oracle text, both hexagram answers and moving lines:
 - Large file (2600+ lines). Has its own `:root` with `--text-primary`, `--text-muted`, `--text-secondary` — do NOT rename, they're used throughout.
 - Finder date dropdowns are **Day / Month** order (not Month / Day).
 - The "Minimise" toggle button sits between the planets row and the dates row in the finder result (not in the top corner).
+- Finder header: the `Finder` section-label and the day/month form box sit on one top-aligned row via `.finder-top` (grid `1fr auto 1fr`, label left, box centered); stacks to one column ≤560px.
+
+---
+
+## Spread grid (shared component)
+
+`.spread-grid` is the 7-column playing-card grid (crown row + 7 planetary rows + planet-label row). The CSS is **duplicated** in both `cardsoflife.html` (used by the browse grid and the annual/Quadrations grid) and `quadrations.html` — keep the two copies in sync.
+
+- Columns are fluid: `grid-template-columns: repeat(7, 1fr)`, `width:100%`, capped at `max-width:560px` and centered. Cards use `aspect-ratio: 5/7` (not fixed px) so they scale proportionally. Change `max-width` to resize the whole grid.
+- Standalone cards (`#mFace`, `#ccFace`, `.result-pip-card`, `.pcard .spread-card`, `.rel-equation .spread-card`) set explicit width+height, which overrides the base `aspect-ratio` — leave those as-is.
 
 ---
 
