@@ -1552,7 +1552,7 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
       <span class="section-label">Your Cards</span>
     </div>
     <div class="pcards-row" id="pcardsRow"></div>
-    <div class="pcards-empty" id="pcardsEmpty">Enter a birthday in the Finder, then set your age in Quadrations above to reveal your Yearly, 52-day and Daily cards.</div>
+    <div class="pcards-empty" id="pcardsEmpty">Set Day, Month and Age.</div>
   </div>
 </section>
 
@@ -2289,7 +2289,7 @@ function renderPersonalCards() {
   const d = parseInt(document.getElementById('fDay').value);
   if (!m || !d) {
     row.innerHTML = ''; empty.style.display = '';
-    empty.textContent = 'Enter a birthday in the Finder, then set your age in Quadrations above to reveal your Yearly, 52-day and Daily cards.';
+    empty.textContent = 'Set Day, Month and Age.';
     return;
   }
   const sv = solarValue(m, d);
