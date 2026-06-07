@@ -644,14 +644,29 @@
 
     /* ── Annual Spreads ──────────────────────────────────────── */
     .spreads { padding: 2rem 0 2.5rem; background: #252a4a; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .spreads-top { margin-bottom: 2rem; text-align: center; }
+    .spreads-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
     .spreads-top h2 { font-family: var(--serif); font-size: 1.8rem; font-weight: 400; color: rgba(255,255,255,.9); }
     .spreads-top p  { font-size: .9rem; color: rgba(255,255,255,.5); line-height: 1.75; max-width: 560px; margin-top: .5rem; }
-    .spreads .age-selector { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
     .spreads .age-btn { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
     .spreads .age-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
     .spreads .age-input { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
     .spreads .age-input:focus { border-color: var(--gold); }
+    .spreads-toggle {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .35rem 1.1rem; border-radius: 999px;
+      background: none; border: 1px solid rgba(255,255,255,.22);
+      color: var(--gold); cursor: pointer;
+      font-family: var(--sans); font-size: .7rem; font-weight: 500;
+      letter-spacing: .1em; text-transform: uppercase;
+      transition: background .2s, border-color .2s; white-space: nowrap;
+    }
+    .spreads-toggle::after { content: '▾'; font-size: .75rem; transition: transform .25s ease; display: inline-block; }
+    .spreads-toggle:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.45); }
+    .spreads.collapsed .spreads-toggle::after { transform: rotate(180deg); }
+    .spreads.collapsed .spread-layout { display: none; }
     .spreads .planet-label-text { color: rgba(255,255,255,.38); }
     .spreads .planet-col-label  { color: rgba(255,255,255,.38); }
 
@@ -662,16 +677,8 @@
     /* Wrapper that hugs the grid so the age selector can tuck into its corner */
     .spread-stack { position: relative; display: inline-block; }
     .age-selector {
-      /* Sits in the two empty crown cells, just left of the King of Spades */
-      position: absolute; top: 0; left: 0;
-      width: calc(52px * 2 + .35rem); height: 74px;
       display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--border); border-radius: var(--r-md);
     }
-    .age-selector .age-controls { gap: .25rem; }
-    .age-selector .age-btn { width: 26px; height: 26px; font-size: 1rem; }
-    .age-selector .age-input { width: 38px; height: 26px; font-size: .8rem; }
-    .age-selector .age-mobile-label { margin-bottom: .15rem; font-size: .55rem; }
     .age-controls { display: flex; align-items: center; gap: .5rem; }
     .age-btn {
       width: 32px; height: 32px; border-radius: 50%;
@@ -720,15 +727,8 @@
     @media (max-width: 700px) {
       .spread-layout { flex-direction: column; align-items: center; }
       .spread-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
-      .age-selector {
-        position: static; order: -1; width: auto; height: auto;
-        margin-bottom: 1rem; padding: .5rem .9rem;
-      }
-      .age-selector .age-controls { gap: .5rem; }
-      .age-selector .age-btn { width: 32px; height: 32px; font-size: 1.1rem; }
-      .age-selector .age-input { width: 60px; height: 32px; font-size: .9rem; }
-      .age-selector .age-mobile-label { font-size: .62rem; margin-bottom: .3rem; }
       .spread-layout .spread-wrap { width: 100%; justify-content: center; }
+      .spreads-top { flex-direction: column; align-items: flex-start; gap: .75rem; }
     }
     .spread-grid {
       display: inline-grid;
@@ -1507,21 +1507,22 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
   <div class="container">
     <div class="spreads-top">
       <span class="section-label">Quadrations</span>
+      <div class="age-selector">
+        <div class="age-controls-wrap">
+          <span class="age-mobile-label">Age</span>
+          <div class="age-controls">
+            <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
+            <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
+            <button class="age-btn" id="ageUp" aria-label="Next age">+</button>
+          </div>
+        </div>
+      </div>
+      <button class="spreads-toggle" id="spreadsToggle" onclick="toggleSpreads()" title="Minimise grid" aria-label="Minimise grid">Minimise</button>
     </div>
     <div class="spread-layout">
       <div class="spread-wrap">
         <div class="spread-stack">
           <div id="annualGrid" class="spread-grid"></div>
-          <div class="age-selector">
-            <div class="age-controls-wrap">
-              <span class="age-mobile-label">Age</span>
-              <div class="age-controls">
-                <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
-                <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
-                <button class="age-btn" id="ageUp" aria-label="Next age">+</button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -2235,6 +2236,15 @@ function setAge(age) {
 }
 
 // Collapse/expand the finder result detail (keeps card, nickname, vow, keywords, planet).
+function toggleSpreads() {
+  const s = document.getElementById('spreads');
+  const collapsed = s.classList.toggle('collapsed');
+  const btn = document.getElementById('spreadsToggle');
+  btn.textContent = collapsed ? 'Show' : 'Minimise';
+  btn.setAttribute('title', collapsed ? 'Show grid' : 'Minimise grid');
+  btn.setAttribute('aria-label', collapsed ? 'Show grid' : 'Minimise grid');
+}
+
 function toggleFinderDetail() {
   const r = document.getElementById('finderResult');
   const collapsed = r.classList.toggle('collapsed');

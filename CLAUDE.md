@@ -19,7 +19,7 @@ A hub site (`index.html`) linking to standalone tool pages. All files live toget
 | File | Purpose |
 |------|---------|
 | `index.html` | Hub — two large cards (Card of Life, I Ching) + tools pill-row below |
-| `quadration.html` | Card of Life — full playing card engine: Finder, annual spread grid, personal cards, relationship tool |
+| `cardsoflife.html` | Card of Life — full playing card engine: Finder, annual spread grid, personal cards, relationship tool |
 | `quadrations.html` | Standalone annual spread grid tool (age selector + card popup) |
 | `iching.html` | I Ching oracle — cast readings + 8×8 hexagram grid (collapsed by default, toggled by Fu Xi/King Wen buttons) |
 | `hexagrams.html` | Standalone 8×8 hexagram grid tool (always open, popup on click) |
@@ -52,7 +52,7 @@ A hub site (`index.html`) linking to standalone tool pages. All files live toget
 
 ```js
 var NAV = [
-  { href: 'quadration.html',  label: 'Card of Life'  },
+  { href: 'cardsoflife.html',  label: 'Card of Life'  },
   { href: 'calculator.html',  label: 'Calculator'    },
   { href: 'iching.html',      label: 'I Ching'       },
   { href: 'hexagrams.html',   label: 'Hexagrams'     },
@@ -105,7 +105,7 @@ These apply to all I Ching oracle text, both hexagram answers and moving lines:
 
 ---
 
-## quadration.html notes
+## cardsoflife.html notes
 
 - Large file (2600+ lines). Has its own `:root` with `--text-primary`, `--text-muted`, `--text-secondary` — do NOT rename, they're used throughout.
 - Finder date dropdowns are **Day / Month** order (not Month / Day).
@@ -125,7 +125,7 @@ VN=$(ls /sessions/<session>/mnt/Super/versions/ | grep -E '^v[0-9]+_' | sort -t_
 NEXT=$((VN + 1))
 DIR="/sessions/<session>/mnt/Super/versions/v${NEXT}_${TS}"
 mkdir -p "$DIR"
-for f in index.html site.js site.css iching.html bip39.html calculator.html quadration.html hexagrams.html quadrations.html cardsdata.js dozenal.js ichingdata.js linedata.js; do
+for f in index.html site.js site.css iching.html bip39.html calculator.html cardsoflife.html hexagrams.html quadrations.html cardsdata.js dozenal.js ichingdata.js linedata.js; do
   [ -f "/sessions/<session>/mnt/Super/$f" ] && cp "/sessions/<session>/mnt/Super/$f" "$DIR/"
 done
 ```

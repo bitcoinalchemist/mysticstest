@@ -1,5 +1,5 @@
 // cardsdata.js — shared card data and popup logic
-// Used by: quadration.html, iching.html
+// Used by: cardsoflife.html, quadrations.html, iching.html
 // Pattern: same as ichingdata.js / linedata.js
 
 // ── Card Data ──────────────────────────────────────────────────────
