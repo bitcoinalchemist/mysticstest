@@ -136,16 +136,17 @@
     }
     .finder-left p { font-size: .9rem; color: var(--text-secondary); line-height: 1.75; }
     .finder-form {
-      max-width: 560px; width: 100%;
+      max-width: 460px; width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--r-lg);
-      padding: 2rem;
+      padding: 1.25rem 1.5rem;
       box-shadow: var(--sh-sm);
     }
-    .finder-inputs { display: flex; gap: .75rem; margin-bottom: 1rem; }
+    .finder-inputs { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+    .finder-inputs .section-label { flex-shrink: 0; white-space: nowrap; margin: 0; }
     .finder-inputs select {
-      flex: 1; background: var(--surface-alt); border: 1.5px solid var(--border);
+      flex: 1; min-width: 0; background: var(--surface-alt); border: 1.5px solid var(--border);
       border-radius: var(--r-sm); padding: .65rem .9rem;
       font-size: .9rem; color: var(--text-primary);
       outline: none; appearance: none; -webkit-appearance: none;
@@ -1359,10 +1360,9 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
 <!-- ── Unified Card Finder ───────────────────────────────────────── -->
 <section class="finder" id="finder" style="scroll-margin-top:64px">
   <div class="finder-inner">
-    <span class="section-label">Finder</span>
     <div class="finder-form">
-      <div class="rel-person-label" id="person1Label" style="display:none">Person 1</div>
       <div class="finder-inputs">
+        <span class="section-label" id="person1Label">Finder</span>
         <select id="fDay"><option value="">Day</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
         <select id="fMonth">
           <option value="">Month</option>
@@ -1378,8 +1378,8 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
         <button type="button" class="add-second-btn" id="addSecondBtn" onclick="toggleSecond()">＋ Add relationship</button>
       </div>
       <div id="person2Wrap" style="display:none">
-        <div class="rel-person-label" style="margin-top:.75rem">Person 2</div>
-        <div class="finder-inputs" style="margin-bottom:0">
+        <div class="finder-inputs" style="margin-bottom:0; margin-top:.75rem">
+          <span class="section-label" style="flex-shrink:0;white-space:nowrap;margin:0">Person 2</span>
           <select id="relDay2"><option value="">Day</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
           <select id="relMonth2">
             <option value="">Month</option>
@@ -1923,7 +1923,7 @@ function _buildBrowseGrid() {
 function toggleSecond() {
   secondVisible = !secondVisible;
   document.getElementById('person2Wrap').style.display   = secondVisible ? 'block' : 'none';
-  document.getElementById('person1Label').style.display  = secondVisible ? 'block' : 'none';
+  document.getElementById('person1Label').textContent = secondVisible ? 'Person 1' : 'Finder';
   document.getElementById('addSecondBtn').textContent    = secondVisible ? '− Remove relationship' : '＋ Add relationship';
   document.getElementById('relResult').classList.remove('visible');
   if (!secondVisible) {
