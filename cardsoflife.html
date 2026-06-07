@@ -1410,7 +1410,7 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
     </div>
   </div>
 
-  <div class="finder-result" id="finderResult">
+  <div class="finder-result collapsed" id="finderResult">
     <div class="finder-result-inner">
       <div class="result-card-row">
         <div class="spread-card result-pip-card" id="rFace"></div>
@@ -1419,10 +1419,10 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
           <div class="result-subtitle" id="rSubtitle"></div>
           <div class="card-vow" id="rVow"></div>
         </div>
+        <button type="button" class="result-toggle" id="rToggle" onclick="toggleFinderDetail()" title="Show details" aria-label="Show details">Show</button>
         <div class="result-kws" id="rKws"></div>
         <div class="ccard-planets" id="rPlanets"></div>
       </div>
-      <button type="button" class="result-toggle" id="rToggle" onclick="toggleFinderDetail()" title="Minimise details" aria-label="Minimise details">Minimise</button>
       <div class="result-dates" id="rDates" style="text-align:center; margin: .5rem 0 .75rem;"></div>
       <div class="result-body">
         <div class="result-left">
@@ -2002,6 +2002,7 @@ function _findBirthCard() {
     document.getElementById('rLifeScript'),
     document.getElementById('rLifeScriptWrap'));
   resultEl.classList.add('visible');
+  collapseFinderDetail();
 }
 
 function _findRelationship() {
@@ -2261,6 +2262,13 @@ function toggleSpreads() {
   btn.setAttribute('aria-label', collapsed ? 'Show grid' : 'Minimise grid');
 }
 
+// Reset the finder result to its minimised state (called whenever a card is shown).
+function collapseFinderDetail() {
+  document.getElementById('finderResult').classList.add('collapsed');
+  const btn = document.getElementById('rToggle');
+  if (btn) { btn.textContent = 'Show'; btn.setAttribute('title', 'Show details'); btn.setAttribute('aria-label', 'Show details'); }
+}
+
 function toggleFinderDetail() {
   const r = document.getElementById('finderResult');
   const collapsed = r.classList.toggle('collapsed');
@@ -2451,6 +2459,10 @@ function loadCardInFinder() {
     document.getElementById('rLifeScript'),
     document.getElementById('rLifeScriptWrap'));
   document.getElementById('finderResult').classList.add('visible');
+  // "Open full profile" intent: show details expanded.
+  document.getElementById('finderResult').classList.remove('collapsed');
+  const _rb = document.getElementById('rToggle');
+  if (_rb) { _rb.textContent = 'Minimise'; _rb.setAttribute('title', 'Minimise details'); _rb.setAttribute('aria-label', 'Minimise details'); }
   document.getElementById('finderResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
