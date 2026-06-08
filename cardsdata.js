@@ -2,6 +2,17 @@
 // Used by: cardsoflife.html, quadrations.html, iching.html
 // Pattern: same as ichingdata.js / linedata.js
 
+// ── Suit pip glyphs ────────────────────────────────────────────────
+// Hearts / diamonds use Unicode (♥ / ♦) — their silhouettes are already
+// distinct. Clubs / spades are drawn as inline SVG so the trefoil and the
+// leaf-on-pedestal read clearly at every pip size, instead of the near-
+// identical dark blobs the Unicode glyphs produce in most fonts.
+window.SUIT_PIP_SVG = {
+  '♠': '<svg class="pip-svg" viewBox="0 0 100 100" aria-hidden="true"><path d="M50,8 C30,26 6,50 6,66 C6,82 22,90 36,82 C42,78 47,74 50,70 L40,95 L60,95 L50,70 C53,74 58,78 64,82 C78,90 94,82 94,66 C94,50 70,26 50,8 Z"/></svg>',
+  '♣': '<svg class="pip-svg" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="30" r="20"/><circle cx="27" cy="58" r="20"/><circle cx="73" cy="58" r="20"/><path d="M44,46 L40,96 L60,96 L56,46 Z"/></svg>'
+};
+window.pipMark = function (sym) { return window.SUIT_PIP_SVG[sym] || sym; };
+
 // ── Card Data ──────────────────────────────────────────────────────
 const CARDS = [
   // HEARTS
@@ -573,14 +584,15 @@ function spreadCardPips(c) {
       return corners + `<img class="court-art" src="${courtSvgs[courtKey]}" alt="${rank} of ${c.suit}">`;
     }
     // Fallback: suit centred between the corner indices
-    return corners + `<div class="card-pips"><span class="pip ace" style="left:50%;top:50%">${sym}</span></div>`;
+    return corners + `<div class="card-pips"><span class="pip ace" style="left:50%;top:50%">${window.pipMark(sym)}</span></div>`;
   }
   const layout = PIP_LAYOUTS[rank];
   if (!layout) return corners;
   const ace = rank === 'A';
+  const mark = window.pipMark(sym);
   return corners + '<div class="card-pips">' +
     layout.map(([x,y,inv]) =>
-      `<span class="pip${inv?' inv':''}${ace?' ace':''}" style="left:${x}%;top:${y}%">${sym}</span>`
+      `<span class="pip${inv?' inv':''}${ace?' ace':''}" style="left:${x}%;top:${y}%">${mark}</span>`
     ).join('') + '</div>';
 }
 

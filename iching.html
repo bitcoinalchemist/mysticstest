@@ -17,11 +17,11 @@
     /* ── Oracle ── */
     .oracle { margin-bottom: 3rem; text-align: center; }
     .inquiry-top {
-      display: grid; grid-template-columns: auto minmax(0, 1fr);
-      align-items: start; gap: 1.25rem; text-align: left;
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: start; gap: 1rem; text-align: left;
     }
     .inquiry-top .section-label { margin-bottom: 0; padding-top: 0.3rem; }
-    .inquiry-wrap { min-width: 0; }
+    .inquiry-wrap { max-width: 640px; min-width: 0; }
     .question-wrap { margin-bottom: 1.5rem; }
     .question-input {
       width: 100%; padding: 0.85rem 1rem; font-family: var(--sans); font-size: 0.95rem;
@@ -51,10 +51,11 @@
     .history-row { display: flex; gap: .6rem; justify-content: center; margin-top: .5rem; position: relative; }
     .hist-wrap { position: relative; }
     .hist-panel {
-      position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      position: absolute; top: calc(100% + 6px); right: 0;
       background: var(--surface); border: 1px solid var(--rule-strong); border-radius: 10px;
       box-shadow: 0 6px 24px rgba(0,0,0,.13); z-index: 300;
-      min-width: 300px; max-height: 340px; overflow-y: auto; display: none;
+      min-width: 300px; max-width: calc(100vw - 32px);
+      max-height: 340px; overflow-y: auto; display: none;
     }
     .hist-panel.open { display: block; }
     .hist-item {
@@ -113,6 +114,7 @@
     .pip { position: absolute; transform: translate(-50%, -50%); font-size: max(14cqw, 12px); line-height: 1; user-select: none; pointer-events: none; }
     .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
     .pip.ace { font-size: max(44cqw, 22px); }
+    .pip-svg { width: 1em; height: 1em; fill: currentColor; display: block; }
     .court-art { position: absolute; inset: 8% 5%; width: 90%; height: 84%; object-fit: contain; object-position: center; }
     .hex-result { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
     .hex-result-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-align: center; }
@@ -369,7 +371,8 @@
     .hex-ref-header {
       display: grid; grid-template-columns: 1fr auto 1fr;
       align-items: center; width: 100%;
-      margin: 0.1rem 0 0.7rem; padding: 0 0.6rem;
+      max-width: var(--max-w);
+      margin: 0.1rem auto 0.7rem; padding: 0 2rem;
     }
     .hex-ref-label {
       font-family: var(--sans); font-size: 0.62rem; font-weight: 600;
@@ -768,7 +771,7 @@
 <body>
 <script src="site.js"></script>
 
-<div class="page-content" style="padding: 2px 24px 12px">
+<div class="page-content" style="max-width: var(--max-w); padding: 2px 2rem 12px">
 
 <!-- ── Oracle ── -->
 <section class="oracle" id="oracle" style="margin: 0; padding-top: 1.75rem">
@@ -1434,10 +1437,11 @@
     var layout = PIP_LAYOUTS[rank];
     if (!layout) return corners;
     var ace = rank === 'A';
+    var mark = (window.pipMark ? window.pipMark(sym) : sym);
     return corners + '<div class="card-pips">' +
       layout.map(function (p) {
         return '<span class="pip' + (p[2] ? ' inv' : '') + (ace ? ' ace' : '') +
-               '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + sym + '</span>';
+               '" style="left:' + p[0] + '%;top:' + p[1] + '%">' + mark + '</span>';
       }).join('') + '</div>';
   }
 
