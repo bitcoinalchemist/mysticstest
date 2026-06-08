@@ -26,21 +26,22 @@
     .question-input:focus { border-color: var(--rule-strong); }
     .question-input::placeholder { color: var(--muted); font-style: italic; }
     .cast-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; justify-content: center; align-items: center; }
-    .cast-btn-icon {
-      width: 40px; height: 40px; padding: 0; flex-shrink: 0;
-      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
-      display: inline-flex; align-items: center; justify-content: center;
-    }
     .cast-btn {
       padding: 0.7rem 1.8rem; background: var(--accent); color: white;
       border: 1px solid var(--accent); border-radius: 8px; font-size: 0.78rem; font-weight: 600;
       letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
       transition: opacity var(--ease), background var(--ease);
+      display: inline-flex; align-items: center; justify-content: center;
+      text-align: center; line-height: 1;
     }
     .cast-btn:hover { opacity: 0.82; }
     .cast-btn:disabled { opacity: 0.35; cursor: default; }
     .cast-btn-alt { background: transparent; color: var(--accent); border-color: var(--rule-strong); }
     .cast-btn-alt:hover { opacity: 1; background: var(--surface-alt); }
+    .cast-btn-icon {
+      width: 40px; height: 40px; padding: 0; flex-shrink: 0;
+      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
+    }
     /* History row */
     .history-row { display: flex; gap: .6rem; justify-content: center; margin-top: .5rem; position: relative; }
     .hist-wrap { position: relative; }
@@ -773,8 +774,8 @@
         <textarea class="question-input" id="questionInput" rows="2"
           placeholder="Hold your question in mind…"></textarea>
         <div class="cast-actions">
-          <button class="cast-btn" id="castOneBtn" style="width: 100px;">Single</button>
-          <button class="cast-btn cast-btn-alt" id="castAllBtn" style="width: 100px;">All</button>
+          <button class="cast-btn" id="castOneBtn" style="width: 130px;">Single</button>
+          <button class="cast-btn cast-btn-alt" id="castAllBtn" style="width: 130px;">All</button>
           <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="display:none;" title="Save reading"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" style="display:block;pointer-events:none"><path fill="currentColor" fill-rule="evenodd" d="M1 1H10L14 5V15H1ZM3 2H8V6.5H3ZM3 10.5H13V14H3Z"/></svg></button>
           <div class="hist-wrap">
             <button class="cast-btn cast-btn-alt cast-btn-icon" id="historyBtn" title="Past readings">≡</button>
