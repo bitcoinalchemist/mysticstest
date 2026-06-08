@@ -12,6 +12,16 @@
     button { cursor: pointer; border: none; background: none; font: inherit; }
     /* ── Oracle ── */
     .oracle { margin-bottom: 3rem; text-align: center; }
+    .inquiry-top {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: start; gap: 1rem; text-align: left;
+    }
+    .inquiry-top .section-label { margin-bottom: 0; padding-top: 0.2rem; }
+    .inquiry-wrap { width: 500px; }
+    @media (max-width: 580px) {
+      .inquiry-top { grid-template-columns: 1fr; }
+      .inquiry-wrap { width: 100%; }
+    }
     .question-wrap { margin-bottom: 1.5rem; }
     .question-input {
       width: 100%; padding: 0.85rem 1rem; font-family: var(--sans); font-size: 0.95rem;
@@ -749,21 +759,26 @@
 
 <!-- ── Oracle ── -->
 <section class="oracle" id="oracle" style="margin: 0; padding-top: 1.75rem">
-  <span class="section-label">Inquiry</span>
-  <div class="question-wrap">
-    <textarea class="question-input" id="questionInput" rows="2"
-      placeholder="Hold your question in mind…"></textarea>
-    <div class="cast-actions">
-      <button class="cast-btn" id="castOneBtn" style="width: 134px;">Single</button>
-      <button class="cast-btn cast-btn-alt" id="castAllBtn">Cast all</button>
-    </div>
-    <div class="history-row">
-      <button class="cast-btn cast-btn-alt" id="saveReadingBtn" style="display:none; font-size:.72rem; padding:.55rem 1.2rem;">Save reading</button>
-      <div class="hist-wrap">
-        <button class="cast-btn cast-btn-alt" id="historyBtn" style="font-size:.72rem; padding:.55rem 1.2rem;">Past readings ▾</button>
-        <div class="hist-panel" id="histPanel"></div>
+  <div class="inquiry-top">
+    <span class="section-label">Inquiry</span>
+    <div class="inquiry-wrap">
+      <div class="question-wrap">
+        <textarea class="question-input" id="questionInput" rows="2"
+          placeholder="Hold your question in mind…"></textarea>
+        <div class="cast-actions">
+          <button class="cast-btn" id="castOneBtn" style="width: 134px;">Single</button>
+          <button class="cast-btn cast-btn-alt" id="castAllBtn">Cast all</button>
+        </div>
+        <div class="history-row">
+          <button class="cast-btn cast-btn-alt" id="saveReadingBtn" style="display:none; font-size:.72rem; padding:.55rem 1.2rem;">Save reading</button>
+          <div class="hist-wrap">
+            <button class="cast-btn cast-btn-alt" id="historyBtn" style="font-size:.72rem; padding:.55rem 1.2rem;">Past readings ▾</button>
+            <div class="hist-panel" id="histPanel"></div>
+          </div>
+        </div>
       </div>
     </div>
+    <div></div>
   </div>
 
   <div class="asked" id="askedLine" style="display:none"></div>
