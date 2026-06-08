@@ -16,10 +16,7 @@
       display: flex; align-items: flex-start; gap: 1.25rem; text-align: left;
     }
     .inquiry-top .section-label { margin-bottom: 0; padding-top: 0.3rem; flex-shrink: 0; }
-    .inquiry-wrap { flex: 1; }
-    @media (max-width: 580px) {
-      .inquiry-top { flex-direction: column; gap: 0.5rem; }
-    }
+    .inquiry-wrap { flex: 1; min-width: 0; }
     .question-wrap { margin-bottom: 1.5rem; }
     .question-input {
       width: 100%; padding: 0.85rem 1rem; font-family: var(--sans); font-size: 0.95rem;
@@ -359,8 +356,9 @@
       --yang: rgba(255,255,255,.9);
     }
     .hex-ref-header {
-      display: flex; align-items: center; justify-content: center;
-      gap: 1rem; margin: 0.1rem auto 0.7rem;
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; width: 100%;
+      margin: 0.1rem 0 0.7rem; padding: 0 0.6rem;
     }
     .hex-ref-label {
       font-family: var(--sans); font-size: 0.62rem; font-weight: 600;
@@ -813,6 +811,7 @@
       <button data-seq="fuxi">Fu Xi</button>
       <button data-seq="kingwen">King Wen</button>
     </div>
+    <div></div>
   </div>
   <div class="hex-ref-grid" id="hex-grid"></div>
 </section>
