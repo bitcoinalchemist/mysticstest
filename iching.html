@@ -97,6 +97,7 @@
     .pip { position: absolute; transform: translate(-50%, -50%); font-size: max(14cqw, 12px); line-height: 1; user-select: none; pointer-events: none; }
     .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
     .pip.ace { font-size: max(44cqw, 22px); }
+    .court-art { position: absolute; inset: 8% 5%; width: 90%; height: 84%; object-fit: contain; object-position: center; }
     .hex-result { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
     .hex-result-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-align: center; }
     .hex-arrow { font-size: 1.5rem; color: var(--muted); align-self: center; padding-top: 1rem; }
@@ -1398,7 +1399,8 @@
       '<div class="card-corner card-tl"><span class="cc-rank">' + rank + '</span></div>' +
       '<div class="card-corner card-br"><span class="cc-rank">' + rank + '</span></div>';
     if (['J','Q','K'].indexOf(rank) !== -1) {
-      return corners + '<div class="card-pips"><span class="pip ace" style="left:50%;top:50%">' + sym + '</span></div>';
+      var suitLetter = sym === '♥' ? 'H' : sym === '♦' ? 'D' : sym === '♣' ? 'C' : 'S';
+      return corners + '<img class="court-art" src="Court%20Cards/' + rank + suitLetter + '.svg" alt="' + rank + ' of ' + SUIT_CLASS[sym] + '">';
     }
     var layout = PIP_LAYOUTS[rank];
     if (!layout) return corners;
