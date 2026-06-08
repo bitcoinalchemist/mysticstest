@@ -25,7 +25,12 @@
     }
     .question-input:focus { border-color: var(--rule-strong); }
     .question-input::placeholder { color: var(--muted); font-style: italic; }
-    .cast-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    .cast-actions { display: flex; gap: 0.6rem; margin-top: 0.75rem; justify-content: center; align-items: center; }
+    .cast-btn-icon {
+      width: 40px; height: 40px; padding: 0; flex-shrink: 0;
+      font-size: 1.05rem; letter-spacing: 0; text-transform: none;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
     .cast-btn {
       padding: 0.7rem 1.8rem; background: var(--accent); color: white;
       border: 1px solid var(--accent); border-radius: 8px; font-size: 0.78rem; font-weight: 600;
@@ -770,11 +775,9 @@
         <div class="cast-actions">
           <button class="cast-btn" id="castOneBtn" style="width: 134px;">Single</button>
           <button class="cast-btn cast-btn-alt" id="castAllBtn">Cast all</button>
-        </div>
-        <div class="history-row">
-          <button class="cast-btn cast-btn-alt" id="saveReadingBtn" style="display:none; font-size:.72rem; padding:.55rem 1.2rem;">Save reading</button>
+          <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="display:none;" title="Save reading">↓</button>
           <div class="hist-wrap">
-            <button class="cast-btn cast-btn-alt" id="historyBtn" style="font-size:.72rem; padding:.55rem 1.2rem;">Past readings ▾</button>
+            <button class="cast-btn cast-btn-alt cast-btn-icon" id="historyBtn" title="Past readings">≡</button>
             <div class="hist-panel" id="histPanel"></div>
           </div>
         </div>
@@ -1228,9 +1231,9 @@
     list.push({ id: Date.now(), ts: Date.now(), question: _question, draws: draws });
     saveHistory(list);
     var btn = document.getElementById('saveReadingBtn');
-    btn.textContent = 'Saved ✓';
+    btn.textContent = '✓';
     btn.disabled = true;
-    setTimeout(function(){ btn.style.display = 'none'; btn.textContent = 'Save reading'; btn.disabled = false; }, 1400);
+    setTimeout(function(){ btn.style.display = 'none'; btn.textContent = '↓'; btn.disabled = false; }, 1400);
   }
 
   var _isRestoring = false;
@@ -1499,7 +1502,7 @@
     if (window.setCastGlow) window.setCastGlow(hasChanging ? [primary, secondary] : [primary]);
     if (!_isRestoring) {
       var sBtn = document.getElementById('saveReadingBtn');
-      sBtn.textContent = 'Save reading';
+      sBtn.textContent = '↓';
       sBtn.disabled = false;
       sBtn.style.display = '';
     }
