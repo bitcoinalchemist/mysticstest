@@ -1337,11 +1337,13 @@
     /* ── Personal Cards (Birth / Yearly / 52-day / Daily) ─────── */
     .personal-cards { padding: 2rem 0 2.5rem; }
     .pcards-row {
-      display: flex; justify-content: center; align-items: flex-start;
-      gap: 1.5rem; flex-wrap: wrap;
+      display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+      justify-content: center; align-items: start;
+      gap: 1.5rem;
+      max-width: 648px; margin: 0 auto;
     }
-    .pcard { display: flex; flex-direction: column; align-items: center; width: 88px; }
-    .pcard .spread-card { width: 88px; height: 122px; }
+    .pcard { display: flex; flex-direction: column; align-items: center; min-width: 0; width: 100%; }
+    .pcard .spread-card { width: 100%; height: auto; aspect-ratio: 5/7; }
     .pcard-label {
       margin-top: .6rem; font-size: .72rem; letter-spacing: .09em;
       text-transform: uppercase; color: var(--text-primary);
@@ -1354,10 +1356,48 @@
       text-align: center; font-size: .88rem; color: var(--text-muted);
       max-width: 440px; margin: 0 auto; line-height: 1.6;
     }
+    .spread-card.placeholder {
+      background: transparent; border-style: dashed; border-color: var(--border);
+      cursor: default;
+    }
+    .spread-card.placeholder::before { display: none; }
+    .spread-card.placeholder:hover { box-shadow: none; transform: none; border-color: var(--border); }
+    .pcard-sub.placeholder { color: var(--text-muted); opacity: .5; }
+    .birth-actions { display: flex; gap: .5rem; align-items: center; justify-self: end; }
+    .birth-wrap { position: relative; }
+    .birth-btn {
+      font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+      font-weight: 600; padding: .45rem .9rem; background: transparent;
+      color: var(--text-primary); border: 1px solid var(--border);
+      border-radius: 6px; cursor: pointer; line-height: 1;
+      transition: background var(--ease), border-color var(--ease);
+    }
+    .birth-btn:hover { background: var(--surface-alt); border-color: var(--border-strong); }
+    .birth-panel {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.13); z-index: 200;
+      min-width: 260px; max-width: calc(100vw - 32px);
+      max-height: 340px; overflow-y: auto; display: none;
+    }
+    .birth-panel.open { display: block; }
+    .birth-item {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .65rem .9rem; border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .birth-item:last-child { border-bottom: none; }
+    .birth-item:hover { background: var(--surface-alt); }
+    .birth-item-body { flex: 1; min-width: 0; }
+    .birth-name { font-size: .9rem; color: var(--text-primary); margin-bottom: .15rem;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .birth-date { font-size: .68rem; color: var(--text-muted); font-family: var(--mono); letter-spacing: .04em; }
+    .birth-del { flex-shrink: 0; font-size: 1rem; color: var(--text-muted);
+      padding: 2px 7px; border-radius: 5px; line-height: 1;
+      background: transparent; border: none; cursor: pointer; }
+    .birth-del:hover { color: var(--text-primary); background: var(--border); }
+    .birth-empty { padding: 1rem; text-align: center; font-size: .82rem; color: var(--text-muted); font-style: italic; }
     @media (max-width: 480px) {
-      .pcards-row { gap: .7rem; }
-      .pcard { width: 70px; }
-      .pcard .spread-card { width: 70px; height: 98px; }
+      .pcards-row { gap: .4rem; }
     }
   </style>
 </head>
@@ -1557,9 +1597,17 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
   <div class="container">
     <div class="spreads-top">
       <span class="section-label">Your Cards</span>
+      <div></div>
+      <div class="birth-actions">
+        <button class="birth-btn" id="birthSaveBtn" type="button" title="Save current Day/Month/Age">Save</button>
+        <div class="birth-wrap">
+          <button class="birth-btn" id="birthListBtn" type="button">Saved</button>
+          <div class="birth-panel" id="birthPanel"></div>
+        </div>
+      </div>
     </div>
     <div class="pcards-row" id="pcardsRow"></div>
-    <div class="pcards-empty" id="pcardsEmpty">Set Day, Month and Age.</div>
+    <div class="pcards-empty" id="pcardsEmpty" style="display:none"></div>
   </div>
 </section>
 
@@ -2302,9 +2350,16 @@ function renderPersonalCards() {
   if (!row || !empty) return;
   const m = parseInt(document.getElementById('fMonth').value);
   const d = parseInt(document.getElementById('fDay').value);
+  const placeholderLabels = ['Birth Card', '13-Year', '7-Year', 'Yearly', '52-Day', 'Daily'];
+  const renderPlaceholders = () => placeholderLabels.map(label => `
+    <div class="pcard">
+      <div class="spread-card placeholder"></div>
+      <div class="pcard-label">${label}</div>
+      <div class="pcard-sub placeholder">&mdash;</div>
+    </div>`).join('');
   if (!m || !d) {
-    row.innerHTML = ''; empty.style.display = '';
-    empty.textContent = 'Set Day, Month and Age.';
+    row.innerHTML = renderPlaceholders();
+    empty.style.display = 'none';
     return;
   }
   const sv = solarValue(m, d);
@@ -2333,20 +2388,29 @@ function renderPersonalCards() {
   const todayWD = new Date(todayUTC).getUTCDay();
 
   // Spread + position for each card type
+  const tSpread = Math.floor(age / 91),           tPos = Math.floor((age % 91) / 13);
+  const cSpread = Math.floor(age / 49),           cPos = Math.floor((age % 49) / 7);
   const ySpread = Math.floor(age / 7),            yPos = age % 7;
   const fSpread = age,                            fPos = Math.min(Math.floor(daysSinceBday / 52), 6);
   const dSpread = ((weeksAlive % 90) + 90) % 90,  dPos = (todayWD - bornWD + 7) % 7;
 
+  const tIdx = _pcReadCard(tSpread, birthIdx, tPos);
+  const cIdx = _pcReadCard(cSpread, birthIdx, cPos);
   const yIdx = _pcReadCard(ySpread, birthIdx, yPos);
   const fIdx = _pcReadCard(fSpread, birthIdx, fPos);
   const dIdx = _pcReadCard(dSpread, birthIdx, dPos);
 
+  const tStart = Math.floor(age / 13) * 13, tEnd = tStart + 12;
+  const cStart = Math.floor(age / 7) * 7,   cEnd = cStart + 6;
+
   const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const cards = [
     { idx: birthIdx, label: 'Birth Card', sub: CARDS[birthIdx].name },
-    { idx: yIdx, label: 'Yearly', sub: SPREAD_PLANETS[yPos] + ' · age ' + age },
-    { idx: fIdx, label: '52-Day', sub: SPREAD_PLANETS[fPos] + ' · period ' + (fPos + 1) + '/7' },
-    { idx: dIdx, label: 'Daily',  sub: SPREAD_PLANETS[dPos] + ' · ' + WD[todayWD] },
+    { idx: tIdx, label: '13-Year', sub: SPREAD_PLANETS[tPos] + '<br>age ' + tStart + '–' + tEnd },
+    { idx: cIdx, label: '7-Year', sub: SPREAD_PLANETS[cPos] + '<br>age ' + cStart + '–' + cEnd },
+    { idx: yIdx, label: 'Yearly', sub: SPREAD_PLANETS[yPos] + '<br>age ' + age },
+    { idx: fIdx, label: '52-Day', sub: SPREAD_PLANETS[fPos] + '<br>period ' + (fPos + 1) + '/7' },
+    { idx: dIdx, label: 'Daily',  sub: SPREAD_PLANETS[dPos] + '<br>' + WD[todayWD] },
   ];
 
   row.innerHTML = cards.map(pc => {
@@ -2365,6 +2429,96 @@ function changeAge(d) {
   setAge(a);
 }
 
+// ── Saved birthdays (localStorage) ─────────────────────────────────
+const BIRTH_KEY = 'cardsoflife_births';
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function _escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function loadBirths() {
+  try { return JSON.parse(localStorage.getItem(BIRTH_KEY)) || []; } catch(e) { return []; }
+}
+function saveBirths(list) {
+  try { localStorage.setItem(BIRTH_KEY, JSON.stringify(list)); } catch(e) {}
+}
+function _lastBdayYear(m, d) {
+  const t = new Date();
+  const ty = t.getFullYear();
+  const todayUTC = Date.UTC(ty, t.getMonth(), t.getDate());
+  return (Date.UTC(ty, m-1, d) > todayUTC) ? ty - 1 : ty;
+}
+function ageFromBirthYear(birthYear, m, d) { return _lastBdayYear(m, d) - birthYear; }
+function birthYearFromAge(age, m, d)       { return _lastBdayYear(m, d) - age; }
+
+function persistCurrentBirth() {
+  const m = parseInt(document.getElementById('fMonth').value);
+  const d = parseInt(document.getElementById('fDay').value);
+  if (!m || !d) { alert('Set Day and Month first.'); return; }
+  const name = prompt('Name for this birthday?', '');
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const list = loadBirths();
+  list.push({ id: Date.now(), name: trimmed, day: d, month: m, year: birthYearFromAge(currentAge, m, d) });
+  saveBirths(list);
+  renderBirthPanel();
+}
+function loadBirth(entry) {
+  document.getElementById('fMonth').value = entry.month;
+  document.getElementById('fMonth').dispatchEvent(new Event('change'));
+  document.getElementById('fDay').value = entry.day;
+  document.getElementById('fDay').dispatchEvent(new Event('change'));
+  setAge(ageFromBirthYear(entry.year, entry.month, entry.day));
+  closeBirthPanel();
+}
+function renderBirthPanel() {
+  const panel = document.getElementById('birthPanel');
+  const btn = document.getElementById('birthListBtn');
+  const list = loadBirths();
+  btn.textContent = 'Saved' + (list.length ? ' (' + list.length + ')' : '');
+  if (!list.length) {
+    panel.innerHTML = '<div class="birth-empty">No saved birthdays yet.</div>';
+    return;
+  }
+  panel.innerHTML = list.map(e =>
+    '<div class="birth-item" data-id="' + e.id + '">' +
+      '<div class="birth-item-body">' +
+        '<div class="birth-name">' + _escHtml(e.name) + '</div>' +
+        '<div class="birth-date">' + MONTHS_SHORT[e.month-1] + ' ' + e.day + ', ' + e.year +
+          ' &middot; age ' + ageFromBirthYear(e.year, e.month, e.day) + '</div>' +
+      '</div>' +
+      '<button class="birth-del" data-del="' + e.id + '" title="Delete">&times;</button>' +
+    '</div>'
+  ).join('');
+  panel.querySelectorAll('.birth-item').forEach(item => {
+    item.addEventListener('click', e => {
+      if (e.target.closest('[data-del]')) return;
+      const id = +item.dataset.id;
+      const entry = loadBirths().find(x => x.id === id);
+      if (entry) loadBirth(entry);
+    });
+  });
+  panel.querySelectorAll('[data-del]').forEach(b => {
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = +b.dataset.del;
+      saveBirths(loadBirths().filter(x => x.id !== id));
+      renderBirthPanel();
+    });
+  });
+}
+function openBirthPanel()  { renderBirthPanel(); document.getElementById('birthPanel').classList.add('open'); }
+function closeBirthPanel() { document.getElementById('birthPanel').classList.remove('open'); }
+
+document.getElementById('birthSaveBtn').addEventListener('click', persistCurrentBirth);
+document.getElementById('birthListBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  const panel = document.getElementById('birthPanel');
+  panel.classList.contains('open') ? closeBirthPanel() : openBirthPanel();
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.birth-wrap')) closeBirthPanel();
+});
+renderBirthPanel(); // initialize button label
+
 document.getElementById('ageDown').addEventListener('click', () => changeAge(-1));
 document.getElementById('ageUp').addEventListener('click',   () => changeAge(+1));
 document.getElementById('ageInput').addEventListener('change', function() { setAge(this.value); });
@@ -2374,6 +2528,7 @@ document.getElementById('ageInput').addEventListener('keydown', function(e) {
 });
 
 buildAnnualGrid(1); // render Life Spread on load
+renderPersonalCards();
 
 // ── Compare Modal ────────────────────────────────────────────────
 function cmpChip(c, idx) {
@@ -2730,7 +2885,7 @@ document.addEventListener('keydown', e => {
 
 <!-- ── Footer ───────────────────────────────────────────────────── -->
 <footer class="site-footer">
-  <div class="sf-inner">for mathematical and entertainment purposes only</div>
+  <div class="sf-inner"></div>
 </footer>
 </body>
 </html>
