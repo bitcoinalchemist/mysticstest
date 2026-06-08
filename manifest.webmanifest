@@ -1,0 +1,16 @@
+{
+  "name": "mysticscards.space",
+  "short_name": "mysticscards",
+  "description": "Cards of Life, I Ching, and other esoteric tools.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f2ea",
+  "theme_color": "#1e2340",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "apple-touch-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
