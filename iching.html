@@ -774,8 +774,8 @@
           placeholder="Hold your question in mind…"></textarea>
         <div class="cast-actions">
           <button class="cast-btn" id="castOneBtn" style="width: 134px;">Single</button>
-          <button class="cast-btn cast-btn-alt" id="castAllBtn">Cast all</button>
-          <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="display:none;" title="Save reading">↓</button>
+          <button class="cast-btn cast-btn-alt" id="castAllBtn">All</button>
+          <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="display:none;" title="Save reading"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" style="display:block;pointer-events:none"><path d="M2 1H9.5L13 4.5V13H2V1Z"/><rect x="3" y="1" width="4.5" height="4"/><rect x="3" y="9" width="7" height="3.5" rx="0.5"/></svg></button>
           <div class="hist-wrap">
             <button class="cast-btn cast-btn-alt cast-btn-icon" id="historyBtn" title="Past readings">≡</button>
             <div class="hist-panel" id="histPanel"></div>
@@ -1231,9 +1231,9 @@
     list.push({ id: Date.now(), ts: Date.now(), question: _question, draws: draws });
     saveHistory(list);
     var btn = document.getElementById('saveReadingBtn');
-    btn.textContent = '✓';
+    btn.innerHTML = '✓';
     btn.disabled = true;
-    setTimeout(function(){ btn.style.display = 'none'; btn.textContent = '↓'; btn.disabled = false; }, 1400);
+    setTimeout(function(){ btn.style.display = 'none'; btn.innerHTML = FLOPPY_SVG; btn.disabled = false; }, 1400);
   }
 
   var _isRestoring = false;
@@ -1502,7 +1502,7 @@
     if (window.setCastGlow) window.setCastGlow(hasChanging ? [primary, secondary] : [primary]);
     if (!_isRestoring) {
       var sBtn = document.getElementById('saveReadingBtn');
-      sBtn.textContent = '↓';
+      sBtn.innerHTML = FLOPPY_SVG;
       sBtn.disabled = false;
       sBtn.style.display = '';
     }
@@ -1549,6 +1549,8 @@
       setTimeout(next, 150);
     })();
   }
+
+  var FLOPPY_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" style="display:block;pointer-events:none"><path d="M2 1H9.5L13 4.5V13H2V1Z"/><rect x="3" y="1" width="4.5" height="4"/><rect x="3" y="9" width="7" height="3.5" rx="0.5"/></svg>';
 
   document.getElementById('castOneBtn').addEventListener('click', castOne);
   document.getElementById('castAllBtn').addEventListener('click', castAll);
