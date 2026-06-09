@@ -411,11 +411,19 @@
     /* ── Tools Section (bottom of page) ──────────────────────────── */
     /* Navy band matching the Quadrations section; panels sit on the darker --accent inside */
     .tools-section {
-      padding: 2.5rem 0 3rem; background: #252a4a;
+      padding: 2.25rem 0 2rem; background: #252a4a;
       border-top: 1px solid rgba(255,255,255,.08);
       border-bottom: 1px solid rgba(255,255,255,.08);
     }
-    .tools-section .section-label { margin-bottom: .85rem; }
+    .tools-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .85rem;
+    }
+    .tools-top .section-label { margin-bottom: 0; }
+    .tools-section.collapsed { padding: 1.6rem 0; }
+    .tools-section.collapsed .tools-top { margin-bottom: 0; }
+    .tools-section.collapsed .tools-grid { display: none; }
+    .tools-section.collapsed .spreads-toggle svg { transform: rotate(180deg); }
     .tools-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1789,9 +1797,12 @@
 </section>
 
 <!-- ── Tools ─────────────────────────────────────────────────────── -->
-<section class="tools-section" id="tools">
+<section class="tools-section collapsed" id="tools">
   <div class="container">
-    <span class="section-label">Tools</span>
+    <div class="tools-top">
+      <span class="section-label">Tools</span>
+      <button class="spreads-toggle" id="toolsToggle" onclick="toggleTools()" title="Show tools" aria-label="Show tools"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
     <div class="tools-grid">
       <button class="tool-card-btn is-toggle" id="compareToolBtn" aria-expanded="false" aria-controls="comparePanel" onclick="toggleToolPanel('compare')">Spirit &amp; Life <span class="tool-card-arrow">⌄</span></button>
       <button class="tool-card-btn is-toggle" id="calendarToolBtn" aria-expanded="false" aria-controls="calendarPanel" onclick="toggleToolPanel('calendar')">Year Calendar <span class="tool-card-arrow">⌄</span></button>
@@ -2484,6 +2495,15 @@ function toggleSpreads() {
   const btn = document.getElementById('spreadsToggle');
   btn.setAttribute('title', collapsed ? 'Show grid' : 'Minimise grid');
   btn.setAttribute('aria-label', collapsed ? 'Show grid' : 'Minimise grid');
+}
+
+// Collapse/expand the whole Tools section.
+function toggleTools() {
+  const s = document.getElementById('tools');
+  const collapsed = s.classList.toggle('collapsed');
+  const btn = document.getElementById('toolsToggle');
+  btn.setAttribute('title', collapsed ? 'Show tools' : 'Minimise tools');
+  btn.setAttribute('aria-label', collapsed ? 'Show tools' : 'Minimise tools');
 }
 
 // Reset the finder result to its minimised state (called whenever a card is shown).
