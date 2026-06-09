@@ -562,7 +562,7 @@ const PIP_LAYOUTS = {
 function spreadCardPips(c) {
   const { rank, sym } = c;
   if (c.suit === 'joker') {
-    return `<img class="court-art" src="Court%20Cards/JOKER-3.svg" alt="Joker">`;
+    return `<img class="court-art" src="assets/cards/JOKER-3.svg" alt="Joker">`;
   }
   // Corner indices on every card: rank+suit top-left (upright) and bottom-right (rotated)
   const corners =
@@ -572,12 +572,12 @@ function spreadCardPips(c) {
     // Check for illustrated court card SVG
     const courtKey = rank + (c.suit === 'hearts' ? 'H' : c.suit === 'diamonds' ? 'D' : c.suit === 'clubs' ? 'C' : 'S');
     const courtSvgs = {
-      JC: 'Court%20Cards/JC.svg', JD: 'Court%20Cards/JD.svg',
-      JH: 'Court%20Cards/JH.svg', JS: 'Court%20Cards/JS.svg',
-      QC: 'Court%20Cards/QC.svg', QD: 'Court%20Cards/QD.svg',
-      QH: 'Court%20Cards/QH.svg', QS: 'Court%20Cards/QS.svg',
-      KC: 'Court%20Cards/KC.svg', KD: 'Court%20Cards/KD.svg',
-      KH: 'Court%20Cards/KH.svg', KS: 'Court%20Cards/KS.svg',
+      JC: 'assets/cards/JC.svg', JD: 'assets/cards/JD.svg',
+      JH: 'assets/cards/JH.svg', JS: 'assets/cards/JS.svg',
+      QC: 'assets/cards/QC.svg', QD: 'assets/cards/QD.svg',
+      QH: 'assets/cards/QH.svg', QS: 'assets/cards/QS.svg',
+      KC: 'assets/cards/KC.svg', KD: 'assets/cards/KD.svg',
+      KH: 'assets/cards/KH.svg', KS: 'assets/cards/KS.svg',
     };
     if (courtSvgs[courtKey]) {
       // Court art has had its built-in corner indices stripped — add our themed serif corners to match the number cards.

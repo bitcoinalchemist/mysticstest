@@ -7,11 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="manifest" href="manifest.webmanifest" />
   <meta name="theme-color" content="#1e2340" />
-  <link rel="stylesheet" href="site.css" />
+  <link rel="stylesheet" href="css/site.css" />
   <style>
     button { cursor: pointer; border: none; background: none; font: inherit; }
     /* ── Oracle ── */
@@ -769,7 +769,7 @@
   </style>
 </head>
 <body>
-<script src="site.js"></script>
+<script src="js/site.js"></script>
 
 <div class="page-content" style="max-width: var(--max-w); padding: 2px 2rem 12px">
 
@@ -851,11 +851,11 @@
 </div>
 
 <!-- Shared card data + popup logic -->
-<script src="cardsdata.js"></script>
+<script src="js/cardsdata.js"></script>
 <!-- 64 hexagram oracle answers (Sage voice) -->
-<script src="ichingdata.js"></script>
+<script src="js/ichingdata.js"></script>
 <!-- 384 moving-line texts (Sage voice) -->
-<script src="linedata.js"></script>
+<script src="js/linedata.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT — render hexagrams
@@ -1432,7 +1432,7 @@
       '<div class="card-corner card-br"><span class="cc-rank">' + rank + '</span></div>';
     if (['J','Q','K'].indexOf(rank) !== -1) {
       var suitLetter = sym === '♥' ? 'H' : sym === '♦' ? 'D' : sym === '♣' ? 'C' : 'S';
-      return corners + '<img class="court-art" src="Court%20Cards/' + rank + suitLetter + '.svg" alt="' + rank + ' of ' + SUIT_CLASS[sym] + '">';
+      return corners + '<img class="court-art" src="assets/cards/' + rank + suitLetter + '.svg" alt="' + rank + ' of ' + SUIT_CLASS[sym] + '">';
     }
     var layout = PIP_LAYOUTS[rank];
     if (!layout) return corners;
