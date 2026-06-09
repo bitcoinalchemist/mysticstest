@@ -432,6 +432,7 @@
 
   document.getElementById('ageDown').addEventListener('click', function() { changeAge(-1); });
   document.getElementById('ageUp').addEventListener('click',   function() { changeAge(+1); });
+  document.getElementById('ageInput').addEventListener('input',  function() { if (this.value !== '') setAge(this.value); });
   document.getElementById('ageInput').addEventListener('change', function() { setAge(this.value); });
   document.getElementById('ageInput').addEventListener('keydown', function(e) {
     if (e.key === 'ArrowUp')   { e.preventDefault(); changeAge(+1); }
