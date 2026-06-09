@@ -134,6 +134,9 @@
     .spread-card.clubs    { color: var(--green); }
     .spread-card.spades   { color: var(--navy); }
     .spread-card.joker    { color: var(--gold); }
+    /* Court / joker SVGs have a white inner card-body rect — match the card
+       background so the parchment surface doesn't peek through at the edges. */
+    .spread-card:has(.court-art) { background: #ffffff; }
 
     .card-corner {
       position: absolute; z-index: 1;

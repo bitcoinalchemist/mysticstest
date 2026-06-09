@@ -105,6 +105,9 @@
     .spread-card.clubs::before, .spread-card.spades::before { background: var(--card-dark); }
     .spread-card.hearts, .spread-card.diamonds { color: var(--red); }
     .spread-card.clubs, .spread-card.spades { color: var(--card-dark); }
+    /* Court / joker SVGs have a white inner card-body rect — match the card
+       background so the parchment surface doesn't peek through at the edges. */
+    .spread-card:has(.court-art) { background: #ffffff; }
     .spread-card.changing { box-shadow: 0 0 0 2px var(--gold); }
     .card-corner { position: absolute; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1; }
     .card-tl { top: 3px; left: 3px; }

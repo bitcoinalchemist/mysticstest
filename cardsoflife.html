@@ -171,19 +171,17 @@
       position: relative;
     }
     .result-toggle {
-      display: flex; align-items: center; justify-content: center; gap: .4rem;
+      display: inline-flex; align-items: center; justify-content: center;
       margin: .6rem auto .1rem;
-      padding: .35rem 1.1rem;
-      border-radius: 999px;
+      width: 34px; height: 34px; padding: 0;
+      border-radius: 50%;
       background: none; border: 1px solid rgba(255,255,255,.22);
       color: var(--gold); cursor: pointer;
-      font-family: var(--sans); font-size: .7rem; font-weight: 500;
-      letter-spacing: .1em; text-transform: uppercase;
       transition: background .2s, border-color .2s;
     }
-    .result-toggle::after { content: '▾'; font-size: .75rem; transition: transform .25s ease; display: inline-block; }
+    .result-toggle svg { width: 14px; height: 14px; display: block; transition: transform .25s ease; }
     .result-toggle:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.45); }
-    .finder-result.collapsed .result-toggle::after { transform: rotate(180deg); }
+    .finder-result.collapsed .result-toggle svg { transform: rotate(180deg); }
     .finder-result.collapsed .result-card-row .result-kws,
     .finder-result.collapsed .ccard-planets,
     .finder-result.collapsed .result-dates,
@@ -276,7 +274,6 @@
     .finder-result-inner .ls-card {
       width: 100% !important;
       min-width: 0 !important;
-      min-height: 74px !important;
       aspect-ratio: 9 / 13;
     }
     .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -411,6 +408,69 @@
     }
     .tool-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-light); }
 
+    /* ── Tools Section (bottom of page) ──────────────────────────── */
+    .tools-section { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border); background: var(--bg); }
+    .tools-section .section-label { margin-bottom: .35rem; }
+    .tools-intro {
+      font-size: .9rem; color: var(--text-secondary);
+      line-height: 1.7; max-width: 560px; margin-bottom: 1.5rem;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: .6rem;
+    }
+    .tool-card-btn {
+      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-sm); padding: .6rem .85rem;
+      font-family: var(--serif); font-size: 1rem; font-weight: 400;
+      color: var(--text-primary); text-align: left; cursor: pointer;
+      transition: border-color var(--ease), box-shadow var(--ease), transform var(--ease), color var(--ease);
+    }
+    .tool-card-btn .tool-card-arrow {
+      font-family: var(--sans); font-size: .8rem; color: var(--gold);
+      flex-shrink: 0; transition: transform var(--ease);
+    }
+    .tool-card-btn:hover {
+      border-color: var(--gold); color: var(--gold);
+      box-shadow: var(--sh-sm); transform: translateY(-2px);
+    }
+    .tool-card-btn:hover .tool-card-arrow { transform: translate(2px, -2px); }
+    /* Toggle (inline-expand) tool buttons use a chevron that rotates when open */
+    .tool-card-btn.is-toggle .tool-card-arrow { transition: transform .25s ease; }
+    .tool-card-btn[aria-expanded="true"] {
+      border-color: var(--gold); color: var(--gold); background: var(--gold-light);
+    }
+    .tool-card-btn[aria-expanded="true"] .tool-card-arrow { transform: rotate(180deg); }
+    /* Inline panel that expands beneath the grid */
+    .tool-panel {
+      grid-column: 1 / -1;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height .35s ease, opacity .25s ease, margin .25s ease;
+    }
+    .tool-panel.open {
+      max-height: 4000px;
+      opacity: 1;
+      margin-top: .5rem;
+    }
+    .tool-panel-inner {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-md); padding: 1.5rem 1.75rem;
+    }
+    @media (max-width: 600px) { .tool-panel-inner { padding: 1.25rem 1.15rem; } }
+    /* Light-theme overrides for content that was originally styled for the dark modal */
+    .tool-panel .sync-intro { color: var(--text-secondary); }
+    .tool-panel .planet-row { border-bottom-color: var(--border); }
+    .tool-panel .planet-text h4 { color: var(--text-primary); }
+    .tool-panel .planet-text p { color: var(--text-secondary); }
+    .tool-panel .info-text p { color: var(--text-secondary); }
+    .tool-panel .info-text .sv-inline { color: var(--text-primary); }
+    /* Dark inner box for JS-rendered tools (reuses the modal's dark styling inline) */
+    .tool-panel .tool-modal { margin: 0 auto; animation: none; max-height: none; }
+
     /* ── Add Second Person Toggle ────────────────────────────────── */
     .add-second-wrap { margin: .85rem 0 0; text-align: center; }
     .add-second-btn {
@@ -426,6 +486,9 @@
       max-width: var(--max-w); margin: 0 auto; width: 100%;
       box-sizing: border-box; text-align: center;
     }
+    #browseToggleBtn { display: inline-flex; align-items: center; gap: .4rem; }
+    #browseToggleBtn svg { width: 12px; height: 12px; display: block; transition: transform .25s ease; }
+    #browseToggleBtn.open svg { transform: rotate(180deg); }
     .browse-section {
       display: none;
       padding: .75rem 0 1rem;
@@ -666,17 +729,16 @@
     .spreads .age-input { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
     .spreads .age-input:focus { border-color: var(--gold); }
     .spreads-toggle {
-      display: flex; align-items: center; gap: .4rem;
-      padding: .35rem 1.1rem; border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; padding: 0;
+      border-radius: 50%;
       background: none; border: 1px solid rgba(255,255,255,.22);
       color: var(--gold); cursor: pointer;
-      font-family: var(--sans); font-size: .7rem; font-weight: 500;
-      letter-spacing: .1em; text-transform: uppercase;
-      transition: background .2s, border-color .2s; white-space: nowrap;
+      transition: background .2s, border-color .2s;
     }
-    .spreads-toggle::after { content: '▾'; font-size: .75rem; transition: transform .25s ease; display: inline-block; }
+    .spreads-toggle svg { width: 14px; height: 14px; display: block; transition: transform .25s ease; }
     .spreads-toggle:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.45); }
-    .spreads.collapsed .spreads-toggle::after { transform: rotate(180deg); }
+    .spreads.collapsed .spreads-toggle svg { transform: rotate(180deg); }
     .spreads.collapsed .spread-layout { display: none; }
     .spreads .planet-label-text { color: rgba(255,255,255,.38); }
     .spreads .planet-col-label  { color: rgba(255,255,255,.38); }
@@ -781,6 +843,9 @@
     .spread-card.clubs    { color: var(--green); }
     .spread-card.spades   { color: var(--navy); }
     .spread-card.joker    { color: var(--gold); }
+    /* Court / joker SVGs have a white inner card-body rect — match the card
+       background so the parchment surface doesn't peek through at the edges. */
+    .spread-card:has(.court-art) { background: #ffffff; }
 
     /* Card chosen in the Birth Card Finder — lights up gold and follows the card across every age */
     .spread-card.finder-pick {
@@ -1339,17 +1404,24 @@
     .pcards-row {
       display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
       justify-content: center; align-items: start;
-      gap: 1.5rem;
+      column-gap: 1.5rem; row-gap: 0;
       max-width: 648px; margin: 0 auto;
     }
-    .pcard { display: flex; flex-direction: column; align-items: center; min-width: 0; width: 100%; }
-    .pcard .spread-card { width: 100%; height: auto; aspect-ratio: 5/7; }
+    /* .pcard is display:contents so its children participate directly in the
+       grid: cards live in row 1, labels in row 2, subs in row 3. When the
+       longest label wraps, the whole label row grows together and every sub
+       below it stays vertically aligned. */
+    .pcard { display: contents; }
+    .pcard .spread-card { width: 100%; height: auto; aspect-ratio: 5/7; grid-row: 1; }
     .pcard-label {
-      margin-top: .6rem; font-size: .72rem; letter-spacing: .09em;
+      grid-row: 2; margin-top: .6rem;
+      font-size: .72rem; letter-spacing: .09em;
       text-transform: uppercase; color: var(--text-primary);
+      text-align: center; line-height: 1.25;
     }
     .pcard-sub {
-      margin-top: .15rem; font-size: .68rem; color: var(--text-muted);
+      grid-row: 3; margin-top: .15rem;
+      font-size: .68rem; color: var(--text-muted);
       text-align: center; line-height: 1.35;
     }
     .pcards-empty {
@@ -1373,6 +1445,71 @@
       transition: background var(--ease), border-color var(--ease);
     }
     .birth-btn:hover { background: var(--surface-alt); border-color: var(--border-strong); }
+    .birth-btn.icon-btn {
+      width: 34px; height: 34px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .birth-btn.icon-btn svg { width: 14px; height: 14px; display: block; }
+    .birth-btn-badge {
+      position: absolute; top: -5px; right: -5px;
+      min-width: 16px; height: 16px; padding: 0 4px;
+      border-radius: 999px;
+      background: var(--gold); color: #fff;
+      font-family: var(--sans); font-size: .58rem; font-weight: 600;
+      letter-spacing: .02em; line-height: 1;
+      display: none; align-items: center; justify-content: center;
+      box-sizing: border-box; pointer-events: none;
+    }
+    .birth-btn-badge.visible { display: inline-flex; }
+    .birth-add-panel {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.13); z-index: 200;
+      padding: .6rem .7rem;
+      max-width: calc(100vw - 32px);
+      display: none;
+    }
+    .birth-add-panel.open { display: block; }
+    .birth-add-row {
+      display: flex; gap: .3rem; align-items: center;
+      margin-bottom: .45rem;
+    }
+    .birth-add-row input {
+      font-family: var(--mono); font-size: .88rem;
+      text-align: center; padding: .38rem .3rem;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--surface); color: var(--text-primary);
+      min-width: 0; box-sizing: content-box; line-height: 1;
+    }
+    .birth-add-row input:focus { outline: none; border-color: var(--gold); }
+    .birth-add-row .dd, .birth-add-row .mm { width: 2.4ch; }
+    .birth-add-row .yy { width: 4.5ch; }
+    .birth-add-row .sep { color: var(--text-muted); font-family: var(--mono); font-size: .88rem; }
+    .birth-add-save {
+      width: 30px; height: 30px; padding: 0; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-left: .25rem;
+      background: transparent; color: var(--text-primary);
+      border: 1px solid var(--border); border-radius: 6px;
+      cursor: pointer;
+      transition: background var(--ease), border-color var(--ease);
+    }
+    .birth-add-save:hover { background: var(--surface-alt); border-color: var(--border-strong); }
+    .birth-add-save svg { width: 13px; height: 13px; display: block; }
+    .birth-add-name {
+      width: 100%; box-sizing: border-box;
+      font: inherit; font-size: .85rem;
+      padding: .4rem .55rem; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--surface); color: var(--text-primary);
+      margin-bottom: .35rem;
+    }
+    .birth-add-name:focus { outline: none; border-color: var(--gold); }
+    .birth-add-error {
+      font-size: .7rem; color: #b53a3a; min-height: 1em; line-height: 1.3;
+      margin-top: .15rem;
+    }
+    .birth-add-error:empty { display: none; }
     .birth-panel {
       position: absolute; top: calc(100% + 6px); right: 0;
       background: var(--surface); border: 1px solid var(--border-strong);
@@ -1396,25 +1533,53 @@
       background: transparent; border: none; cursor: pointer; }
     .birth-del:hover { color: var(--text-primary); background: var(--border); }
     .birth-empty { padding: 1rem; text-align: center; font-size: .82rem; color: var(--text-muted); font-style: italic; }
+    /* ── Personal Cards: date nav bar ─────────────────────────────── */
+    .pcards-date-bar {
+      display: none; align-items: center; justify-content: center;
+      flex-wrap: wrap; gap: .35rem;
+      margin-top: 1.75rem;
+    }
+    .pcards-date-bar.visible { display: flex; }
+    .pdate-nav {
+      width: 30px; height: 30px; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 50%; line-height: 1;
+      font-family: var(--serif); font-size: 1rem;
+      color: var(--text-secondary); cursor: pointer;
+      transition: all var(--ease);
+    }
+    .pdate-nav:hover { background: var(--border); color: var(--text-primary); }
+    .pdate-label {
+      font-family: var(--serif); font-size: 1rem;
+      padding: .35rem .9rem; min-width: 11rem; text-align: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; line-height: 1.3;
+      color: var(--text-primary); cursor: pointer;
+      transition: background var(--ease), border-color var(--ease);
+    }
+    .pdate-label:hover { background: var(--surface-alt); border-color: var(--border-strong); }
+    .pdate-input {
+      position: absolute; opacity: 0; pointer-events: none;
+      width: 0; height: 0; padding: 0; margin: 0; border: 0;
+    }
+    .pdate-today {
+      font-family: var(--sans);
+      font-size: .62rem; letter-spacing: .12em; text-transform: uppercase;
+      font-weight: 600; color: var(--gold);
+      background: transparent; border: none; cursor: pointer;
+      padding: .25rem .55rem; margin-left: .35rem;
+      display: none;
+    }
+    .pdate-today.visible { display: inline-block; }
+    .pdate-today:hover { text-decoration: underline; }
     @media (max-width: 480px) {
-      .pcards-row { gap: .4rem; }
+      .pcards-row { column-gap: .4rem; }
     }
   </style>
 </head>
 <body>
 <script src="js/site.js"></script>
-<script>
-// Append quadration-specific tool buttons to the shared nav
-document.getElementById('shNav').insertAdjacentHTML('beforeend',
-  '<hr>' +
-  '<button class="tool-btn" onclick="openCompareModal()">Spirit &amp; Life Chart ↗</button>' +
-  '<button class="tool-btn" onclick="openCalendarModal()">Year Calendar ↗</button>' +
-  '<button class="tool-btn" onclick="openSVModal()">Solar Values ↗</button>' +
-  '<button class="tool-btn" onclick="openSyncModal()">Synchronicities ↗</button>' +
-  '<button class="tool-btn" onclick="openPlanetsModal()">Planets ↗</button>' +
-  '<button class="tool-btn" onclick="openInfoModal()">Info ↗</button>'
-);
-</script>
 
 <!-- ── Unified Card Finder ───────────────────────────────────────── -->
 <section class="finder" id="finder" style="scroll-margin-top:64px">
@@ -1466,7 +1631,7 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
           <div class="result-subtitle" id="rSubtitle"></div>
           <div class="card-vow" id="rVow"></div>
         </div>
-        <button type="button" class="result-toggle" id="rToggle" onclick="toggleFinderDetail()" title="Show details" aria-label="Show details">Show</button>
+        <button type="button" class="result-toggle" id="rToggle" onclick="toggleFinderDetail()" title="Show details" aria-label="Show details"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="result-kws" id="rKws"></div>
         <div class="ccard-planets" id="rPlanets"></div>
       </div>
@@ -1547,7 +1712,7 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
   </div>
 
   <div class="browse-toggle-wrap">
-    <button type="button" class="add-second-btn" id="browseToggleBtn" onclick="toggleBrowse()">All ↓</button>
+    <button type="button" class="add-second-btn" id="browseToggleBtn" onclick="toggleBrowse()">All Cards <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
   <div class="browse-section" id="browseSection">
     <div class="browse-inner">
@@ -1580,7 +1745,7 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
           </div>
         </div>
       </div>
-      <button class="spreads-toggle" id="spreadsToggle" onclick="toggleSpreads()" title="Minimise grid" aria-label="Minimise grid">Minimise</button>
+      <button class="spreads-toggle" id="spreadsToggle" onclick="toggleSpreads()" title="Minimise grid" aria-label="Minimise grid"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <div class="spread-layout">
       <div class="spread-wrap">
@@ -1599,15 +1764,197 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
       <span class="section-label">Your Cards</span>
       <div></div>
       <div class="birth-actions">
-        <button class="birth-btn" id="birthSaveBtn" type="button" title="Save current Day/Month/Age">Save</button>
         <div class="birth-wrap">
-          <button class="birth-btn" id="birthListBtn" type="button">Saved</button>
+          <button class="birth-btn icon-btn" id="birthAddBtn" type="button" title="Add a birthday" aria-label="Add a birthday"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+          <div class="birth-add-panel" id="birthAddPanel">
+            <div class="birth-add-row">
+              <input class="dd" id="baDay"   type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="DD" aria-label="Day" />
+              <span class="sep">/</span>
+              <input class="mm" id="baMonth" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="MM" aria-label="Month" />
+              <span class="sep">/</span>
+              <input class="yy" id="baYear"  type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="YYYY" aria-label="Year" />
+              <button class="birth-add-save" id="birthAddSave" type="button" title="Save birthday" aria-label="Save birthday"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M1 1H10L14 5V15H1ZM3 2H8V6.5H3ZM3 10.5H13V14H3Z"/></svg></button>
+            </div>
+            <input class="birth-add-name" id="baName" type="text" placeholder="Name" maxlength="60" />
+            <div class="birth-add-error" id="birthAddError"></div>
+          </div>
+        </div>
+        <div class="birth-wrap">
+          <button class="birth-btn icon-btn" id="birthListBtn" type="button" title="Saved birthdays" aria-label="Saved birthdays"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3V2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><span class="birth-btn-badge" id="birthListBadge"></span></button>
           <div class="birth-panel" id="birthPanel"></div>
         </div>
       </div>
     </div>
     <div class="pcards-row" id="pcardsRow"></div>
     <div class="pcards-empty" id="pcardsEmpty" style="display:none"></div>
+    <div class="pcards-date-bar" id="pcardsDateBar">
+      <button class="pdate-nav" type="button" data-shift-year="-1" title="−1 year" aria-label="Back one year">«</button>
+      <button class="pdate-nav" type="button" data-shift-day="-1"  title="Previous day" aria-label="Previous day">‹</button>
+      <button class="pdate-label" id="pcardsDateLabel" type="button" title="Pick a date" aria-label="Pick a date"></button>
+      <input class="pdate-input" id="pcardsDateInput" type="date" tabindex="-1" aria-hidden="true" />
+      <button class="pdate-nav" type="button" data-shift-day="1"   title="Next day" aria-label="Next day">›</button>
+      <button class="pdate-nav" type="button" data-shift-year="1"  title="+1 year" aria-label="Forward one year">»</button>
+      <button class="pdate-today" id="pcardsTodayBtn" type="button" title="Reset to today">↻ Today</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Tools ─────────────────────────────────────────────────────── -->
+<section class="tools-section" id="tools">
+  <div class="container">
+    <span class="section-label">Tools</span>
+    <div class="tools-grid">
+      <button class="tool-card-btn is-toggle" id="compareToolBtn" aria-expanded="false" aria-controls="comparePanel" onclick="toggleToolPanel('compare')">Spirit &amp; Life <span class="tool-card-arrow">⌄</span></button>
+      <button class="tool-card-btn is-toggle" id="calendarToolBtn" aria-expanded="false" aria-controls="calendarPanel" onclick="toggleToolPanel('calendar')">Year Calendar <span class="tool-card-arrow">⌄</span></button>
+      <button class="tool-card-btn is-toggle" id="svToolBtn" aria-expanded="false" aria-controls="svPanel" onclick="toggleToolPanel('sv')">Solar Values <span class="tool-card-arrow">⌄</span></button>
+      <button class="tool-card-btn is-toggle" id="syncToolBtn" aria-expanded="false" aria-controls="syncPanel" onclick="toggleToolPanel('sync')">Synchronicities <span class="tool-card-arrow">⌄</span></button>
+      <button class="tool-card-btn is-toggle" id="planetsToolBtn" aria-expanded="false" aria-controls="planetsPanel" onclick="toggleToolPanel('planets')">Planets <span class="tool-card-arrow">⌄</span></button>
+      <button class="tool-card-btn is-toggle" id="infoToolBtn" aria-expanded="false" aria-controls="infoPanel" onclick="toggleToolPanel('info')">Info <span class="tool-card-arrow">⌄</span></button>
+
+      <!-- Inline panel: Synchronicities -->
+      <div class="tool-panel" id="syncPanel" role="region" aria-labelledby="syncToolBtn">
+        <div class="tool-panel-inner">
+          <div class="sync-list">
+
+            <div class="sync-list-section">The Calendar</div>
+            <ul class="sync-items">
+              <li><span class="sync-key">52 cards</span><span class="sync-eq">=</span><span class="sync-val">52 weeks per year</span></li>
+              <li><span class="sync-key">5 + 2</span><span class="sync-eq">=</span><span class="sync-val">7 days per week</span></li>
+              <li><span class="sync-key">4 suits</span><span class="sync-eq">=</span><span class="sync-val">4 seasons &amp; 4 classical elements</span></li>
+              <li><span class="sync-key">12 face cards</span><span class="sync-eq">=</span><span class="sync-val">12 months &amp; 12 zodiac signs</span></li>
+              <li><span class="sync-key">13 ranks per suit</span><span class="sync-eq">=</span><span class="sync-val">13 lunar months per year</span></li>
+              <li><span class="sync-key">91 pips per suit</span><span class="sync-eq">=</span><span class="sync-val">91 days per season</span></li>
+              <li><span class="sync-key">91 × 4</span><span class="sync-eq">=</span><span class="sync-val">364 days</span></li>
+              <li><span class="sync-key">52 × 7</span><span class="sync-eq">=</span><span class="sync-val">364 days</span></li>
+              <li><span class="sync-key">The Joker</span><span class="sync-eq">=</span><span class="sync-val">4 elements of a quarter each, plus the 5th element equals 1¼ days</span></li>
+              <li><span class="sync-key">364 + 1¼</span><span class="sync-eq">=</span><span class="sync-val">365¼ days in a year</span></li>
+              <li><span class="sync-key">2 colours</span><span class="sync-eq">=</span><span class="sync-val">yin &amp; yang</span></li>
+            </ul>
+
+            <div class="sync-list-section">The Piano</div>
+            <ul class="sync-items">
+              <li><span class="sync-key">52 white keys</span><span class="sync-eq">=</span><span class="sync-val">52 cards in the deck</span></li>
+              <li><span class="sync-key">36 black keys</span><span class="sync-eq">=</span><span class="sync-val">36 decans of the zodiac</span></li>
+              <li><span class="sync-key">88 keys total</span><span class="sync-eq">=</span><span class="sync-val">the full chromatic span</span></li>
+            </ul>
+
+            <div class="sync-list-section">The Constellations</div>
+            <ul class="sync-items">
+              <li><span class="sync-key">52 northern</span><span class="sync-eq">=</span><span class="sync-val">52 cards in the deck</span></li>
+              <li><span class="sync-key">36 southern</span><span class="sync-eq">=</span><span class="sync-val">36 decans of the zodiac</span></li>
+              <li><span class="sync-key">88 constellations</span><span class="sync-eq">=</span><span class="sync-val">cover the entire sky</span></li>
+            </ul>
+
+            <div class="sync-list-section">Quadrations</div>
+            <ul class="sync-items">
+              <li><span class="sync-key">88 quadrations</span><span class="sync-eq">=</span><span class="sync-val">between Spirit &amp; Life spread</span></li>
+            </ul>
+
+            <div class="sync-list-section">Numerology</div>
+            <ul class="sync-items">
+              <li><span class="sync-key">"Red" &amp; "Black"</span><span class="sync-eq">=</span><span class="sync-val">both equal 11 in Chaldean numerology</span></li>
+              <li><span class="sync-key">"Red", "Black" &amp; "White"</span><span class="sync-eq">=</span><span class="sync-val">together equal 53</span></li>
+            </ul>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Inline panel: Planets -->
+      <div class="tool-panel" id="planetsPanel" role="region" aria-labelledby="planetsToolBtn">
+        <div class="tool-panel-inner">
+          <p class="sync-intro">Every card in a spread sits beneath a planetary influence, read left to right from Neptune through to Mercury. The planet colours how that card expresses itself across a given area of life.</p>
+          <div class="sync-list">
+
+            <div class="sync-list-section">The Seven Planets</div>
+            <div class="planet-list">
+              <div class="planet-row">
+                <span class="planet-glyph">☿</span>
+                <div class="planet-text"><h4>Mercury</h4><p>The mind. How you think, learn, and communicate, along with the mental patterns and curiosity formed in early life.</p></div>
+              </div>
+              <div class="planet-row">
+                <span class="planet-glyph">♀</span>
+                <div class="planet-text"><h4>Venus</h4><p>Love and values. Romance, pleasure, beauty, and the people and things you are naturally drawn to.</p></div>
+              </div>
+              <div class="planet-row">
+                <span class="planet-glyph">♂</span>
+                <div class="planet-text"><h4>Mars</h4><p>Drive and passion. Ambition, courage, desire, and the way you assert yourself or meet conflict.</p></div>
+              </div>
+              <div class="planet-row">
+                <span class="planet-glyph">♃</span>
+                <div class="planet-text"><h4>Jupiter</h4><p>Expansion and abundance. Generosity, fortune, wisdom, and the areas of life where you grow and give.</p></div>
+              </div>
+              <div class="planet-row">
+                <span class="planet-glyph">♄</span>
+                <div class="planet-text"><h4>Saturn</h4><p>Discipline and lessons. Responsibility, hard work, limitation, and the burdens that ultimately teach and strengthen you.</p></div>
+              </div>
+              <div class="planet-row">
+                <span class="planet-glyph">♅</span>
+                <div class="planet-text"><h4>Uranus</h4><p>Freedom and originality. Independence, intuition, friendships, and the sudden, unconventional changes that move you forward.</p></div>
+              </div>
+              <div class="planet-row">
+                <span class="planet-glyph">♆</span>
+                <div class="planet-text"><h4>Neptune</h4><p>Dreams and spirit. Imagination, ideals, the subconscious, and the long-term or hidden dimensions of life.</p></div>
+              </div>
+            </div>
+
+            <div class="sync-list-section">The Crown</div>
+            <div class="planet-list">
+              <div class="planet-row">
+                <span class="planet-glyph">♛</span>
+                <div class="planet-text"><h4>Crown</h4><p>The master cards above the Sun Line (the Jack, Queen and King of Spades), representing spiritual mastery and the higher influences that preside over the whole spread.</p></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Inline panel: Info -->
+      <div class="tool-panel" id="infoPanel" role="region" aria-labelledby="infoToolBtn">
+        <div class="tool-panel-inner">
+          <div class="sync-list info-text">
+            <p>Every playing card corresponds to a day of the year, turning the familiar 52-card deck into a map of time and personality. Each person carries a single Birth Card, set by their date of birth.</p>
+
+            <div class="sync-list-section">Your Birth Card</div>
+            <p>Your Birth Card comes from your birthday through the Solar Value: <span class="sv-inline">sv = 55 − (2 × month + day)</span>. That number points to one of the 52 cards. December 31 is the exception, belonging to the Joker, which stands outside the system. Look yours up with the Finder.</p>
+
+            <div class="sync-list-section">Spreads and Quadrations</div>
+            <p>The deck can be laid out in a grid of seven planetary rows, crowned by three master cards. Reshuffling that layout by a fixed rule called a Quadration moves every card to a new seat. Ninety Quadrations bring the deck back to where it began, so each age from 0 to 89 has its own spread. The age selector steps through them, showing how your influences shift across a lifetime.</p>
+
+            <div class="sync-list-section">The Life Script</div>
+            <p>Reading across the seven planetary columns, from Mercury through to Neptune, gives your Life Script: the cards that govern your mind, love, drive, fortune, lessons, freedom and dreams. See Planets for what each one represents.</p>
+
+            <div class="sync-list-section">Relationships</div>
+            <p>Add a second birthday in the Finder to see how two people connect. Their Solar Values are combined to reveal the card that describes the bond between them.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inline panel: Spirit & Life Chart -->
+      <div class="tool-panel" id="comparePanel" role="region" aria-labelledby="compareToolBtn">
+        <div class="compare-modal tool-modal">
+          <div class="cmp-sbs" id="cmpSbs"></div>
+        </div>
+      </div>
+
+      <!-- Inline panel: Year Calendar -->
+      <div class="tool-panel" id="calendarPanel" role="region" aria-labelledby="calendarToolBtn">
+        <div class="cal-modal tool-modal">
+          <div class="cal-scroll-wrap">
+            <div class="cal-grid-main" id="calGrid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inline panel: Solar Values -->
+      <div class="tool-panel" id="svPanel" role="region" aria-labelledby="svToolBtn">
+        <div class="cal-modal tool-modal" style="max-width:600px">
+          <p class="sv-formula"><em>sv</em> &nbsp;=&nbsp; <strong>55</strong> &nbsp;&minus;&nbsp; (2 &times; month &nbsp;+&nbsp; day)</p>
+          <div id="svGrid"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1661,14 +2008,6 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
   </div>
 </div>
 
-<!-- ── Compare Overlay ──────────────────────────────────────────── -->
-<div class="compare-overlay" id="compareOverlay">
-  <div class="compare-modal">
-    <button class="modal-close cmp-close-btn" id="compareCloseBtn">✕</button>
-    <div class="cmp-sbs" id="cmpSbs"></div>
-  </div>
-</div>
-
 <!-- ── Compare Card Popup ───────────────────────────────────────── -->
 <div class="ccard-overlay" id="ccardOverlay">
   <div class="ccard-popup" id="ccardPopup">
@@ -1691,163 +2030,6 @@ document.getElementById('shNav').insertAdjacentHTML('beforeend',
     <div class="ccard-footer">
       <button class="ccard-load-btn" onclick="event.stopPropagation(); loadCardInFinder()">Open full profile →</button>
     </div>
-  </div>
-</div>
-
-<!-- ── Year Calendar Overlay ────────────────────────────────────── -->
-<div class="cal-overlay" id="calOverlay">
-  <div class="cal-modal">
-    <button class="modal-close cal-close-btn" id="calCloseBtn">✕</button>
-    <div class="cal-header">
-      <span class="section-label">Calendar</span>
-    </div>
-    <div class="cal-scroll-wrap">
-      <div class="cal-grid-main" id="calGrid"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Synchronicities Modal ─────────────────────────────────────── -->
-<div class="cal-overlay" id="syncOverlay">
-  <div class="cal-modal" style="max-width:800px;">
-    <button class="modal-close cal-close-btn" id="syncCloseBtn">✕</button>
-    <div class="cal-header">
-      <span class="section-label">Synchronicities</span>
-    </div>
-    <div class="sync-list">
-
-      <div class="sync-list-section">The Calendar</div>
-      <ul class="sync-items">
-        <li><span class="sync-key">52 cards</span><span class="sync-eq">=</span><span class="sync-val">52 weeks per year</span></li>
-        <li><span class="sync-key">5 + 2</span><span class="sync-eq">=</span><span class="sync-val">7 days per week</span></li>
-        <li><span class="sync-key">4 suits</span><span class="sync-eq">=</span><span class="sync-val">4 seasons &amp; 4 classical elements</span></li>
-        <li><span class="sync-key">12 face cards</span><span class="sync-eq">=</span><span class="sync-val">12 months &amp; 12 zodiac signs</span></li>
-        <li><span class="sync-key">13 ranks per suit</span><span class="sync-eq">=</span><span class="sync-val">13 lunar months per year</span></li>
-        <li><span class="sync-key">91 pips per suit</span><span class="sync-eq">=</span><span class="sync-val">91 days per season</span></li>
-        <li><span class="sync-key">91 × 4</span><span class="sync-eq">=</span><span class="sync-val">364 days</span></li>
-        <li><span class="sync-key">52 × 7</span><span class="sync-eq">=</span><span class="sync-val">364 days</span></li>
-        <li><span class="sync-key">The Joker</span><span class="sync-eq">=</span><span class="sync-val">4 elements of a quarter each, plus the 5th element equals 1¼ days</span></li>
-        <li><span class="sync-key">364 + 1¼</span><span class="sync-eq">=</span><span class="sync-val">365¼ days in a year</span></li>
-        <li><span class="sync-key">2 colours</span><span class="sync-eq">=</span><span class="sync-val">yin &amp; yang</span></li>
-      </ul>
-
-      <div class="sync-list-section">The Piano</div>
-      <ul class="sync-items">
-        <li><span class="sync-key">52 white keys</span><span class="sync-eq">=</span><span class="sync-val">52 cards in the deck</span></li>
-        <li><span class="sync-key">36 black keys</span><span class="sync-eq">=</span><span class="sync-val">36 decans of the zodiac</span></li>
-        <li><span class="sync-key">88 keys total</span><span class="sync-eq">=</span><span class="sync-val">the full chromatic span</span></li>
-      </ul>
-
-      <div class="sync-list-section">The Constellations</div>
-      <ul class="sync-items">
-        <li><span class="sync-key">52 northern</span><span class="sync-eq">=</span><span class="sync-val">52 cards in the deck</span></li>
-        <li><span class="sync-key">36 southern</span><span class="sync-eq">=</span><span class="sync-val">36 decans of the zodiac</span></li>
-        <li><span class="sync-key">88 constellations</span><span class="sync-eq">=</span><span class="sync-val">cover the entire sky</span></li>
-      </ul>
-
-      <div class="sync-list-section">Quadrations</div>
-      <ul class="sync-items">
-        <li><span class="sync-key">88 quadrations</span><span class="sync-eq">=</span><span class="sync-val">between Spirit &amp; Life spread</span></li>
-      </ul>
-
-      <div class="sync-list-section">Numerology</div>
-      <ul class="sync-items">
-        <li><span class="sync-key">"Red" &amp; "Black"</span><span class="sync-eq">=</span><span class="sync-val">both equal 11 in Chaldean numerology</span></li>
-        <li><span class="sync-key">"Red", "Black" &amp; "White"</span><span class="sync-eq">=</span><span class="sync-val">together equal 53</span></li>
-      </ul>
-
-    </div>
-  </div>
-</div>
-
-<!-- ── Planets Overlay ───────────────────────────────────────────── -->
-<div class="cal-overlay" id="planetsOverlay">
-  <div class="cal-modal" style="max-width:740px;">
-    <button class="modal-close cal-close-btn" id="planetsCloseBtn">✕</button>
-    <div class="cal-header">
-      <span class="section-label">Planets</span>
-    </div>
-    <p class="sync-intro">Every card in a spread sits beneath a planetary influence, read left to right from Neptune through to Mercury. The planet colours how that card expresses itself across a given area of life.</p>
-    <div class="sync-list">
-
-      <div class="sync-list-section">The Seven Planets</div>
-      <div class="planet-list">
-        <div class="planet-row">
-          <span class="planet-glyph">☿</span>
-          <div class="planet-text"><h4>Mercury</h4><p>The mind. How you think, learn, and communicate, along with the mental patterns and curiosity formed in early life.</p></div>
-        </div>
-        <div class="planet-row">
-          <span class="planet-glyph">♀</span>
-          <div class="planet-text"><h4>Venus</h4><p>Love and values. Romance, pleasure, beauty, and the people and things you are naturally drawn to.</p></div>
-        </div>
-        <div class="planet-row">
-          <span class="planet-glyph">♂</span>
-          <div class="planet-text"><h4>Mars</h4><p>Drive and passion. Ambition, courage, desire, and the way you assert yourself or meet conflict.</p></div>
-        </div>
-        <div class="planet-row">
-          <span class="planet-glyph">♃</span>
-          <div class="planet-text"><h4>Jupiter</h4><p>Expansion and abundance. Generosity, fortune, wisdom, and the areas of life where you grow and give.</p></div>
-        </div>
-        <div class="planet-row">
-          <span class="planet-glyph">♄</span>
-          <div class="planet-text"><h4>Saturn</h4><p>Discipline and lessons. Responsibility, hard work, limitation, and the burdens that ultimately teach and strengthen you.</p></div>
-        </div>
-        <div class="planet-row">
-          <span class="planet-glyph">♅</span>
-          <div class="planet-text"><h4>Uranus</h4><p>Freedom and originality. Independence, intuition, friendships, and the sudden, unconventional changes that move you forward.</p></div>
-        </div>
-        <div class="planet-row">
-          <span class="planet-glyph">♆</span>
-          <div class="planet-text"><h4>Neptune</h4><p>Dreams and spirit. Imagination, ideals, the subconscious, and the long-term or hidden dimensions of life.</p></div>
-        </div>
-      </div>
-
-      <div class="sync-list-section">The Crown</div>
-      <div class="planet-list">
-        <div class="planet-row">
-          <span class="planet-glyph">♛</span>
-          <div class="planet-text"><h4>Crown</h4><p>The master cards above the Sun Line (the Jack, Queen and King of Spades), representing spiritual mastery and the higher influences that preside over the whole spread.</p></div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ── Info Overlay ──────────────────────────────────────────────── -->
-<div class="cal-overlay" id="infoOverlay">
-  <div class="cal-modal" style="max-width:660px;">
-    <button class="modal-close cal-close-btn" id="infoCloseBtn">✕</button>
-    <div class="cal-header">
-      <span class="section-label">Info</span>
-    </div>
-    <div class="sync-list info-text">
-      <p>Every playing card corresponds to a day of the year, turning the familiar 52-card deck into a map of time and personality. Each person carries a single Birth Card, set by their date of birth.</p>
-
-      <div class="sync-list-section">Your Birth Card</div>
-      <p>Your Birth Card comes from your birthday through the Solar Value: <span class="sv-inline">sv = 55 − (2 × month + day)</span>. That number points to one of the 52 cards. December 31 is the exception, belonging to the Joker, which stands outside the system. Look yours up with the Finder.</p>
-
-      <div class="sync-list-section">Spreads and Quadrations</div>
-      <p>The deck can be laid out in a grid of seven planetary rows, crowned by three master cards. Reshuffling that layout by a fixed rule called a Quadration moves every card to a new seat. Ninety Quadrations bring the deck back to where it began, so each age from 0 to 89 has its own spread. The age selector steps through them, showing how your influences shift across a lifetime.</p>
-
-      <div class="sync-list-section">The Life Script</div>
-      <p>Reading across the seven planetary columns, from Mercury through to Neptune, gives your Life Script: the cards that govern your mind, love, drive, fortune, lessons, freedom and dreams. See Planets for what each one represents.</p>
-
-      <div class="sync-list-section">Relationships</div>
-      <p>Add a second birthday in the Finder to see how two people connect. Their Solar Values are combined to reveal the card that describes the bond between them.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ── Solar Values Overlay ──────────────────────────────────────── -->
-<div class="cal-overlay" id="svOverlay">
-  <div class="cal-modal" style="max-width:600px">
-    <button class="modal-close cal-close-btn" id="svCloseBtn">✕</button>
-    <div class="cal-header">
-      <span class="section-label">Solar Values</span>
-    </div>
-    <p class="sv-formula"><em>sv</em> &nbsp;=&nbsp; <strong>55</strong> &nbsp;&minus;&nbsp; (2 &times; month &nbsp;+&nbsp; day)</p>
-    <div id="svGrid"></div>
   </div>
 </div>
 
@@ -1935,8 +2117,7 @@ let _browseBuilt   = false;
 function toggleBrowse() {
   _browseVisible = !_browseVisible;
   document.getElementById('browseSection').classList.toggle('visible', _browseVisible);
-  document.getElementById('browseToggleBtn').textContent =
-    _browseVisible ? 'All ↑' : 'All ↓';
+  document.getElementById('browseToggleBtn').classList.toggle('open', _browseVisible);
   if (_browseVisible && !_browseBuilt) {
     _buildBrowseGrid();
     _browseBuilt = true;
@@ -2312,7 +2493,6 @@ function toggleSpreads() {
   const s = document.getElementById('spreads');
   const collapsed = s.classList.toggle('collapsed');
   const btn = document.getElementById('spreadsToggle');
-  btn.textContent = collapsed ? 'Show' : 'Minimise';
   btn.setAttribute('title', collapsed ? 'Show grid' : 'Minimise grid');
   btn.setAttribute('aria-label', collapsed ? 'Show grid' : 'Minimise grid');
 }
@@ -2321,7 +2501,7 @@ function toggleSpreads() {
 function collapseFinderDetail() {
   document.getElementById('finderResult').classList.add('collapsed');
   const btn = document.getElementById('rToggle');
-  if (btn) { btn.textContent = 'Show'; btn.setAttribute('title', 'Show details'); btn.setAttribute('aria-label', 'Show details'); }
+  if (btn) { btn.setAttribute('title', 'Show details'); btn.setAttribute('aria-label', 'Show details'); }
 }
 
 function toggleFinderDetail() {
@@ -2329,7 +2509,6 @@ function toggleFinderDetail() {
   const collapsed = r.classList.toggle('collapsed');
   const btn = document.getElementById('rToggle');
   const label = collapsed ? 'Show details' : 'Minimise details';
-  btn.textContent = collapsed ? 'Show' : 'Minimise';
   btn.setAttribute('title', label);
   btn.setAttribute('aria-label', label);
 }
@@ -2344,13 +2523,32 @@ function _pcReadCard(spreadIdx, birthCardIdx, posIdx) {
   return deck[(p + 1 + posIdx) % 52];
 }
 
+// View-date support: the personal-cards section can show cards "as of" any
+// date, not just today. viewDate is a local-midnight epoch (ms). Age at that
+// date is derived from the user's birth year, so jumping to 10 years ago
+// renders the cards the user would have had then.
+function _localMidnight(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+let viewDate = _localMidnight(new Date());
+function _isViewingToday() {
+  return viewDate === _localMidnight(new Date());
+}
+function _lastBdayYearOf(refMs, m, d) {
+  const t = new Date(refMs);
+  const ty = t.getFullYear();
+  const refUTC = Date.UTC(ty, t.getMonth(), t.getDate());
+  return (Date.UTC(ty, m - 1, d) > refUTC) ? ty - 1 : ty;
+}
+
 function renderPersonalCards() {
-  const row   = document.getElementById('pcardsRow');
-  const empty = document.getElementById('pcardsEmpty');
+  const row     = document.getElementById('pcardsRow');
+  const empty   = document.getElementById('pcardsEmpty');
+  const dateBar = document.getElementById('pcardsDateBar');
   if (!row || !empty) return;
   const m = parseInt(document.getElementById('fMonth').value);
   const d = parseInt(document.getElementById('fDay').value);
-  const placeholderLabels = ['Birth Card', '13-Year', '7-Year', 'Yearly', '52-Day', 'Daily'];
+  const placeholderLabels = ['Birth', '13-Year', '7-Year', 'Yearly', '52-Day', 'Daily'];
   const renderPlaceholders = () => placeholderLabels.map(label => `
     <div class="pcard">
       <div class="spread-card placeholder"></div>
@@ -2360,27 +2558,40 @@ function renderPersonalCards() {
   if (!m || !d) {
     row.innerHTML = renderPlaceholders();
     empty.style.display = 'none';
+    if (dateBar) dateBar.classList.remove('visible');
     return;
   }
   const sv = solarValue(m, d);
   if (sv === 0) { // Joker (Dec 31) — no seat in the spreads
     row.innerHTML = ''; empty.style.display = '';
     empty.textContent = 'The Joker (Dec 31) sits outside the 52-card spreads, so it has no Yearly, 52-day or Daily cards.';
+    if (dateBar) dateBar.classList.remove('visible');
     return;
   }
   empty.style.display = 'none';
+  if (dateBar) dateBar.classList.add('visible');
   const birthIdx = sv - 1;
-  const age = currentAge;
+
+  // Birth year is anchored from currentAge against today's real date.
+  // Age-at-viewDate then derives from birth year + viewDate's last-birthday year.
+  const realLbYear = _lastBdayYearOf(Date.now(), m, d);
+  const birthYear  = realLbYear - currentAge;
+  const viewLbYear = _lastBdayYearOf(viewDate, m, d);
+  const age = Math.max(0, viewLbYear - birthYear);
+
+  if (viewLbYear - birthYear < 0) {
+    // viewDate is before birth — nothing to render.
+    row.innerHTML = ''; empty.style.display = '';
+    empty.textContent = 'That date is before this birthday.';
+    return;
+  }
 
   // Date math (UTC to avoid DST/timezone drift on day counts)
-  const now = new Date();
+  const now = new Date(viewDate);
   const ty = now.getFullYear();
   const todayUTC = Date.UTC(ty, now.getMonth(), now.getDate());
-  let lbYear = ty;                                   // year of most recent birthday
-  if (Date.UTC(ty, m - 1, d) > todayUTC) lbYear = ty - 1;
-  const lastBdayUTC   = Date.UTC(lbYear, m - 1, d);
+  const lastBdayUTC   = Date.UTC(viewLbYear, m - 1, d);
   const daysSinceBday = Math.floor((todayUTC - lastBdayUTC) / 86400000);
-  const birthYear = lbYear - age;                    // reconstructed from age + month/day
   const birthUTC  = Date.UTC(birthYear, m - 1, d);
   const daysAlive = Math.floor((todayUTC - birthUTC) / 86400000);
   const weeksAlive = Math.floor(daysAlive / 7);
@@ -2405,7 +2616,7 @@ function renderPersonalCards() {
 
   const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const cards = [
-    { idx: birthIdx, label: 'Birth Card', sub: CARDS[birthIdx].name },
+    { idx: birthIdx, label: 'Birth', sub: CARDS[birthIdx].name },
     { idx: tIdx, label: '13-Year', sub: SPREAD_PLANETS[tPos] + '<br>age ' + tStart + '–' + tEnd },
     { idx: cIdx, label: '7-Year', sub: SPREAD_PLANETS[cPos] + '<br>age ' + cStart + '–' + cEnd },
     { idx: yIdx, label: 'Yearly', sub: SPREAD_PLANETS[yPos] + '<br>age ' + age },
@@ -2429,6 +2640,76 @@ function changeAge(d) {
   setAge(a);
 }
 
+// ── Personal Cards: date nav ─────────────────────────────────────
+function _formatViewDate(ms) {
+  const d = new Date(ms);
+  const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+  return `${wd}, ${d.getDate()} ${mo} ${d.getFullYear()}`;
+}
+function _isoFromMs(ms) {
+  const d = new Date(ms);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function renderPCardsDateBar() {
+  const label = document.getElementById('pcardsDateLabel');
+  const input = document.getElementById('pcardsDateInput');
+  const today = document.getElementById('pcardsTodayBtn');
+  if (!label || !input || !today) return;
+  label.textContent = _formatViewDate(viewDate);
+  input.value = _isoFromMs(viewDate);
+  today.classList.toggle('visible', !_isViewingToday());
+}
+function setViewDate(ms) {
+  viewDate = _localMidnight(new Date(ms));
+  renderPCardsDateBar();
+  renderPersonalCards();
+}
+function shiftViewDays(n) {
+  const d = new Date(viewDate);
+  d.setDate(d.getDate() + n);
+  d.setHours(0, 0, 0, 0); // normalize across DST
+  setViewDate(d.getTime());
+}
+function shiftViewYears(n) {
+  const d = new Date(viewDate);
+  d.setFullYear(d.getFullYear() + n);
+  d.setHours(0, 0, 0, 0);
+  setViewDate(d.getTime());
+}
+
+document.querySelectorAll('.pdate-nav').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const dy = parseInt(btn.dataset.shiftYear || '0', 10);
+    const dd = parseInt(btn.dataset.shiftDay  || '0', 10);
+    if (dy) shiftViewYears(dy);
+    if (dd) shiftViewDays(dd);
+  });
+});
+document.getElementById('pcardsTodayBtn').addEventListener('click', () => {
+  setViewDate(Date.now());
+});
+(function () {
+  const label = document.getElementById('pcardsDateLabel');
+  const input = document.getElementById('pcardsDateInput');
+  label.addEventListener('click', () => {
+    if (typeof input.showPicker === 'function') {
+      try { input.showPicker(); return; } catch (e) { /* fall through */ }
+    }
+    input.focus();
+    input.click();
+  });
+  input.addEventListener('change', () => {
+    if (!input.value) return;
+    const [y, m, d] = input.value.split('-').map(Number);
+    setViewDate(new Date(y, m - 1, d).getTime());
+  });
+})();
+renderPCardsDateBar();
+
 // ── Saved birthdays (localStorage) ─────────────────────────────────
 const BIRTH_KEY = 'cardsoflife_births';
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -2448,19 +2729,6 @@ function _lastBdayYear(m, d) {
 function ageFromBirthYear(birthYear, m, d) { return _lastBdayYear(m, d) - birthYear; }
 function birthYearFromAge(age, m, d)       { return _lastBdayYear(m, d) - age; }
 
-function persistCurrentBirth() {
-  const m = parseInt(document.getElementById('fMonth').value);
-  const d = parseInt(document.getElementById('fDay').value);
-  if (!m || !d) { alert('Set Day and Month first.'); return; }
-  const name = prompt('Name for this birthday?', '');
-  if (name === null) return;
-  const trimmed = name.trim();
-  if (!trimmed) return;
-  const list = loadBirths();
-  list.push({ id: Date.now(), name: trimmed, day: d, month: m, year: birthYearFromAge(currentAge, m, d) });
-  saveBirths(list);
-  renderBirthPanel();
-}
 function loadBirth(entry) {
   document.getElementById('fMonth').value = entry.month;
   document.getElementById('fMonth').dispatchEvent(new Event('change'));
@@ -2471,9 +2739,17 @@ function loadBirth(entry) {
 }
 function renderBirthPanel() {
   const panel = document.getElementById('birthPanel');
-  const btn = document.getElementById('birthListBtn');
+  const badge = document.getElementById('birthListBadge');
   const list = loadBirths();
-  btn.textContent = 'Saved' + (list.length ? ' (' + list.length + ')' : '');
+  if (badge) {
+    if (list.length) {
+      badge.textContent = list.length > 99 ? '99+' : String(list.length);
+      badge.classList.add('visible');
+    } else {
+      badge.textContent = '';
+      badge.classList.remove('visible');
+    }
+  }
   if (!list.length) {
     panel.innerHTML = '<div class="birth-empty">No saved birthdays yet.</div>';
     return;
@@ -2505,22 +2781,108 @@ function renderBirthPanel() {
     });
   });
 }
-function openBirthPanel()  { renderBirthPanel(); document.getElementById('birthPanel').classList.add('open'); }
+function openBirthPanel()  { closeBirthAddPanel(); renderBirthPanel(); document.getElementById('birthPanel').classList.add('open'); }
 function closeBirthPanel() { document.getElementById('birthPanel').classList.remove('open'); }
 
-document.getElementById('birthSaveBtn').addEventListener('click', persistCurrentBirth);
+// ── Manual birthday entry (DD / MM / YYYY) ─────────────────────────
+function openBirthAddPanel() {
+  closeBirthPanel();
+  // Pre-fill from the Finder if Day/Month are set.
+  // Year: derived from currentAge if set (>0), otherwise the current calendar year.
+  const dEl = document.getElementById('baDay');
+  const mEl = document.getElementById('baMonth');
+  const yEl = document.getElementById('baYear');
+  const fD  = parseInt(document.getElementById('fDay').value, 10);
+  const fM  = parseInt(document.getElementById('fMonth').value, 10);
+  if (fD && fM) {
+    if (!dEl.value) dEl.value = String(fD).padStart(2, '0');
+    if (!mEl.value) mEl.value = String(fM).padStart(2, '0');
+    if (!yEl.value) {
+      const yr = currentAge > 0 ? birthYearFromAge(currentAge, fM, fD) : new Date().getFullYear();
+      yEl.value = String(yr);
+    }
+  }
+  document.getElementById('birthAddPanel').classList.add('open');
+  // Focus the first empty field, or the name if all date fields are filled.
+  setTimeout(() => {
+    const firstEmpty = ['baDay','baMonth','baYear','baName'].find(id => !document.getElementById(id).value);
+    document.getElementById(firstEmpty || 'baName').focus();
+  }, 0);
+}
+function closeBirthAddPanel() {
+  document.getElementById('birthAddPanel').classList.remove('open');
+  document.getElementById('birthAddError').textContent = '';
+}
+function saveManualBirth() {
+  const dEl = document.getElementById('baDay');
+  const mEl = document.getElementById('baMonth');
+  const yEl = document.getElementById('baYear');
+  const nEl = document.getElementById('baName');
+  const err = document.getElementById('birthAddError');
+  const d = parseInt(dEl.value, 10);
+  const m = parseInt(mEl.value, 10);
+  const y = parseInt(yEl.value, 10);
+  const name = (nEl.value || '').trim();
+  err.textContent = '';
+  if (!name)                                     { err.textContent = 'Name is required.'; nEl.focus(); return; }
+  if (!d || d < 1 || d > 31)                     { err.textContent = 'Day must be 1–31.'; dEl.focus(); return; }
+  if (!m || m < 1 || m > 12)                     { err.textContent = 'Month must be 1–12.'; mEl.focus(); return; }
+  const yMax = new Date().getFullYear();
+  if (!y || y < 1900 || y > yMax)                { err.textContent = 'Year must be 1900–' + yMax + '.'; yEl.focus(); return; }
+  const test = new Date(y, m - 1, d);
+  if (test.getFullYear() !== y || test.getMonth() !== m - 1 || test.getDate() !== d) {
+    err.textContent = 'Not a valid date.'; dEl.focus(); return;
+  }
+  const list = loadBirths();
+  const entry = { id: Date.now(), name, day: d, month: m, year: y };
+  list.push(entry);
+  saveBirths(list);
+  // Reset inputs
+  dEl.value = ''; mEl.value = ''; yEl.value = ''; nEl.value = '';
+  closeBirthAddPanel();
+  renderBirthPanel();
+  // Load into the finder so the result shows immediately
+  loadBirth(entry);
+}
+// Auto-advance numeric inputs DD → MM → YYYY → name
+(function () {
+  const seq = ['baDay', 'baMonth', 'baYear', 'baName'];
+  seq.slice(0, 3).forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/\D/g, '');
+      const maxLen = el.getAttribute('maxlength') | 0;
+      if (el.value.length >= maxLen) document.getElementById(seq[i + 1]).focus();
+    });
+  });
+  // Enter inside any field submits
+  ['baDay','baMonth','baYear','baName'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); saveManualBirth(); }
+    });
+  });
+})();
+
+document.getElementById('birthAddBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  const panel = document.getElementById('birthAddPanel');
+  panel.classList.contains('open') ? closeBirthAddPanel() : openBirthAddPanel();
+});
+document.getElementById('birthAddSave').addEventListener('click', saveManualBirth);
+
 document.getElementById('birthListBtn').addEventListener('click', e => {
   e.stopPropagation();
   const panel = document.getElementById('birthPanel');
   panel.classList.contains('open') ? closeBirthPanel() : openBirthPanel();
 });
 document.addEventListener('click', e => {
-  if (!e.target.closest('.birth-wrap')) closeBirthPanel();
+  if (!e.target.closest('.birth-wrap')) { closeBirthPanel(); closeBirthAddPanel(); }
 });
 renderBirthPanel(); // initialize button label
 
 document.getElementById('ageDown').addEventListener('click', () => changeAge(-1));
 document.getElementById('ageUp').addEventListener('click',   () => changeAge(+1));
+document.getElementById('ageInput').addEventListener('input',  function() { if (this.value !== '') setAge(this.value); });
 document.getElementById('ageInput').addEventListener('change', function() { setAge(this.value); });
 document.getElementById('ageInput').addEventListener('keydown', function(e) {
   if (e.key==='ArrowUp')   { e.preventDefault(); changeAge(+1); }
@@ -2624,7 +2986,7 @@ function loadCardInFinder() {
   // "Open full profile" intent: show details expanded.
   document.getElementById('finderResult').classList.remove('collapsed');
   const _rb = document.getElementById('rToggle');
-  if (_rb) { _rb.textContent = 'Minimise'; _rb.setAttribute('title', 'Minimise details'); _rb.setAttribute('aria-label', 'Minimise details'); }
+  if (_rb) { _rb.setAttribute('title', 'Minimise details'); _rb.setAttribute('aria-label', 'Minimise details'); }
   document.getElementById('finderResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -2659,31 +3021,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeCompareCard();
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); openCompareCard((_ccardIdx + 1) % CARDS.length); }
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); openCompareCard((_ccardIdx - 1 + CARDS.length) % CARDS.length); }
-});
-
-let _compareBuilt = false; // built once on first open
-function openCompareModal() {
-  if (!_compareBuilt) {
-    buildSideBySide();
-    _compareBuilt = true;
-  }
-  document.getElementById('compareOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeCompareModal() {
-  document.getElementById('compareOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.getElementById('compareOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeCompareModal();
-});
-document.getElementById('compareCloseBtn').addEventListener('click', closeCompareModal);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('compareOverlay').classList.contains('open')) {
-    closeCompareModal();
-  }
 });
 
 // ── Year Calendar ────────────────────────────────────────────────
@@ -2731,87 +3068,32 @@ function openModalFromCalendar(idx) {
   openCompareCard(idx);
 }
 
-let _calBuilt = false;
-function openCalendarModal() {
-  if (!_calBuilt) {
-    buildCalendar();
-    _calBuilt = true;
+// ── Inline tool panels (expand in place rather than open a modal) ──
+// Tools whose content is rendered by JS the first time they open.
+var _toolBuilt = {};
+function _buildToolPanel(key) {
+  if (_toolBuilt[key]) return;
+  if (key === 'compare')  buildSideBySide();
+  else if (key === 'calendar') buildCalendar();
+  else if (key === 'sv')       buildSVChart();
+  _toolBuilt[key] = true;
+}
+function toggleToolPanel(key) {
+  var panel = document.getElementById(key + 'Panel');
+  var btn   = document.getElementById(key + 'ToolBtn');
+  if (!panel || !btn) return;
+  var willOpen = !panel.classList.contains('open');
+  if (willOpen) _buildToolPanel(key);
+  panel.classList.toggle('open', willOpen);
+  btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  if (willOpen) {
+    // Scroll the button to the top so the panel expanding below it comes into view
+    // (respects the sticky header via scroll-padding-top on <html>)
+    setTimeout(function () {
+      btn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
   }
-  document.getElementById('calOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
-
-function closeCalendarModal() {
-  document.getElementById('calOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.getElementById('calOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeCalendarModal();
-});
-document.getElementById('calCloseBtn').addEventListener('click', closeCalendarModal);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('calOverlay').classList.contains('open')) {
-    closeCalendarModal();
-  }
-});
-
-// ── Synchronicities Modal ────────────────────────────────────────
-function openSyncModal() {
-  document.getElementById('syncOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeSyncModal() {
-  document.getElementById('syncOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('syncOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeSyncModal();
-});
-document.getElementById('syncCloseBtn').addEventListener('click', closeSyncModal);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('syncOverlay').classList.contains('open')) {
-    closeSyncModal();
-  }
-});
-
-// ── Planets Modal ────────────────────────────────────────────────
-function openPlanetsModal() {
-  document.getElementById('planetsOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closePlanetsModal() {
-  document.getElementById('planetsOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('planetsOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closePlanetsModal();
-});
-document.getElementById('planetsCloseBtn').addEventListener('click', closePlanetsModal);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('planetsOverlay').classList.contains('open')) {
-    closePlanetsModal();
-  }
-});
-
-// ── Info Modal ───────────────────────────────────────────────────
-function openInfoModal() {
-  document.getElementById('infoOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeInfoModal() {
-  document.getElementById('infoOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.getElementById('infoOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeInfoModal();
-});
-document.getElementById('infoCloseBtn').addEventListener('click', closeInfoModal);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('infoOverlay').classList.contains('open')) {
-    closeInfoModal();
-  }
-});
 
 // ── Solar Values Chart ───────────────────────────────────────────
 function buildSVChart() {
@@ -2857,30 +3139,6 @@ function openModalFromSV(idx) {
   openCompareCard(idx);
 }
 
-let _svBuilt = false;
-function openSVModal() {
-  if (!_svBuilt) {
-    buildSVChart();
-    _svBuilt = true;
-  }
-  document.getElementById('svOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeSVModal() {
-  document.getElementById('svOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.getElementById('svOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeSVModal();
-});
-document.getElementById('svCloseBtn').addEventListener('click', closeSVModal);
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && document.getElementById('svOverlay').classList.contains('open')) {
-    closeSVModal();
-  }
-});
 </script>
 
 <!-- ── Footer ───────────────────────────────────────────────────── -->
