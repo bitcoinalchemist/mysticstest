@@ -37,6 +37,8 @@
     gap: 1.25rem;
     width: 100%;
   }
+  /* An odd last card spans the full row */
+  .main-row .card:nth-child(odd):last-child { grid-column: 1 / -1; }
   .card {
     display: flex;
     align-items: center;
@@ -103,6 +105,7 @@
     <div class="main-row">
       <a class="card" href="cardsoflife.html">Cards of Life</a>
       <a class="card" href="iching.html">I Ching</a>
+      <a class="card" href="astrology.html">Astrology</a>
     </div>
     <div class="tools-row">
       <a class="tool-btn" href="calculator.html">Calculator</a>

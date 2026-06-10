@@ -230,6 +230,7 @@
       exprEl.innerHTML = "&nbsp;";
       convEl.innerHTML = "";
       conv2El.innerHTML = "";
+      conv3El.innerHTML = "";
       highlightOp();
       return;
     }
@@ -398,6 +399,9 @@
 
   // ---- keyboard ----
   document.addEventListener("keydown", function (e) {
+    // Don't hijack typing in form fields (e.g. the SHA-256 input)
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
     var k = e.key;
     if (/^[0-9]$/.test(k)) digit(k);
     else if (k === "a" || k === "A") digit("A");

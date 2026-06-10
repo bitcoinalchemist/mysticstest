@@ -2435,12 +2435,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Nav ──────────────────────────────────────────────────────────
-window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('scrolled', scrollY > 10);
-});
-window.addEventListener('scroll', () => {
-  document.getElementById('siteHeader').classList.toggle('scrolled', scrollY > 10);
-});
+// (header scroll shadow now handled globally in js/site.js)
 
 
 

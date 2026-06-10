@@ -7,6 +7,7 @@
   var NAV = [
     { href: 'cardsoflife.html', label: 'Cards of Life' },
     { href: 'iching.html',      label: 'I Ching'       },
+    { href: 'astrology.html',   label: 'Astrology'     },
     { heading: 'Tools' },
     { href: 'calculator.html',  label: 'Calculator'    },
     { href: 'quadrations.html', label: 'Quadrations'   },
@@ -61,4 +62,18 @@
     nav.classList.remove('open');
     btn.setAttribute('aria-expanded', 'false');
   });
+
+  // Scroll shadow on the sticky header (.site-header.scrolled in site.css)
+  var header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', function () {
+    header.classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive: true });
+
+  // Offline support — register the service worker (sw.js at site root).
+  // Works on https and localhost; silently skipped elsewhere (e.g. file://).
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () { /* no-op */ });
+    });
+  }
 })();

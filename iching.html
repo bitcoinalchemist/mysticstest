@@ -788,6 +788,7 @@
           <button class="cast-btn" id="castOneBtn" style="width: 130px;">Single</button>
           <button class="cast-btn cast-btn-alt" id="castAllBtn" style="width: 130px;">All</button>
           <button class="cast-btn cast-btn-alt cast-btn-icon" id="saveReadingBtn" style="visibility:hidden;" title="Save reading"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" style="display:block;pointer-events:none"><path fill="currentColor" fill-rule="evenodd" d="M1 1H10L14 5V15H1ZM3 2H8V6.5H3ZM3 10.5H13V14H3Z"/></svg></button>
+          <button class="cast-btn cast-btn-alt cast-btn-icon" id="shareBtn" style="visibility:hidden;" title="Copy link to this reading"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;pointer-events:none"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
           <div class="hist-wrap">
             <button class="cast-btn cast-btn-alt cast-btn-icon" id="historyBtn" title="Past readings">≡</button>
             <div class="hist-panel" id="histPanel"></div>
@@ -1248,6 +1249,70 @@
     setTimeout(function(){ btn.style.visibility = 'hidden'; btn.innerHTML = FLOPPY_SVG; btn.disabled = false; }, 1400);
   }
 
+  // ── Shareable reading links ──────────────────────────────
+  // A reading is fully defined by its 6 cards + question, encoded in the
+  // URL hash: iching.html#r=JH.10S.3D.QC.7H.2S&q=encoded%20question
+  // (card token = rank + suit letter, index 0 = line 1 / bottom)
+  var SUIT_LETTER = { '♥':'H', '♦':'D', '♣':'C', '♠':'S' };
+  var LETTER_SUIT = { 'H':'♥', 'D':'♦', 'C':'♣', 'S':'♠' };
+
+  function readingURL() {
+    if (draws.length < 6) return null;
+    var r = draws.map(function(c){ return c.rank + SUIT_LETTER[c.suit]; }).join('.');
+    var hash = '#r=' + r + (_question ? '&q=' + encodeURIComponent(_question) : '');
+    return location.origin + location.pathname + hash;
+  }
+
+  function decodeHashReading() {
+    var h = location.hash.replace(/^#/, '');
+    if (!h) return null;
+    var params = {};
+    h.split('&').forEach(function(p) {
+      var i = p.indexOf('=');
+      if (i > 0) params[p.slice(0, i)] = p.slice(i + 1);
+    });
+    if (!params.r) return null;
+    var toks = params.r.split('.');
+    if (toks.length !== 6) return null;
+    var ds = [];
+    for (var i = 0; i < 6; i++) {
+      var m = /^(A|[2-9]|10|J|Q|K)([HDCS])$/.exec(toks[i]);
+      if (!m) return null;
+      var suit = LETTER_SUIT[m[2]];
+      ds.push({ suit: suit, rank: m[1], red: RED_SUITS.includes(suit), court: COURTS.includes(m[1]) });
+    }
+    var q = '';
+    try { q = params.q ? decodeURIComponent(params.q) : ''; } catch(e) {}
+    return { question: q, draws: ds };
+  }
+
+  function copyShareLink() {
+    var url = readingURL();
+    if (!url) return;
+    var done = function() {
+      var btn = document.getElementById('shareBtn');
+      var prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      btn.disabled = true;
+      setTimeout(function(){ btn.innerHTML = prev; btn.disabled = false; }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(done, function(){ legacyCopy(url); done(); });
+    } else {
+      legacyCopy(url); done();
+    }
+  }
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+
   var _isRestoring = false;
 
   function restoreReading(saved) {
@@ -1287,6 +1352,9 @@
     document.getElementById('resultWrap').style.display = 'none';
     document.getElementById('governingLine').innerHTML = '';
     document.getElementById('saveReadingBtn').style.visibility = 'hidden';
+    document.getElementById('shareBtn').style.visibility = 'hidden';
+    // Drop any stale shared-reading hash so the URL matches the new cast
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
   }
 
   // ── Ruling / governing line (Alfred Huang – Wilhelm system) ──────────────
@@ -1519,6 +1587,8 @@
       sBtn.disabled = false;
       sBtn.style.visibility = 'visible';
     }
+    // Share is available for any complete reading, fresh or restored
+    document.getElementById('shareBtn').style.visibility = 'visible';
   }
 
   // Both tiles are clickable; clicking one loads its reading below and marks it active
@@ -1568,6 +1638,7 @@
   document.getElementById('castOneBtn').addEventListener('click', castOne);
   document.getElementById('castAllBtn').addEventListener('click', castAll);
   document.getElementById('saveReadingBtn').addEventListener('click', persistCurrentReading);
+  document.getElementById('shareBtn').addEventListener('click', copyShareLink);
   document.getElementById('historyBtn').addEventListener('click', function(e) {
     e.stopPropagation();
     var panel = document.getElementById('histPanel');
@@ -1615,6 +1686,19 @@
     if (e.key === 'ArrowLeft')  { window.navigateCast(-1); return; }
     if (e.key === 'ArrowRight') { window.navigateCast(1);  return; }
   });
+
+  // ── Restore a shared reading from the URL hash, if present ──
+  // (Explicitly shared links only — normal page loads still start clean.)
+  (function() {
+    var shared = decodeHashReading();
+    if (!shared) return;
+    restoreReading(shared);
+    // A shared reading isn't in this visitor's history yet — allow saving it
+    var sBtn = document.getElementById('saveReadingBtn');
+    sBtn.innerHTML = FLOPPY_SVG;
+    sBtn.disabled = false;
+    sBtn.style.visibility = 'visible';
+  })();
 
 })();
 
