@@ -430,9 +430,13 @@
     .tools-section.collapsed .tool-panels { display: none; }
     .tools-section.collapsed .spreads-toggle svg { transform: rotate(180deg); }
     .tools-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      display: flex; flex-wrap: nowrap; justify-content: center;
       gap: .6rem;
+    }
+    .tools-grid .tool-card-btn { flex: 1 1 0; min-width: 0; max-width: 200px; }
+    @media (max-width: 560px) {
+      .tools-grid { gap: .4rem; }
+      .tools-grid .tool-card-btn { padding: .6rem .55rem; }
     }
     .tool-card-btn {
       display: flex; align-items: center; justify-content: space-between; gap: .5rem;
@@ -444,13 +448,6 @@
     }
     .tool-card-text { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
     .tool-card-name { line-height: 1.2; }
-    .tool-card-desc {
-      font-family: var(--sans); font-size: .64rem; letter-spacing: .03em;
-      line-height: 1.4; color: rgba(255,255,255,.42);
-      transition: color var(--ease);
-    }
-    .tool-card-btn:hover .tool-card-desc { color: rgba(255,255,255,.6); }
-    .tool-card-btn[aria-expanded="true"] .tool-card-desc { color: rgba(181,134,74,.8); }
     .tool-card-btn .tool-card-arrow {
       font-family: var(--sans); font-size: .8rem; color: var(--gold);
       flex-shrink: 0; transition: transform var(--ease);
@@ -503,7 +500,6 @@
       padding-top: .9rem; padding-bottom: 1rem;
     }
     .tool-panel .cal-scroll-wrap { padding-bottom: 0; }
-    .tool-panel .sv-formula { margin: .1rem 0 .85rem; }
 
     /* ── Add Second Person Toggle ────────────────────────────────── */
     .add-second-wrap { margin: .85rem 0 0; text-align: center; }
@@ -533,6 +529,21 @@
       max-width: var(--max-w); margin: 0 auto; padding: 0 1rem;
       width: 100%; box-sizing: border-box;
     }
+    /* Each browse cell carries its solar value above the card face */
+    .browse-cell { display: flex; flex-direction: column; align-items: center; gap: .2rem; }
+    .browse-cell .spread-card { width: 100%; }
+    .browse-sv {
+      font-family: var(--serif); font-size: .95rem; font-weight: 700; line-height: 1;
+      color: var(--gold); font-variant-numeric: tabular-nums; letter-spacing: .02em;
+    }
+    @media (max-width: 560px) { .browse-sv { font-size: .8rem; } }
+    /* Solar-value formula beneath the deck */
+    .browse-sv-formula {
+      text-align: center; margin: 1.1rem 0 .1rem;
+      font-family: var(--serif); font-style: italic; font-size: .95rem;
+      color: rgba(255,255,255,.55); letter-spacing: .01em;
+    }
+    .browse-sv-formula strong { font-style: normal; font-weight: 700; color: var(--gold); }
 
     .empty-state {
       grid-column: 1 / -1; text-align: center;
@@ -1076,55 +1087,51 @@
     .cal-header h2 {
       font-family: var(--serif); font-size: 1.35rem; font-weight: 400;
     }
-    .cal-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: .5rem; }
+    .cal-scroll-wrap { overflow-x: visible; padding-bottom: .25rem; }
     .cal-grid-main {
       display: grid;
-      grid-template-columns: 1.6rem repeat(12, 1fr);
-      gap: .05rem;
-      min-width: 260px;
+      grid-template-columns: 1rem repeat(12, 1fr);
+      gap: 2px;
+      width: 100%;
     }
     .cal-col-header {
       text-align: center;
-      font-size: .42rem; font-weight: 600; letter-spacing: .04em;
-      color: var(--text-muted); padding-bottom: .22rem; line-height: 1;
+      font-family: var(--sans);
+      font-size: .5rem; font-weight: 700; letter-spacing: .02em;
+      text-transform: uppercase;
+      color: var(--text-secondary); padding-bottom: .3rem; line-height: 1;
     }
     .cal-month-label {
-      display: flex; align-items: center;
-      font-size: .55rem; font-weight: 600; letter-spacing: .04em;
-      color: var(--text-secondary); line-height: 1;
-      padding-right: .3rem;
+      display: flex; align-items: center; justify-content: flex-end;
+      font-family: var(--sans);
+      font-size: .52rem; font-weight: 600;
+      color: var(--text-muted); line-height: 1;
+      padding-right: .16rem; font-variant-numeric: tabular-nums;
     }
     .cal-day {
-      cursor: pointer; border-radius: 2px;
-      transition: transform var(--ease), opacity var(--ease);
+      cursor: pointer; border-radius: 3px;
+      transition: transform var(--ease);
     }
-    .cal-day:hover { transform: scale(1.08); opacity: .85; }
-    .cal-cell-empty { aspect-ratio: 2/1; }
+    .cal-day:hover { transform: scale(1.12); z-index: 2; }
+    .cal-cell-empty { min-height: .9rem; }
+    /* Subtle wash behind alternating month columns to guide the eye */
+    .cal-col-alt { background: rgba(255,255,255,.035); border-radius: 2px; }
     .cal-chip {
-      width: 100%; aspect-ratio: 2/1; border-radius: 2px;
-      background: var(--surface-alt); border: 1px solid var(--border);
-      display: flex; flex-direction: row;
-      align-items: center; justify-content: center;
-      gap: 0; line-height: 1;
+      width: 100%; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      padding: .16rem 0; line-height: 1;
     }
-    .cal-chip.hearts   { color: var(--red);   border-color: rgba(181,48,48,.25);  background: rgba(181,48,48,.06); }
-    .cal-chip.diamonds { color: var(--red);   border-color: rgba(181,48,48,.25);  background: rgba(181,48,48,.06); }
-    .cal-chip.clubs    { color: var(--green); border-color: rgba(26,25,22,.18);   background: rgba(26,25,22,.04); }
-    .cal-chip.spades   { color: var(--navy);  border-color: rgba(26,25,22,.18);   background: rgba(26,25,22,.04); }
-    .cal-chip.joker    { color: var(--gold);  border-color: rgba(181,134,74,.35); background: var(--gold-light); }
-    .cal-chip-rank { font-family: var(--serif); font-size: .5rem; font-weight: 600; line-height: 1; }
-    .cal-chip-sym  { font-size: .46rem; line-height: 1; }
-    .cal-leap-note { font-size: .6rem; color: var(--text-muted); margin-top: .85rem; font-style: italic; }
-    @media (max-width: 700px) {
-      .cal-modal { padding: 1.25rem 1rem 1.5rem; }
-      .cal-grid-main { min-width: 280px; }
+    .cal-token {
+      font-family: var(--sans); font-size: .54rem; font-weight: 700;
+      letter-spacing: 0; line-height: 1; white-space: nowrap;
     }
     @media (max-width: 500px) {
-      .cal-modal { padding: 1rem .75rem 1.25rem; max-height: 90vh; }
-      .cal-grid-main { grid-template-columns: 1.6rem repeat(12, 1fr); gap: .06rem; min-width: 240px; }
-      .cal-chip-rank { font-size: .45rem; }
-      .cal-chip-sym  { font-size: .4rem; }
-      .cal-month-label { font-size: .44rem; }
+      .cal-modal { padding: 1rem .7rem 1.25rem; max-height: 90vh; }
+      .cal-grid-main { grid-template-columns: .85rem repeat(12, 1fr); gap: 1.5px; }
+      .cal-col-header { font-size: .46rem; }
+      .cal-token { font-size: .48rem; }
+      .cal-month-label { font-size: .46rem; padding-right: .2rem; }
+      .cal-cell-empty { min-height: .75rem; }
     }
 
     /* ── Dark-background overrides for cal-modal ─────────────────── */
@@ -1134,16 +1141,19 @@
     }
     .cal-modal .modal-close:hover { background: rgba(255,255,255,.16); color: #fff; }
     .cal-modal .cal-header h2 { color: rgba(255,255,255,.9); }
-    .cal-modal .cal-col-header { color: rgba(255,255,255,.28); }
-    .cal-modal .cal-leap-note  { color: rgba(255,255,255,.3); }
-    /* Calendar chips — all white on dark background */
-    .cal-modal .cal-chip { background: rgba(255,255,255,.92); border-color: rgba(255,255,255,.2); }
+    .cal-modal .cal-col-header { color: rgba(255,255,255,.5); }
+    .cal-modal .cal-month-label { color: rgba(255,255,255,.42); }
+    /* Calendar chips — light face on dark background, suit-colored glyphs */
+    .cal-modal .cal-chip { background: rgba(255,255,255,.94); }
     .cal-modal .cal-chip.hearts,   .cal-modal .cal-chip.diamonds { color: var(--red); }
     .cal-modal .cal-chip.clubs  { color: var(--green); }
     .cal-modal .cal-chip.spades { color: var(--navy); }
-    .cal-modal .cal-chip.joker  { color: var(--gold); background: #fff; }
-    /* Solar Values — dark-context overrides */
-    .cal-modal .sv-joker-row:hover { background: rgba(181,134,74,.08); }
+    .cal-modal .cal-chip.joker  { color: var(--gold); background: var(--gold-light); }
+    /* Today's date — gold ring */
+    .cal-modal .cal-today .cal-chip {
+      outline: 2px solid var(--gold); outline-offset: 1px;
+      box-shadow: 0 0 0 1px var(--gold), 0 0 8px rgba(181,134,74,.5);
+    }
     /* Synchronicities */
     .cal-modal .sync-intro { color: rgba(255,255,255,.5); }
     .cal-modal .sync-subtitle { color: rgba(255,255,255,.3); border-color: rgba(255,255,255,.1); }
@@ -1153,77 +1163,6 @@
     .cal-modal .sync-items li { color: rgba(255,255,255,.45); }
     .cal-modal .sync-key { color: rgba(255,255,255,.85); }
     .cal-modal .sync-val { color: rgba(255,255,255,.45); }
-
-    /* ── Solar Values Chart ─────────────────────────────────────── */
-    .sv-formula {
-      font-family: var(--serif); font-size: .82rem; font-style: italic;
-      color: rgba(255,255,255,.5);
-      text-align: center; margin-bottom: 1.25rem;
-    }
-    .sv-formula strong { font-style: normal; color: var(--gold); font-weight: 700; }
-    .sv-ref-grid {
-      display: flex; gap: 0; align-items: stretch;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: var(--r-md); overflow: hidden;
-    }
-    .sv-ref-col {
-      flex: 1; display: flex; flex-direction: column; gap: 0;
-      border-right: 1px solid rgba(255,255,255,.08);
-    }
-    .sv-ref-col:last-child { border-right: none; }
-    .sv-ref-col-header {
-      padding: .6rem .4rem .45rem; text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,.1);
-      background: rgba(255,255,255,.04);
-      font-size: 1rem; line-height: 1;
-    }
-    .sv-suit-name {
-      display: block; font-family: var(--sans);
-      font-size: .38rem; font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; opacity: .55; margin-top: .22rem;
-    }
-    .sv-ref-col-header.hearts   { color: #c85858; }
-    .sv-ref-col-header.clubs    { color: rgba(255,255,255,.78); }
-    .sv-ref-col-header.diamonds { color: #c85858; }
-    .sv-ref-col-header.spades   { color: rgba(255,255,255,.78); }
-    .sv-ref-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .19rem .45rem; cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,.04);
-      transition: background var(--ease);
-    }
-    .sv-ref-row:last-child { border-bottom: none; }
-    .sv-ref-row:hover { background: rgba(255,255,255,.07); }
-    .sv-ref-card {
-      font-family: var(--serif); font-size: .8rem; line-height: 1;
-    }
-    .sv-ref-card.hearts, .sv-ref-card.diamonds { color: #c85858; }
-    .sv-ref-card.clubs   { color: rgba(255,255,255,.78); }
-    .sv-ref-card.spades  { color: rgba(255,255,255,.78); }
-    .sv-ref-sym { font-size: .58rem; }
-    .sv-ref-val {
-      color: rgba(255,255,255,.38); font-size: .65rem;
-      font-variant-numeric: tabular-nums;
-    }
-    .sv-joker-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: .55rem 1rem .45rem; margin-top: .65rem;
-      border-top: 1px solid rgba(181,134,74,.22);
-      cursor: pointer; border-radius: var(--r-sm);
-      transition: background var(--ease);
-    }
-    .sv-joker-row:hover { background: rgba(181,134,74,.1); }
-    .sv-joker-label { font-family: var(--serif); font-size: .95rem; color: var(--gold); }
-    @media (max-width: 560px) {
-      .sv-ref-grid { flex-wrap: nowrap; }
-      .sv-ref-col  { flex: 1; min-width: 0; }
-      .sv-suit-name { display: none; }
-      .sv-ref-col-header { font-size: .9rem; padding: .5rem .3rem .4rem; }
-      .sv-ref-row { padding: .15rem .2rem; }
-      .sv-ref-card { font-size: .72rem; }
-      .sv-ref-sym  { font-size: .52rem; }
-      .sv-ref-val  { font-size: .6rem; }
-    }
 
     /* ── Synchronicities Modal ──────────────────────────────────── */
     .sync-open-btn {
@@ -1776,17 +1715,16 @@
 </section>
 
 <!-- ── Tools ─────────────────────────────────────────────────────── -->
-<section class="tools-section collapsed" id="tools">
+<section class="tools-section" id="tools">
   <div class="container">
     <div class="tools-top">
       <span class="section-label">Tools</span>
-      <button class="spreads-toggle" id="toolsToggle" onclick="toggleTools()" title="Show tools" aria-label="Show tools"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="spreads-toggle" id="toolsToggle" onclick="toggleTools()" title="Minimise tools" aria-label="Minimise tools"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <div class="tools-grid">
-      <button class="tool-card-btn is-toggle" id="infoToolBtn" aria-expanded="false" aria-controls="infoPanel" onclick="toggleToolPanel('info')"><span class="tool-card-text"><span class="tool-card-name">Info</span><span class="tool-card-desc">How the system works</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-      <button class="tool-card-btn is-toggle" id="browseToolBtn" aria-expanded="false" aria-controls="browsePanel" onclick="toggleToolPanel('browse')"><span class="tool-card-text"><span class="tool-card-name">All Cards</span><span class="tool-card-desc">Browse the full 52-card deck</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-      <button class="tool-card-btn is-toggle" id="svToolBtn" aria-expanded="false" aria-controls="svPanel" onclick="toggleToolPanel('sv')"><span class="tool-card-text"><span class="tool-card-name">Solar Values</span><span class="tool-card-desc">The number behind every card</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
-      <button class="tool-card-btn is-toggle" id="planetsToolBtn" aria-expanded="false" aria-controls="planetsPanel" onclick="toggleToolPanel('planets')"><span class="tool-card-text"><span class="tool-card-name">Planets</span><span class="tool-card-desc">What each column governs</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button class="tool-card-btn is-toggle" id="infoToolBtn" aria-expanded="false" aria-controls="infoPanel" onclick="toggleToolPanel('info')"><span class="tool-card-text"><span class="tool-card-name">Info</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button class="tool-card-btn is-toggle" id="browseToolBtn" aria-expanded="false" aria-controls="browsePanel" onclick="toggleToolPanel('browse')"><span class="tool-card-text"><span class="tool-card-name">All Cards</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button class="tool-card-btn is-toggle" id="planetsToolBtn" aria-expanded="false" aria-controls="planetsPanel" onclick="toggleToolPanel('planets')"><span class="tool-card-text"><span class="tool-card-name">Planets</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
     </div>
 
     <div class="tool-panels">
@@ -1863,16 +1801,10 @@
           <div class="spread-wrap">
             <div class="spread-grid" id="browseGrid"></div>
           </div>
+          <p class="browse-sv-formula">Solar Value &nbsp;=&nbsp; <strong>55</strong> &nbsp;&minus;&nbsp; (2 &times; month &nbsp;+&nbsp; day)</p>
         </div>
       </div>
 
-      <!-- Inline panel: Solar Values -->
-      <div class="tool-panel" id="svPanel" role="region" aria-labelledby="svToolBtn">
-        <div class="cal-modal tool-modal" style="max-width:600px">
-          <p class="sv-formula"><em>sv</em> &nbsp;=&nbsp; <strong>55</strong> &nbsp;&minus;&nbsp; (2 &times; month &nbsp;+&nbsp; day)</p>
-          <div id="svGrid"></div>
-        </div>
-      </div>
     </div>
   </div>
 </section>
@@ -1958,7 +1890,6 @@
 
 // ── Constants ────────────────────────────────────────────────────
 const SUIT_ORDER    = ['hearts','clubs','diamonds','spades','joker'];
-const RANK_ORDER    = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 const MONTH_NAMES   = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAYS_IN_MONTH = [0,31,29,31,30,31,30,31,31,30,31,30,31];
 
@@ -2061,12 +1992,22 @@ function _buildBrowseGrid() {
   const grid = document.getElementById('browseGrid');
   let html = '';
 
+  // One cell = its solar value above the card. SV = index + 1 (1–52);
+  // the Joker (index 52) sits outside the count at 0.
+  function cell(idx) {
+    const c       = CARDS[idx];
+    const sv      = idx === 52 ? 0 : idx + 1;
+    const suitCls = idx === 52 ? 'joker' : c.suit;
+    const jk      = idx === 52 ? ' is-joker' : '';
+    return `<div class="browse-cell${jk}"><span class="browse-sv">${sv}</span>`
+         + `<div class="spread-card ${suitCls}" title="${c.name}" onclick="openCompareCard(${idx})">${spreadCardPips(c)}</div></div>`;
+  }
+
   if (_browseSuit) {
-    // Filtered: show matching cards A–K then spades courts if applicable
+    // Filtered: show matching cards in SV order (numerals reveal where the suit sits in the count)
     for (let i = 0; i < CARDS.length; i++) {
-      const c = CARDS[i];
-      if (c.suit !== _browseSuit) continue;
-      html += `<div class="spread-card ${c.suit}" title="${c.name}" onclick="openCompareCard(${i})">${spreadCardPips(c)}</div>`;
+      if (CARDS[i].suit !== _browseSuit) continue;
+      html += cell(i);
     }
     grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
   } else {
@@ -2075,19 +2016,13 @@ function _buildBrowseGrid() {
     // 7 planetary rows, SV order left → right (SV 1–49)
     for (let row = 0; row < 7; row++) {
       const base = row * 7;
-      for (let col = 0; col < 7; col++) {
-        const c = CARDS[base + col];
-        html += `<div class="spread-card ${c.suit}" title="${c.name}" onclick="openCompareCard(${base + col})">${spreadCardPips(c)}</div>`;
-      }
+      for (let col = 0; col < 7; col++) html += cell(base + col);
     }
     // Crown row: J♠ Q♠ K♠ centred (SV 50–52), Joker at far right
     html += `<div class="crown-row"><div></div><div></div>`;
-    for (let i = 49; i <= 51; i++) {
-      const c = CARDS[i];
-      html += `<div class="spread-card ${c.suit}" title="${c.name}" onclick="openCompareCard(${i})">${spreadCardPips(c)}</div>`;
-    }
+    for (let i = 49; i <= 51; i++) html += cell(i);
     html += `<div></div>`;
-    html += `<div class="spread-card joker" title="The Joker" onclick="openCompareCard(52)">${spreadCardPips(CARDS[52])}</div>`;
+    html += cell(52);
     html += `</div>`;
   }
 
@@ -2913,31 +2848,37 @@ const MONTH_FULL = [
 
 function buildCalendar() {
   let html = '';
+  const now = new Date();
+  const tM = now.getMonth() + 1, tD = now.getDate();
 
   // Header row: blank day-label cell + 12 month names
   html += `<div class="cal-col-header"></div>`;
   for (let m = 1; m <= 12; m++) {
-    html += `<div class="cal-col-header">${MONTH_NAMES[m]}</div>`;
+    const alt = (m % 2 === 0) ? ' cal-col-alt' : '';
+    html += `<div class="cal-col-header${alt}">${MONTH_NAMES[m]}</div>`;
   }
 
   // 31 day rows
   for (let d = 1; d <= 31; d++) {
-    html += `<div class="cal-month-label" style="justify-content:flex-end;padding-right:.35rem;">${d}</div>`;
+    html += `<div class="cal-month-label">${d}</div>`;
 
     for (let m = 1; m <= 12; m++) {
+      const alt = (m % 2 === 0) ? ' cal-col-alt' : '';
       const maxDays = DAYS_IN_MONTH[m];
       if (d > maxDays) {
-        html += `<div class="cal-cell-empty"></div>`;
+        html += `<div class="cal-cell-empty${alt}"></div>`;
         continue;
       }
       const sv = solarValue(m, d);
       const cardIdx = sv === 0 ? 52 : sv - 1;
       const c = CARDS[cardIdx];
       const isLeap = (m === 2 && d === 29);
+      const isToday = (m === tM && d === tD);
+      const SUIT_LETTER = { hearts:'H', diamonds:'D', clubs:'C', spades:'S' };
       const chip = c.suit === 'joker'
-        ? `<div class="cal-chip joker"><span class="cal-chip-rank">✦</span></div>`
-        : `<div class="cal-chip ${c.suit}"><span class="cal-chip-rank">${c.rank}</span><span class="cal-chip-sym">${c.sym}</span></div>`;
-      html += `<div class="cal-day${isLeap ? ' cal-leap' : ''}" onclick="openModalFromCalendar(${cardIdx})" title="${c.name}${isLeap ? ' (leap year)' : ''}">`;
+        ? `<div class="cal-chip joker"><span class="cal-token">✦</span></div>`
+        : `<div class="cal-chip ${c.suit}"><span class="cal-token">${c.rank}${SUIT_LETTER[c.suit]}</span></div>`;
+      html += `<div class="cal-day${alt}${isLeap ? ' cal-leap' : ''}${isToday ? ' cal-today' : ''}" onclick="openModalFromCalendar(${cardIdx})" title="${c.name}${isToday ? ' · today' : ''}${isLeap ? ' (leap year)' : ''}">`;
       html += chip;
       html += `</div>`;
     }
@@ -2956,7 +2897,6 @@ var _toolBuilt = {};
 function _buildToolPanel(key) {
   if (_toolBuilt[key]) return;
   if (key === 'browse')   _buildBrowseGrid();
-  else if (key === 'sv')  buildSVChart();
   else if (key === 'planets') buildPlanets();
   _toolBuilt[key] = true;
 }
@@ -3005,50 +2945,6 @@ function buildPlanets() {
   });
   html += '</div>';
   document.getElementById('planetsList').innerHTML = html;
-}
-
-// ── Solar Values Chart ───────────────────────────────────────────
-function buildSVChart() {
-  const SUITS = [
-    { suit: 'hearts',   sym: '♥', label: '♥ Hearts',   svStart: 1  },
-    { suit: 'clubs',    sym: '♣', label: '♣ Clubs',     svStart: 14 },
-    { suit: 'diamonds', sym: '♦', label: '♦ Diamonds',  svStart: 27 },
-    { suit: 'spades',   sym: '♠', label: '♠ Spades',    svStart: 40 },
-  ];
-
-  let html = `<div class="sv-ref-grid">`;
-
-  SUITS.forEach(({ suit, sym, label, svStart }) => {
-    html += `<div class="sv-ref-col">`;
-    html += `<div class="sv-ref-col-header ${suit}">${sym}<span class="sv-suit-name">${label.split(' ')[1]}</span></div>`;
-
-    for (let i = 0; i < 13; i++) {
-      const sv      = svStart + i;
-      const cardIdx = sv - 1;
-      const c       = CARDS[cardIdx];
-      const rank    = RANK_ORDER[i];
-      html += `<div class="sv-ref-row" onclick="openModalFromSV(${cardIdx})" title="${c.name}">`;
-      html += `<span class="sv-ref-card ${suit}">${rank}<span class="sv-ref-sym">${sym}</span></span>`;
-      html += `<span class="sv-ref-val">${sv}</span>`;
-      html += `</div>`;
-    }
-
-    html += `</div>`;
-  });
-
-  html += `</div>`;
-
-  // Joker
-  html += `<div class="sv-joker-row" onclick="openModalFromSV(52)" title="The Joker · Dec 31">`;
-  html += `<span class="sv-joker-label">✦ Joker</span>`;
-  html += `<span class="sv-ref-val">0</span>`;
-  html += `</div>`;
-
-  document.getElementById('svGrid').innerHTML = html;
-}
-
-function openModalFromSV(idx) {
-  openCompareCard(idx);
 }
 
 // ── Shareable finder links ──────────────────────────────────────
