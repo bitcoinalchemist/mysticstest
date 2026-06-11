@@ -90,11 +90,22 @@
     .age-input::-webkit-outer-spin-button { -webkit-appearance: none; }
     .age-input:focus { outline: none; border-color: var(--gold); }
     .age-controls-wrap { display: flex; flex-direction: column; align-items: center; }
-    .age-mobile-label {
-      display: block; font-size: .62rem; font-weight: 600;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: .3rem; text-align: center;
+    /* Mode labels: Spirit · Age · Life above the stepper (Age = annual view) */
+    .q-mode-labels {
+      display: flex; width: fit-content; margin: 0 auto .55rem;
+      border: 1px solid rgba(255,255,255,.18); border-radius: 999px; overflow: hidden;
     }
+    .q-mode-label {
+      background: transparent; border: none; cursor: pointer;
+      box-sizing: border-box; min-width: 4.5rem; text-align: center;
+      font-family: var(--sans); font-size: .64rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.6); padding: .38rem .55rem;
+      transition: background var(--ease), color var(--ease);
+    }
+    .q-mode-label + .q-mode-label { border-left: 1px solid rgba(255,255,255,.14); }
+    .q-mode-label:hover { color: rgba(255,255,255,.9); }
+    .q-mode-label.active { background: var(--gold); color: #fff; }
 
     /* Spread grid */
     .spread-wrap { overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; flex: 1; min-width: 0; display: flex; justify-content: center; }
@@ -108,21 +119,13 @@
     .spread-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); border-color: var(--border-strong); }
 
     /* ── Spirit & Life mode ── */
-    .sl-mode-row { display: flex; justify-content: center; gap: .5rem; margin: 0 0 1.1rem; }
-    .sl-mode-btn {
-      font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
-      color: rgba(255,255,255,.55); background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
-      padding: .45rem 1.4rem; cursor: pointer; transition: all var(--ease);
-    }
-    .sl-mode-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .sl-mode-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(181,134,74,.12); }
     .sl-seat { min-width: 0; }
     .sl-seat .spread-card { width: 100%; }
     /* Rings only in Spirit/Life (grid opts in via .sl-rings), not Annual */
     .sl-rings .spread-card.sl-fixed { box-shadow: 0 0 0 1.5px rgba(181,134,74,.7); }
     .sl-rings .spread-card.sl-semi  { outline: 1.5px dashed rgba(181,134,74,.55); outline-offset: 1px; }
-    .age-selector.sl-off { opacity: .32; pointer-events: none; }
+    /* Dim only the stepper in Spirit/Life — the mode labels stay live */
+    .age-controls.sl-off { opacity: .32; pointer-events: none; }
 
     /* ── Compare Card Popup ── */
     @keyframes cardFlip {
@@ -271,7 +274,11 @@
       <span class="section-label">Quadrations</span>
       <div class="age-selector" style="justify-self:center">
         <div class="age-controls-wrap">
-          <span class="age-mobile-label">Age</span>
+          <div class="q-mode-labels">
+            <button class="q-mode-label" id="qSpiritBtn" onclick="qSetMode('spirit')">Spirit</button>
+            <button class="q-mode-label active" id="qAnnualBtn" onclick="qSetMode('annual')">Age</button>
+            <button class="q-mode-label" id="qLifeBtn" onclick="qSetMode('life')">Life</button>
+          </div>
           <div class="age-controls">
             <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
             <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
@@ -280,11 +287,6 @@
         </div>
       </div>
       <span></span>
-    </div>
-    <div class="sl-mode-row" id="qModeRow">
-      <button class="sl-mode-btn active" id="qAnnualBtn" onclick="qSetMode('annual')">Annual</button>
-      <button class="sl-mode-btn" id="qSpiritBtn" onclick="qSetMode('spirit')">Spirit</button>
-      <button class="sl-mode-btn" id="qLifeBtn" onclick="qSetMode('life')">Life</button>
     </div>
     <div class="spread-layout">
       <div class="spread-wrap">
@@ -400,7 +402,7 @@
     document.getElementById('qAnnualBtn').classList.toggle('active', m === 'annual');
     document.getElementById('qSpiritBtn').classList.toggle('active', m === 'spirit');
     document.getElementById('qLifeBtn').classList.toggle('active', m === 'life');
-    var ageSel = document.querySelector('.age-selector');
+    var ageSel = document.querySelector('.age-controls');
     var ctl = ensureSpreadCtl();
     if (m === 'annual') {
       if (ageSel) ageSel.classList.remove('sl-off');

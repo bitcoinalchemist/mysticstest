@@ -326,10 +326,6 @@
       display: grid; grid-template-columns: 1fr auto 1fr; gap: .75rem;
       align-items: center; margin-bottom: 1rem;
     }
-    .rel-person-label {
-      font-size: .67rem; font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--text-muted); margin-bottom: .45rem;
-    }
     .rel-plus {
       font-family: var(--serif); font-size: 1.8rem; color: var(--border-strong);
       text-align: center; padding-top: 1.4rem; line-height: 1;
@@ -345,8 +341,20 @@
       justify-content: center; flex-wrap: wrap;
     }
     /* Pip cards need explicit size here (no grid track to size them) */
-    .rel-equation .spread-card { width: 52px; height: 72px; flex-shrink: 0; }
+    .rel-equation .spread-card {
+      width: 52px; height: 72px; flex-shrink: 0;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
     .rel-equation .spread-card.rel-result-pip { width: 64px; height: 88px; }
+    .rel-equation .spread-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(26, 25, 22, .22);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rel-equation .spread-card { transition: none; }
+      .rel-equation .spread-card:hover { transform: none; }
+    }
     .rel-note {
       text-align: center; max-width: 460px; margin: 0 auto;
       font-family: var(--serif); font-style: italic;
@@ -395,6 +403,16 @@
       font-size: .78rem; font-weight: 500; letter-spacing: .05em;
       color: var(--gold); border-bottom: 1px solid var(--gold);
       padding-bottom: 1px; cursor: pointer;
+    }
+    /* Bond text (REL_TEXT) — replaces the generic profile in the relationship result */
+    .rel-bond { max-width: 640px; margin: .9rem auto 0; }
+    .rel-bond-syn {
+      font-family: var(--serif); font-style: italic;
+      font-size: 1.1rem; color: var(--text-primary);
+      text-align: center; line-height: 1.55; margin: 0 0 .85rem;
+    }
+    .rel-bond-para {
+      font-size: .88rem; color: var(--text-secondary); line-height: 1.75; margin: 0;
     }
     @media (max-width: 560px) {
       .rel-people { grid-template-columns: 1fr; }
@@ -785,12 +803,10 @@
     .spreads-toggle:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.45); }
     .spreads.collapsed .spreads-toggle svg { transform: rotate(180deg); }
     .spreads.collapsed .spread-layout { display: none; }
-    .spreads.collapsed .sl-mode-row { display: none; }
     .spreads .planet-label-text { color: rgba(255,255,255,.38); }
     .spreads .planet-col-label  { color: rgba(255,255,255,.38); }
-    /* Quadration Spirit/Life view (reuses .sl-* styles defined below) */
-    .spreads .sl-mode-row { margin: 0 0 1.1rem; }
-    .age-selector.sl-off { opacity: .32; pointer-events: none; }
+    /* Quadration Spirit/Life view: dim only the stepper, the mode labels stay live */
+    .age-controls.sl-off { opacity: .32; pointer-events: none; }
 
     .spread-layout {
       display: flex; gap: 1.25rem; align-items: flex-start;
@@ -841,11 +857,22 @@
     /* Spread grid */
     .spread-wrap { overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; flex: 1; min-width: 0; display: flex; justify-content: center; }
     .age-controls-wrap { display: flex; flex-direction: column; align-items: center; }
-    .age-mobile-label {
-      display: block; font-size: .62rem; font-weight: 600;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--gold); margin-bottom: .3rem; text-align: center;
+    /* Mode labels: Spirit · Age · Life above the stepper (Age = annual view) */
+    .q-mode-labels {
+      display: flex; width: fit-content; margin: 0 auto .55rem;
+      border: 1px solid rgba(255,255,255,.18); border-radius: 999px; overflow: hidden;
     }
+    .q-mode-label {
+      background: transparent; border: none; cursor: pointer;
+      box-sizing: border-box; min-width: 4.5rem; text-align: center;
+      font-family: var(--sans); font-size: .64rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: rgba(255,255,255,.6); padding: .38rem .55rem;
+      transition: background var(--ease), color var(--ease);
+    }
+    .q-mode-label + .q-mode-label { border-left: 1px solid rgba(255,255,255,.14); }
+    .q-mode-label:hover { color: rgba(255,255,255,.9); }
+    .q-mode-label.active { background: var(--gold); color: #fff; }
     @media (max-width: 700px) {
       .spread-layout { flex-direction: column; align-items: center; }
       .spread-stack { display: flex; flex-direction: column; align-items: center; width: 100%; }
@@ -904,15 +931,6 @@
     }
 
     /* ── Spirit & Life: one grid, two states ─────────────────── */
-    .sl-mode-row { display: flex; justify-content: center; gap: .5rem; margin: .1rem 0 .85rem; }
-    .sl-mode-btn {
-      font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
-      color: rgba(255,255,255,.55); background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
-      padding: .45rem 1.4rem; cursor: pointer; transition: all var(--ease);
-    }
-    .sl-mode-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
-    .sl-mode-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(181,134,74,.12); }
     .sl-seat { min-width: 0; }
     .sl-seat .spread-card { width: 100%; }
     /* Cards that keep their seat in both spreads — rings only shown when the
@@ -1287,6 +1305,11 @@
       margin: .5rem 0 1.1rem;
     }
     .info-text p:last-child { margin-bottom: 0; }
+    .info-text .info-image {
+      font-family: var(--serif); font-style: italic;
+      font-size: 1.05rem; color: rgba(255,255,255,.82);
+      line-height: 1.55; margin: .2rem 0 1rem;
+    }
     .info-text .sv-inline {
       font-family: var(--serif); color: rgba(255,255,255,.85); white-space: nowrap;
     }
@@ -1495,7 +1518,6 @@
     <span class="section-label">Finder</span>
     <div class="finder-inner">
     <div class="finder-form">
-      <div class="rel-person-label" id="person1Label" style="display:none">Person 1</div>
       <div class="finder-inputs">
         <select id="fDay"><option value="">Day</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
         <select id="fMonth">
@@ -1512,8 +1534,7 @@
         <button type="button" class="add-second-btn" id="addSecondBtn" onclick="toggleSecond()">＋ Add relationship</button>
       </div>
       <div id="person2Wrap" style="display:none">
-        <div class="rel-person-label" style="margin-top:.75rem">Person 2</div>
-        <div class="finder-inputs" style="margin-bottom:0">
+        <div class="finder-inputs" style="margin-bottom:0; margin-top:.75rem">
           <select id="relDay2"><option value="">Day</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
           <select id="relMonth2">
             <option value="">Month</option>
@@ -1597,7 +1618,8 @@
           <button type="button" class="result-toggle result-share" id="relShare" onclick="copyFinderLink(this)" title="Copy link to this relationship" aria-label="Copy link to this relationship"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
         </div>
       </div>
-      <div class="result-dates" id="relRDates" style="text-align:center; margin: .5rem 0 .75rem;"></div>
+      <div class="result-dates" id="relRDates" style="display:none; text-align:center; margin: .5rem 0 .75rem;"></div>
+      <div class="rel-bond" id="relBond" style="display:none"></div>
       <div class="result-body">
         <div class="result-left">
           <div class="result-box">
@@ -1647,7 +1669,11 @@
       <span class="section-label">Quadrations</span>
       <div class="age-selector">
         <div class="age-controls-wrap">
-          <span class="age-mobile-label">Age</span>
+          <div class="q-mode-labels">
+            <button class="q-mode-label" id="qSpiritBtn" onclick="qSetMode('spirit')">Spirit</button>
+            <button class="q-mode-label active" id="qAnnualBtn" onclick="qSetMode('annual')">Age</button>
+            <button class="q-mode-label" id="qLifeBtn" onclick="qSetMode('life')">Life</button>
+          </div>
           <div class="age-controls">
             <button class="age-btn" id="ageDown" aria-label="Previous age">−</button>
             <input type="number" id="ageInput" class="age-input" min="0" max="89" value="0" aria-label="Age">
@@ -1656,11 +1682,6 @@
         </div>
       </div>
       <button class="spreads-toggle" id="spreadsToggle" onclick="toggleSpreads()" title="Minimise grid" aria-label="Minimise grid"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    </div>
-    <div class="sl-mode-row" id="qModeRow">
-      <button class="sl-mode-btn active" id="qAnnualBtn" onclick="qSetMode('annual')">Annual</button>
-      <button class="sl-mode-btn" id="qSpiritBtn" onclick="qSetMode('spirit')">Spirit</button>
-      <button class="sl-mode-btn" id="qLifeBtn" onclick="qSetMode('life')">Life</button>
     </div>
     <div class="spread-layout">
       <div class="spread-wrap">
@@ -1741,50 +1762,54 @@
       <div class="tool-panel" id="infoPanel" role="region" aria-labelledby="infoToolBtn">
         <div class="cal-modal tool-modal">
           <div class="sync-list info-text">
-            <p>Take the deck away from the card table and look at it again. It is a calendar, and the fit is exact:</p>
+            <p class="info-image">You have carried a calendar in your pocket all your life and called it a game.</p>
+
+            <p>Look again at the deck. The measures of the year were counted into it long before anyone thought to keep score, and the fit is exact:</p>
 
             <ul class="sync-items">
-              <li><span class="sync-key">52 cards</span><span class="sync-eq">=</span><span class="sync-val">52 weeks per year</span></li>
-              <li><span class="sync-key">5 + 2</span><span class="sync-eq">=</span><span class="sync-val">7 days per week</span></li>
+              <li><span class="sync-key">52 cards</span><span class="sync-eq">=</span><span class="sync-val">52 weeks of the year</span></li>
+              <li><span class="sync-key">5 + 2</span><span class="sync-eq">=</span><span class="sync-val">7 days of the week</span></li>
               <li><span class="sync-key">4 suits</span><span class="sync-eq">=</span><span class="sync-val">4 seasons &amp; 4 classical elements</span></li>
-              <li><span class="sync-key">12 face cards</span><span class="sync-eq">=</span><span class="sync-val">12 months &amp; 12 zodiac signs</span></li>
+              <li><span class="sync-key">12 court cards</span><span class="sync-eq">=</span><span class="sync-val">12 months &amp; 12 zodiac signs</span></li>
               <li><span class="sync-key">13 ranks per suit</span><span class="sync-eq">=</span><span class="sync-val">13 lunar months per year</span></li>
               <li><span class="sync-key">91 pips per suit</span><span class="sync-eq">=</span><span class="sync-val">91 days per season</span></li>
               <li><span class="sync-key">91 × 4</span><span class="sync-eq">=</span><span class="sync-val">364 days</span></li>
               <li><span class="sync-key">52 × 7</span><span class="sync-eq">=</span><span class="sync-val">364 days</span></li>
-              <li><span class="sync-key">The Joker</span><span class="sync-eq">=</span><span class="sync-val">4 elements of a quarter each, plus the 5th element equals 1¼ days</span></li>
-              <li><span class="sync-key">364 + 1¼</span><span class="sync-eq">=</span><span class="sync-val">365¼ days in a year</span></li>
-              <li><span class="sync-key">2 colours</span><span class="sync-eq">=</span><span class="sync-val">yin &amp; yang</span></li>
+              <li><span class="sync-key">The Joker</span><span class="sync-eq">=</span><span class="sync-val">the 5 elements at a quarter day each, the 1¼ left over</span></li>
+              <li><span class="sync-key">364 + 1¼</span><span class="sync-eq">=</span><span class="sync-val">365¼ days, the solar year</span></li>
+              <li><span class="sync-key">2 colours</span><span class="sync-eq">=</span><span class="sync-val">day &amp; night, yin &amp; yang</span></li>
             </ul>
 
+            <p>Exact to the quarter day. Whoever shaped the deck was watching the sun.</p>
+
             <div class="sync-list-section">Echoes of the Count</div>
-            <p>Once you see the year in the deck, the same numbers start surfacing elsewhere:</p>
+            <p>Once you have seen the year in the deck, the same numbers begin to sound elsewhere. Sit at a piano and count: fifty-two white keys, thirty-six black, eighty-eight in all. Raise your eyes at night and the sky answers in kind.</p>
 
             <ul class="sync-items">
               <li><span class="sync-key">52 white piano keys</span><span class="sync-eq">=</span><span class="sync-val">the 52 cards, and the 52 northern constellations</span></li>
               <li><span class="sync-key">36 black piano keys</span><span class="sync-eq">=</span><span class="sync-val">the 36 decans of the zodiac, and the 36 southern constellations</span></li>
-              <li><span class="sync-key">88 keys in all</span><span class="sync-eq">=</span><span class="sync-val">the 88 constellations that cover the entire sky</span></li>
+              <li><span class="sync-key">88 keys in all</span><span class="sync-eq">=</span><span class="sync-val">the 88 constellations that cover the whole sky</span></li>
               <li><span class="sync-key">88 quadrations</span><span class="sync-eq">=</span><span class="sync-val">lie between the Spirit and the Life spread</span></li>
               <li><span class="sync-key">"Red" &amp; "Black"</span><span class="sync-eq">=</span><span class="sync-val">each counts to 11 in Chaldean numerology</span></li>
               <li><span class="sync-key">"Red", "Black" &amp; "White"</span><span class="sync-eq">=</span><span class="sync-val">together count to 53</span></li>
             </ul>
 
-            <p>Coincidence stacked this high starts to look like architecture. Each person carries the card of the day they were born, and the whole system unfolds from that single card.</p>
+            <p>Once is chance. Counted this many ways, it is architecture. You were born on one day of this measured year, and that day is a card. Everything on this page unfolds from it.</p>
 
             <div class="sync-list-section">Your Birth Card</div>
-            <p>Your birthday counts into the deck through the Solar Value: <span class="sv-inline">sv = 55 − (2 × month + day)</span>. The number lands on one of the 52 cards, and that card is yours: its days, its planets, its company. December 31 alone falls outside the count and belongs to the Joker. The Finder at the top of the page looks it up for you.</p>
+            <p>Your birthday counts you into the deck through the Solar Value: <span class="sv-inline">sv = 55 − (2 × month + day)</span>. The count lands on one of the 52 cards, and that card is yours. Its days are your days, its planets keep your seasons, its company is the company you keep. One date alone stands outside the count: December 31 belongs to the Joker, who holds no seat and answers to no planet. The Finder at the top of the page will look you up.</p>
 
             <div class="sync-list-section">Spreads and Quadrations</div>
-            <p>Laid out in full, the deck forms a spread: seven planetary rows of seven cards beneath a crown of three masters. A fixed reshuffle called a Quadration reseats every card, and ninety Quadrations bring the deck home again, so each age from 0 to 89 has a spread of its own. Step through them with the age selector and watch your influences move across a lifetime.</p>
+            <p>Laid out in full, the deck becomes a chart: seven planetary rows of seven cards beneath a crown of three masters. A fixed reshuffle called a Quadration reseats every card, and ninety Quadrations carry the deck home to where it began. So every age from 0 to 89 keeps a spread of its own. Step the age selector and watch your influences cross the board over a lifetime.</p>
 
             <div class="sync-list-section">The Life Script</div>
-            <p>Each column of the spread belongs to a planet. Reading across the seven columns, Mercury through to Neptune, gives your Life Script: the cards that govern your quickness, your loves, your strength, your fortune, your trials, your labour and your far horizons. The Planets tool gives each its full portrait.</p>
+            <p>Each column of the spread belongs to a planet. Read across the seven, Mercury through Neptune, and the cards you pass are your Life Script: your quickness, your loves, your strength, your fortune, your trials, your labour and your far horizons. The Planets tool holds the full portrait of each.</p>
 
             <div class="sync-list-section">Spirit and Life</div>
-            <p>The deck has two master seatings. The Spirit spread is its perfect original order; the Life spread is the worldly order it settles into. Crossing between them, every card displaces the card whose seat it takes and is displaced from its own in turn, while three hold fast in both: the Jack of Hearts, the Eight of Clubs and the King of Spades, the fixed cards. Flip the spread above between Annual, Spirit and Life to watch the exchange.</p>
+            <p>The deck keeps two master seatings. The Spirit spread is its perfect order, the deck as it was first conceived. The Life spread is the order it settles into here, in the world. Crossing between them, every card takes another's seat and yields its own, and three hold fast through the whole exchange: the Jack of Hearts, the Eight of Clubs and the King of Spades. Flip the spread above between Annual, Spirit and Life and watch the trade.</p>
 
             <div class="sync-list-section">Relationships</div>
-            <p>Add a second birthday in the Finder and the two Solar Values combine into a third card: the card of the relationship itself, with its own character, gifts and lessons.</p>
+            <p>Bring a second birthday to the Finder and the two Solar Values meet in a third card: the card of the relationship itself, with its own character, its own gifts and its own lessons to teach.</p>
           </div>
         </div>
       </div>
@@ -2032,7 +2057,6 @@ function _buildBrowseGrid() {
 function toggleSecond() {
   secondVisible = !secondVisible;
   document.getElementById('person2Wrap').style.display   = secondVisible ? 'block' : 'none';
-  document.getElementById('person1Label').style.display = secondVisible ? 'block' : 'none';
   document.getElementById('addSecondBtn').textContent    = secondVisible ? '− Remove relationship' : '＋ Add relationship';
   document.getElementById('relResult').classList.remove('visible');
   if (!secondVisible) {
@@ -2140,6 +2164,7 @@ function _findRelationship() {
 
     note.textContent = '✦  The Joker stands outside the 52-card solar system, so no combined relationship card can be calculated.';
     note.style.display = '';
+    document.getElementById('relBond').style.display = 'none';
 
     const nameOther = otherSv && otherIdx !== jokerIdx ? otherCard.name : jokerCard.name;
     document.getElementById('relNamesPair').textContent  = `${jokerCard.name}  ×  ${nameOther}`;
@@ -2147,7 +2172,6 @@ function _findRelationship() {
     document.getElementById('relRSubtitle').textContent  = SUBTITLES[`${jokerCard.rank}_${jokerCard.suit}`] || 'The Joker · ✦';
     document.getElementById('relRVow').textContent =
       VOWS[`${jokerCard.rank}_${jokerCard.suit}`] ? `"${VOWS[`${jokerCard.rank}_${jokerCard.suit}`]}"` : '';
-    document.getElementById('relRDates').textContent     = '✦  ' + jokerCard.dates;
     document.getElementById('relRKws').innerHTML         = jokerCard.kws.map(k => `<span class="kw-tag">${k}</span>`).join('');
     document.getElementById('relRPlanets').textContent   = cardPlanetLabel(jokerIdx);
     document.getElementById('relRPersonality').innerHTML = jokerCard.personality.split('\n\n').map(p => `<p style="margin:0 0 .9em">${p}</p>`).join('');
@@ -2165,7 +2189,6 @@ function _findRelationship() {
 
   note.style.display = 'none';
   resultEl.querySelector('.rel-header').style.display = '';
-  resultEl.querySelector('.result-body').style.display = '';
 
   let svComp = sv1 + sv2;
   if (svComp > 52) svComp -= 52;
@@ -2174,6 +2197,21 @@ function _findRelationship() {
   const c2   = CARDS[sv2 - 1];
   const cRel = CARDS[svComp - 1];
   const relIdx = svComp - 1;
+
+  // Bond text (REL_TEXT, js/cardsdata.js): when the result card has a
+  // relationship-voiced entry it replaces the whole generic profile body;
+  // until then the generic profile shows as a fallback.
+  const bond   = (window.REL_TEXT || {})[`${cRel.rank}_${cRel.suit}`];
+  const bondEl = document.getElementById('relBond');
+  const bodyEl = resultEl.querySelector('.result-body');
+  if (bond) {
+    bondEl.innerHTML = `<p class="rel-bond-syn">${bond.syn}</p><p class="rel-bond-para">${bond.text}</p>`;
+    bondEl.style.display = '';
+    bodyEl.style.display = 'none';
+  } else {
+    bondEl.style.display = 'none';
+    bodyEl.style.display = '';
+  }
 
   const rc1 = document.getElementById('relCard1');
   rc1.className = `spread-card ${c1.suit}`;
@@ -2196,7 +2234,6 @@ function _findRelationship() {
     SUBTITLES[`${cRel.rank}_${cRel.suit}`] || (cRel.suit.charAt(0).toUpperCase() + cRel.suit.slice(1) + ' · ' + cRel.rank);
   document.getElementById('relRVow').textContent =
     VOWS[`${cRel.rank}_${cRel.suit}`] ? `"${VOWS[`${cRel.rank}_${cRel.suit}`]}"` : '';
-  document.getElementById('relRDates').textContent     = '✦  ' + cRel.dates;
   document.getElementById('relRKws').innerHTML         = cRel.kws.map(k => `<span class="kw-tag">${k}</span>`).join('');
   document.getElementById('relRPlanets').textContent   = cardPlanetLabel(relIdx);
   document.getElementById('relRPersonality').innerHTML =
@@ -2349,7 +2386,7 @@ function qSetMode(m) {
   document.getElementById('qAnnualBtn').classList.toggle('active', m === 'annual');
   document.getElementById('qSpiritBtn').classList.toggle('active', m === 'spirit');
   document.getElementById('qLifeBtn').classList.toggle('active', m === 'life');
-  const ageSel = document.querySelector('#spreads .age-selector');
+  const ageSel = document.querySelector('#spreads .age-controls');
   const ctl = ensureSpreadCtl();
   if (m === 'annual') {
     if (ageSel) ageSel.classList.remove('sl-off');
