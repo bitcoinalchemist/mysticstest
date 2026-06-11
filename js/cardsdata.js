@@ -669,3 +669,121 @@ function closeCompareCard() {
     document.getElementById('ccardOverlay').classList.remove('open');
   }, { once: true });
 }
+
+// ── Spread grid with FLIP (shared, reusable) ─────────────────────────
+// Builds a seat-based spread grid (crown row + 7 planetary rows + planet
+// labels) into gridEl, holding 52 reusable card elements that move between
+// fixed seats. ANY deck change — stepping ages in the Annual spread, or
+// switching to the Spirit (deckAtAge 90) or Life (deckAtAge 1) master
+// spreads — is a re-seat of the same elements, so it FLIP-animates.
+//
+// Returns a controller:
+//   setDeck(deck, {animate})  re-place the 52 cards (animate defaults true;
+//                             the first call never animates)
+//   showRings(on)             toggle the fixed/semi gold rings (a .sl-rings
+//                             class on the grid; used for Spirit/Life)
+//   setPick(rank, suit)       highlight one card across all seats (the
+//                             Birth Card Finder pick); pass null to clear
+//   cardEl(idx) / getDeck()
+//
+// Fixed (same seat in Spirit and Life) and semi-fixed (two cards that trade
+// seats) classes are baked onto the cards but only shown when rings are on.
+// Clicking a card runs onCardClick (default: openCompareCard). Per-card
+// displacement detail is intentionally not shown here — queued for the popup.
+function buildSpreadGrid(gridEl, opts) {
+  opts = opts || {};
+  const onCardClick = opts.onCardClick ||
+    function (idx) { if (typeof openCompareCard === 'function') openCompareCard(idx); };
+
+  const spir = deckAtAge(90);  // Spirit spread (perfect order)
+  const life = deckAtAge(1);   // Life spread  (age 0)
+  const displaces   = (idx) => spir[life.indexOf(idx)];
+  const displacedBy = (idx) => life[spir.indexOf(idx)];
+
+  function posLabel(pos) {
+    if (pos >= 49) return `Crown · ${52 - pos}`;
+    return `${SPREAD_PLANETS[Math.floor(pos / 7)]} · ${SPREAD_PLANETS[pos % 7]}`;
+  }
+
+  // Static seat cells: crown row + 7 planetary rows + planet-symbol labels
+  let html = '<div class="crown-row"><div></div><div></div>';
+  for (let i = 51; i >= 49; i--) html += `<div class="sl-seat" data-pos="${i}"></div>`;
+  html += '<div></div><div></div></div>';
+  for (let row = 0; row < 7; row++)
+    for (let col = 6; col >= 0; col--)
+      html += `<div class="sl-seat" data-pos="${row * 7 + col}"></div>`;
+  [6,5,4,3,2,1,0].forEach((col) => {
+    html += `<div class="planet-col-label">${SPREAD_PLANET_SYM[SPREAD_PLANETS[col]]}</div>`;
+  });
+  gridEl.innerHTML = html;
+
+  const seats = {};
+  gridEl.querySelectorAll('.sl-seat').forEach((s) => { seats[+s.dataset.pos] = s; });
+
+  // One element per card, reused across every deck
+  const cards = {};
+  for (let idx = 0; idx < 52; idx++) {
+    const c  = SPREAD_CARDS[idx];
+    const el = document.createElement('div');
+    el.className = 'spread-card ' + c.suit;
+    el.dataset.idx = idx;
+    el.innerHTML = spreadCardPips(c);
+    if (spir.indexOf(idx) === life.indexOf(idx)) el.classList.add('sl-fixed');
+    else if (displaces(idx) === displacedBy(idx)) el.classList.add('sl-semi');
+    el.onclick = () => onCardClick(idx);
+    cards[idx] = el;
+  }
+
+  let _deck = null;
+  function place(deck, animate) {
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // FLIP only makes sense once cards already have a position
+    const doAnim = animate && !reduce && _deck;
+    const first  = {};
+    if (doAnim) for (const k in cards) first[k] = cards[k].getBoundingClientRect();
+    deck.forEach((cardIdx, pos) => {
+      const seat = seats[pos], el = cards[cardIdx];
+      if (el && seat) {
+        if (el.parentNode !== seat) seat.appendChild(el);
+        el.title = posLabel(pos);
+      }
+    });
+    _deck = deck;
+    if (!doAnim) return;
+    // Invert to old position, then transition back to none
+    for (const k in cards) {
+      const el = cards[k], f = first[k];
+      if (!f) continue;
+      const l = el.getBoundingClientRect();
+      const dx = f.left - l.left, dy = f.top - l.top;
+      if (!dx && !dy) continue;
+      el.style.transition = 'none';
+      el.style.transform  = `translate(${dx}px, ${dy}px)`;
+    }
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      for (const k in cards) {
+        const el = cards[k];
+        if (!el.style.transform) continue;
+        el.style.transition = 'transform .65s cubic-bezier(.22,1,.36,1)';
+        el.style.transform  = '';
+        el.addEventListener('transitionend', function te() {
+          el.style.transition = '';
+          el.removeEventListener('transitionend', te);
+        });
+      }
+    }));
+  }
+
+  return {
+    setDeck(deck, o) { o = o || {}; place(deck, o.animate !== false); },
+    showRings(on) { gridEl.classList.toggle('sl-rings', !!on); },
+    setPick(rank, suit) {
+      for (const k in cards) {
+        const c = SPREAD_CARDS[k];
+        cards[k].classList.toggle('finder-pick', !!(rank && c.rank === rank && c.suit === suit));
+      }
+    },
+    cardEl(idx) { return cards[idx]; },
+    getDeck() { return _deck; }
+  };
+}

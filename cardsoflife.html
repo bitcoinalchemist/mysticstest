@@ -426,7 +426,8 @@
     .tools-top .section-label { margin-bottom: 0; }
     .tools-section.collapsed { padding: 1.6rem 0; }
     .tools-section.collapsed .tools-top { margin-bottom: 0; }
-    .tools-section.collapsed .tools-grid { display: none; }
+    .tools-section.collapsed .tools-grid,
+    .tools-section.collapsed .tool-panels { display: none; }
     .tools-section.collapsed .spreads-toggle svg { transform: rotate(180deg); }
     .tools-grid {
       display: grid;
@@ -436,11 +437,20 @@
     .tool-card-btn {
       display: flex; align-items: center; justify-content: space-between; gap: .5rem;
       background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
-      border-radius: var(--r-sm); padding: .6rem .85rem;
+      border-radius: var(--r-sm); padding: .65rem .85rem;
       font-family: var(--serif); font-size: 1rem; font-weight: 400;
       color: rgba(255,255,255,.9); text-align: left; cursor: pointer;
       transition: border-color var(--ease), background var(--ease), transform var(--ease), color var(--ease);
     }
+    .tool-card-text { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+    .tool-card-name { line-height: 1.2; }
+    .tool-card-desc {
+      font-family: var(--sans); font-size: .64rem; letter-spacing: .03em;
+      line-height: 1.4; color: rgba(255,255,255,.42);
+      transition: color var(--ease);
+    }
+    .tool-card-btn:hover .tool-card-desc { color: rgba(255,255,255,.6); }
+    .tool-card-btn[aria-expanded="true"] .tool-card-desc { color: rgba(181,134,74,.8); }
     .tool-card-btn .tool-card-arrow {
       font-family: var(--sans); font-size: .8rem; color: var(--gold);
       flex-shrink: 0; transition: transform var(--ease);
@@ -449,28 +459,51 @@
       border-color: rgba(181,134,74,.7); color: #fff;
       background: rgba(255,255,255,.1); transform: translateY(-2px);
     }
-    .tool-card-btn:hover .tool-card-arrow { transform: translate(2px, -2px); }
+    .tool-card-btn:not(.is-toggle):hover .tool-card-arrow { transform: translate(2px, -2px); }
     /* Toggle (inline-expand) tool buttons use a chevron that rotates when open */
     .tool-card-btn.is-toggle .tool-card-arrow { transition: transform .25s ease; }
+    .tool-card-arrow svg { width: 12px; height: 12px; display: block; }
     .tool-card-btn[aria-expanded="true"] {
       border-color: var(--gold); color: var(--gold); background: rgba(181,134,74,.14);
     }
     .tool-card-btn[aria-expanded="true"] .tool-card-arrow { transform: rotate(180deg); }
-    /* Inline panel that expands beneath the grid */
+    /* Inline panels live in their own stack below the button grid.
+       Expand/collapse via grid-template-rows 0fr→1fr (animates cleanly at
+       any content height — no max-height guess). Accordion: JS keeps at
+       most one panel open. */
+    .tool-panels { display: block; }
     .tool-panel {
-      grid-column: 1 / -1;
-      overflow: hidden;
-      max-height: 0;
+      display: grid;
+      grid-template-rows: 0fr;
       opacity: 0;
-      transition: max-height .35s ease, opacity .25s ease, margin .25s ease;
+      visibility: hidden;
+      transition: grid-template-rows .35s ease, opacity .25s ease,
+                  margin .25s ease, visibility 0s linear .35s;
     }
     .tool-panel.open {
-      max-height: 4000px;
+      grid-template-rows: 1fr;
       opacity: 1;
-      margin-top: .5rem;
+      visibility: visible;
+      margin-top: .6rem;
+      transition: grid-template-rows .35s ease, opacity .25s ease, margin .25s ease;
     }
-    /* All tool panels share the modal's dark inner box, rendered inline */
-    .tool-panel .tool-modal { margin: 0 auto; animation: none; max-height: none; }
+    /* The child must be able to reach height 0: border-box height can never
+       go below the element's own padding, so the closed state zeroes the
+       vertical padding too (transitioned, folds in with the row collapse). */
+    .tool-panel > .tool-modal { min-height: 0; overflow: hidden; transition: padding .35s ease; }
+    .tool-panel:not(.open) > .tool-modal { padding-top: 0; padding-bottom: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      .tool-panel, .tool-panel.open, .tool-panel > .tool-modal { transition: none; }
+    }
+    /* All tool panels share the modal's dark inner box, rendered inline.
+       Tighter vertical padding than the modal originals — inline panels
+       don't need breathing room for close buttons or viewport margins. */
+    .tool-panel .tool-modal {
+      margin: 0 auto; animation: none; max-height: none;
+      padding-top: .9rem; padding-bottom: 1rem;
+    }
+    .tool-panel .cal-scroll-wrap { padding-bottom: 0; }
+    .tool-panel .sv-formula { margin: .1rem 0 .85rem; }
 
     /* ── Add Second Person Toggle ────────────────────────────────── */
     .add-second-wrap { margin: .85rem 0 0; text-align: center; }
@@ -487,9 +520,9 @@
       max-width: var(--max-w); margin: 0 auto; width: 100%;
       box-sizing: border-box; text-align: center;
     }
-    #browseToggleBtn { display: inline-flex; align-items: center; gap: .4rem; }
-    #browseToggleBtn svg { width: 12px; height: 12px; display: block; transition: transform .25s ease; }
-    #browseToggleBtn.open svg { transform: rotate(180deg); }
+    #browseToggleBtn, #calToggleBtn { display: inline-flex; align-items: center; gap: .4rem; }
+    #browseToggleBtn svg, #calToggleBtn svg { width: 12px; height: 12px; display: block; transition: transform .25s ease; }
+    #browseToggleBtn.open svg, #calToggleBtn.open svg { transform: rotate(180deg); }
     .browse-section {
       display: none;
       padding: .75rem 0 1rem;
@@ -741,8 +774,12 @@
     .spreads-toggle:hover { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.45); }
     .spreads.collapsed .spreads-toggle svg { transform: rotate(180deg); }
     .spreads.collapsed .spread-layout { display: none; }
+    .spreads.collapsed .sl-mode-row { display: none; }
     .spreads .planet-label-text { color: rgba(255,255,255,.38); }
     .spreads .planet-col-label  { color: rgba(255,255,255,.38); }
+    /* Quadration Spirit/Life view (reuses .sl-* styles defined below) */
+    .spreads .sl-mode-row { margin: 0 0 1.1rem; }
+    .age-selector.sl-off { opacity: .32; pointer-events: none; }
 
     .spread-layout {
       display: flex; gap: 1.25rem; align-items: flex-start;
@@ -855,65 +892,24 @@
       .crown-row { gap: .35rem; }
     }
 
-    /* ── Compare Overlay ─────────────────────────────────────── */
-    .compare-overlay {
-      display: none; position: fixed; inset: 0; z-index: 200;
-      background: rgba(26,25,22,.65);
-      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-      align-items: center; justify-content: center;
-      padding: 1rem; overflow-y: auto;
+    /* ── Spirit & Life: one grid, two states ─────────────────── */
+    .sl-mode-row { display: flex; justify-content: center; gap: .5rem; margin: .1rem 0 .85rem; }
+    .sl-mode-btn {
+      font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+      color: rgba(255,255,255,.55); background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
+      padding: .45rem 1.4rem; cursor: pointer; transition: all var(--ease);
     }
-    .compare-overlay.open { display: flex; }
-    .compare-modal {
-      background: var(--accent); border-radius: var(--r-lg);
-      box-shadow: var(--sh-lg); width: 100%; max-width: 780px;
-      padding: 2.25rem 1rem 1rem;
-      position: relative;
-      animation: pop .22s cubic-bezier(.22,1,.36,1);
-    }
-    .cmp-close-btn {
-      position: absolute; top: .65rem; right: .65rem;
-      color: rgba(255,255,255,.6);
-    }
-    .cmp-close-btn:hover { color: #fff; }
-    /* Side-by-side grid: 7 life | center label | 7 spirit */
-    .cmp-sbs {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr) 1.3rem repeat(7, 1fr);
-      gap: 3px;
-      align-items: center;
-    }
-    .cmp-sbs .cal-chip { cursor: pointer; transition: opacity var(--ease), transform var(--ease); }
-    .cmp-sbs .cal-chip:hover { opacity: .8; transform: scale(1.08); }
-    .cmp-center-label {
-      text-align: center; font-size: 1.3rem; color: rgba(255,255,255,.35);
-      line-height: 1; user-select: none;
-    }
-    .cmp-col-label {
-      text-align: center; font-size: clamp(.9rem, 2.8vw, 1.24rem);
-      color: rgba(255,255,255,.4); padding-top: .3rem; user-select: none;
-    }
-    .cmp-side-title {
-      text-align: center; font-size: .68rem; font-weight: 600;
-      letter-spacing: .16em; text-transform: uppercase;
-      color: rgba(255,255,255,.55); padding-bottom: .6rem; user-select: none;
-    }
-    .cmp-blank { aspect-ratio: 5/3; }
-    /* Dark modal overrides for cal-chips inside the compare modal */
-    .compare-modal .cal-chip,
-    .compare-modal .cal-chip.hearts,
-    .compare-modal .cal-chip.diamonds,
-    .compare-modal .cal-chip.clubs,
-    .compare-modal .cal-chip.spades { background: #fff; border-color: rgba(0,0,0,.12); }
-    .compare-modal .cal-chip.hearts,  .compare-modal .cal-chip.diamonds { color: var(--red); }
-    .compare-modal .cal-chip.clubs  { color: var(--green); }
-    .compare-modal .cal-chip.spades { color: var(--navy); }
-    .compare-modal .cal-chip.joker  { color: var(--gold); background: #fff; border-color: rgba(181,134,74,.35); }
-    @media (max-width: 480px) {
-      .compare-modal { padding: 2rem .35rem .35rem; }
-      .cmp-sbs { gap: 2px; grid-template-columns: repeat(7, 1fr) 1rem repeat(7, 1fr); }
-      .cmp-center-label { font-size: 1rem; }
-    }
+    .sl-mode-btn:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+    .sl-mode-btn.active { color: var(--gold); border-color: var(--gold); background: rgba(181,134,74,.12); }
+    .sl-seat { min-width: 0; }
+    .sl-seat .spread-card { width: 100%; }
+    /* Cards that keep their seat in both spreads — rings only shown when the
+       grid opts in via .sl-rings (Spirit/Life views; not the Annual spread) */
+    .sl-rings .spread-card.sl-fixed { box-shadow: 0 0 0 1.5px rgba(181,134,74,.7); }
+    .sl-rings .spread-card.sl-semi  { outline: 1.5px dashed rgba(181,134,74,.55); outline-offset: 1px; }
+    .cal-modal .sync-intro strong { color: rgba(255,255,255,.8); font-weight: 500; }
+    .cal-modal .planet-col-label { color: rgba(255,255,255,.38); }
 
     /* ── Compare Card Popup ───────────────────────────────────── */
     .ccard-overlay {
@@ -1287,6 +1283,7 @@
       border-bottom: 1px solid var(--border);
     }
     .sync-items { list-style: none; }
+    .info-text .sync-items { margin: .1rem 0 1rem; }
     .sync-items li {
       display: flex; align-items: baseline; gap: .35rem;
       font-size: .73rem; color: var(--text-secondary); line-height: 1.45;
@@ -1314,6 +1311,36 @@
     .planet-text p {
       font-size: .82rem; color: rgba(255,255,255,.55); line-height: 1.6; margin: 0;
     }
+    /* Rich planet entries (rendered from js/planetdata.js) */
+    .planet-row { padding: 1.1rem 0; }
+    .planet-epithet {
+      font-size: .6rem; font-weight: 600; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--gold); white-space: nowrap;
+    }
+    .planet-text h4 { display: flex; align-items: baseline; gap: .55rem; }
+    .planet-kws {
+      font-size: .66rem; letter-spacing: .06em; color: rgba(255,255,255,.4);
+      margin-bottom: .5rem;
+    }
+    .planet-syn {
+      font-family: var(--serif); font-style: italic;
+      font-size: .95rem !important; color: rgba(255,255,255,.75) !important;
+      line-height: 1.55 !important; margin-bottom: .55rem !important;
+    }
+    .planet-text .planet-para { margin-bottom: .55rem; }
+    .planet-attr {
+      display: flex; gap: .5rem; align-items: baseline;
+      font-size: .72rem; line-height: 1.6; margin-top: .3rem;
+    }
+    .pa-label {
+      flex-shrink: 0; width: 3.2rem;
+      font-size: .58rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; padding-top: .1em;
+    }
+    .pa-light .pa-label { color: var(--gold); }
+    .pa-shadow .pa-label { color: rgba(255,255,255,.35); }
+    .pa-light  { color: rgba(255,255,255,.6); }
+    .pa-shadow { color: rgba(255,255,255,.45); }
 
     /* ── Info text (shown inside the dark cal-modal) ────────────── */
     .info-text p {
@@ -1660,18 +1687,14 @@
   </div>
 
   <div class="browse-toggle-wrap">
-    <button type="button" class="add-second-btn" id="browseToggleBtn" onclick="toggleBrowse()">All Cards <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button type="button" class="add-second-btn" id="calToggleBtn" onclick="toggleCalendar()">Year Calendar <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
-  <div class="browse-section" id="browseSection">
+  <div class="browse-section" id="calTopSection">
     <div class="browse-inner">
-      <div class="browse-filter-row">
-        <button class="suit-filter-btn hearts"   id="sf-hearts"   onclick="setBrowseSuit('hearts')">♥</button>
-        <button class="suit-filter-btn clubs"    id="sf-clubs"    onclick="setBrowseSuit('clubs')">♣</button>
-        <button class="suit-filter-btn diamonds" id="sf-diamonds" onclick="setBrowseSuit('diamonds')">♦</button>
-        <button class="suit-filter-btn spades"   id="sf-spades"   onclick="setBrowseSuit('spades')">♠</button>
-      </div>
-      <div class="spread-wrap">
-        <div class="spread-grid" id="browseGrid"></div>
+      <div class="cal-modal" style="max-width:600px;">
+        <div class="cal-scroll-wrap">
+          <div class="cal-grid-main" id="calGrid"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1694,6 +1717,11 @@
         </div>
       </div>
       <button class="spreads-toggle" id="spreadsToggle" onclick="toggleSpreads()" title="Minimise grid" aria-label="Minimise grid"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="sl-mode-row" id="qModeRow">
+      <button class="sl-mode-btn active" id="qAnnualBtn" onclick="qSetMode('annual')">Annual</button>
+      <button class="sl-mode-btn" id="qSpiritBtn" onclick="qSetMode('spirit')">Spirit</button>
+      <button class="sl-mode-btn" id="qLifeBtn" onclick="qSetMode('life')">Life</button>
     </div>
     <div class="spread-layout">
       <div class="spread-wrap">
@@ -1755,19 +1783,28 @@
       <button class="spreads-toggle" id="toolsToggle" onclick="toggleTools()" title="Show tools" aria-label="Show tools"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
     <div class="tools-grid">
-      <button class="tool-card-btn is-toggle" id="compareToolBtn" aria-expanded="false" aria-controls="comparePanel" onclick="toggleToolPanel('compare')">Spirit &amp; Life <span class="tool-card-arrow">⌄</span></button>
-      <button class="tool-card-btn is-toggle" id="calendarToolBtn" aria-expanded="false" aria-controls="calendarPanel" onclick="toggleToolPanel('calendar')">Year Calendar <span class="tool-card-arrow">⌄</span></button>
-      <button class="tool-card-btn is-toggle" id="svToolBtn" aria-expanded="false" aria-controls="svPanel" onclick="toggleToolPanel('sv')">Solar Values <span class="tool-card-arrow">⌄</span></button>
-      <button class="tool-card-btn is-toggle" id="syncToolBtn" aria-expanded="false" aria-controls="syncPanel" onclick="toggleToolPanel('sync')">Synchronicities <span class="tool-card-arrow">⌄</span></button>
-      <button class="tool-card-btn is-toggle" id="planetsToolBtn" aria-expanded="false" aria-controls="planetsPanel" onclick="toggleToolPanel('planets')">Planets <span class="tool-card-arrow">⌄</span></button>
-      <button class="tool-card-btn is-toggle" id="infoToolBtn" aria-expanded="false" aria-controls="infoPanel" onclick="toggleToolPanel('info')">Info <span class="tool-card-arrow">⌄</span></button>
+      <button class="tool-card-btn is-toggle" id="infoToolBtn" aria-expanded="false" aria-controls="infoPanel" onclick="toggleToolPanel('info')"><span class="tool-card-text"><span class="tool-card-name">Info</span><span class="tool-card-desc">How the system works</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button class="tool-card-btn is-toggle" id="browseToolBtn" aria-expanded="false" aria-controls="browsePanel" onclick="toggleToolPanel('browse')"><span class="tool-card-text"><span class="tool-card-name">All Cards</span><span class="tool-card-desc">Browse the full 52-card deck</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button class="tool-card-btn is-toggle" id="svToolBtn" aria-expanded="false" aria-controls="svPanel" onclick="toggleToolPanel('sv')"><span class="tool-card-text"><span class="tool-card-name">Solar Values</span><span class="tool-card-desc">The number behind every card</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+      <button class="tool-card-btn is-toggle" id="planetsToolBtn" aria-expanded="false" aria-controls="planetsPanel" onclick="toggleToolPanel('planets')"><span class="tool-card-text"><span class="tool-card-name">Planets</span><span class="tool-card-desc">What each column governs</span></span> <span class="tool-card-arrow"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+    </div>
 
-      <!-- Inline panel: Synchronicities -->
-      <div class="tool-panel" id="syncPanel" role="region" aria-labelledby="syncToolBtn">
+    <div class="tool-panels">
+
+      <!-- Inline panel: Planets (rendered from js/planetdata.js) -->
+      <div class="tool-panel" id="planetsPanel" role="region" aria-labelledby="planetsToolBtn">
         <div class="cal-modal tool-modal">
-          <div class="sync-list">
+          <p class="sync-intro">Every card in a spread sits beneath a planetary influence. These are the seven planets as Olney H. Richmond gave them in <em>The Mystic Test Book</em>, each with its light and its shadow, and the Crown that presides over them all.</p>
+          <div class="sync-list" id="planetsList"></div>
+        </div>
+      </div>
 
-            <div class="sync-list-section">The Calendar</div>
+      <!-- Inline panel: Info -->
+      <div class="tool-panel" id="infoPanel" role="region" aria-labelledby="infoToolBtn">
+        <div class="cal-modal tool-modal">
+          <div class="sync-list info-text">
+            <p>Take the deck away from the card table and look at it again. It is a calendar, and the fit is exact:</p>
+
             <ul class="sync-items">
               <li><span class="sync-key">52 cards</span><span class="sync-eq">=</span><span class="sync-val">52 weeks per year</span></li>
               <li><span class="sync-key">5 + 2</span><span class="sync-eq">=</span><span class="sync-val">7 days per week</span></li>
@@ -1782,118 +1819,49 @@
               <li><span class="sync-key">2 colours</span><span class="sync-eq">=</span><span class="sync-val">yin &amp; yang</span></li>
             </ul>
 
-            <div class="sync-list-section">The Piano</div>
+            <div class="sync-list-section">Echoes of the Count</div>
+            <p>Once you see the year in the deck, the same numbers start surfacing elsewhere:</p>
+
             <ul class="sync-items">
-              <li><span class="sync-key">52 white keys</span><span class="sync-eq">=</span><span class="sync-val">52 cards in the deck</span></li>
-              <li><span class="sync-key">36 black keys</span><span class="sync-eq">=</span><span class="sync-val">36 decans of the zodiac</span></li>
-              <li><span class="sync-key">88 keys total</span><span class="sync-eq">=</span><span class="sync-val">the full chromatic span</span></li>
+              <li><span class="sync-key">52 white piano keys</span><span class="sync-eq">=</span><span class="sync-val">the 52 cards, and the 52 northern constellations</span></li>
+              <li><span class="sync-key">36 black piano keys</span><span class="sync-eq">=</span><span class="sync-val">the 36 decans of the zodiac, and the 36 southern constellations</span></li>
+              <li><span class="sync-key">88 keys in all</span><span class="sync-eq">=</span><span class="sync-val">the 88 constellations that cover the entire sky</span></li>
+              <li><span class="sync-key">88 quadrations</span><span class="sync-eq">=</span><span class="sync-val">lie between the Spirit and the Life spread</span></li>
+              <li><span class="sync-key">"Red" &amp; "Black"</span><span class="sync-eq">=</span><span class="sync-val">each counts to 11 in Chaldean numerology</span></li>
+              <li><span class="sync-key">"Red", "Black" &amp; "White"</span><span class="sync-eq">=</span><span class="sync-val">together count to 53</span></li>
             </ul>
 
-            <div class="sync-list-section">The Constellations</div>
-            <ul class="sync-items">
-              <li><span class="sync-key">52 northern</span><span class="sync-eq">=</span><span class="sync-val">52 cards in the deck</span></li>
-              <li><span class="sync-key">36 southern</span><span class="sync-eq">=</span><span class="sync-val">36 decans of the zodiac</span></li>
-              <li><span class="sync-key">88 constellations</span><span class="sync-eq">=</span><span class="sync-val">cover the entire sky</span></li>
-            </ul>
-
-            <div class="sync-list-section">Quadrations</div>
-            <ul class="sync-items">
-              <li><span class="sync-key">88 quadrations</span><span class="sync-eq">=</span><span class="sync-val">between Spirit &amp; Life spread</span></li>
-            </ul>
-
-            <div class="sync-list-section">Numerology</div>
-            <ul class="sync-items">
-              <li><span class="sync-key">"Red" &amp; "Black"</span><span class="sync-eq">=</span><span class="sync-val">both equal 11 in Chaldean numerology</span></li>
-              <li><span class="sync-key">"Red", "Black" &amp; "White"</span><span class="sync-eq">=</span><span class="sync-val">together equal 53</span></li>
-            </ul>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Inline panel: Planets -->
-      <div class="tool-panel" id="planetsPanel" role="region" aria-labelledby="planetsToolBtn">
-        <div class="cal-modal tool-modal">
-          <p class="sync-intro">Every card in a spread sits beneath a planetary influence, read left to right from Neptune through to Mercury. The planet colours how that card expresses itself across a given area of life.</p>
-          <div class="sync-list">
-
-            <div class="sync-list-section">The Seven Planets</div>
-            <div class="planet-list">
-              <div class="planet-row">
-                <span class="planet-glyph">☿</span>
-                <div class="planet-text"><h4>Mercury</h4><p>The mind. How you think, learn, and communicate, along with the mental patterns and curiosity formed in early life.</p></div>
-              </div>
-              <div class="planet-row">
-                <span class="planet-glyph">♀</span>
-                <div class="planet-text"><h4>Venus</h4><p>Love and values. Romance, pleasure, beauty, and the people and things you are naturally drawn to.</p></div>
-              </div>
-              <div class="planet-row">
-                <span class="planet-glyph">♂</span>
-                <div class="planet-text"><h4>Mars</h4><p>Drive and passion. Ambition, courage, desire, and the way you assert yourself or meet conflict.</p></div>
-              </div>
-              <div class="planet-row">
-                <span class="planet-glyph">♃</span>
-                <div class="planet-text"><h4>Jupiter</h4><p>Expansion and abundance. Generosity, fortune, wisdom, and the areas of life where you grow and give.</p></div>
-              </div>
-              <div class="planet-row">
-                <span class="planet-glyph">♄</span>
-                <div class="planet-text"><h4>Saturn</h4><p>Discipline and lessons. Responsibility, hard work, limitation, and the burdens that ultimately teach and strengthen you.</p></div>
-              </div>
-              <div class="planet-row">
-                <span class="planet-glyph">♅</span>
-                <div class="planet-text"><h4>Uranus</h4><p>Freedom and originality. Independence, intuition, friendships, and the sudden, unconventional changes that move you forward.</p></div>
-              </div>
-              <div class="planet-row">
-                <span class="planet-glyph">♆</span>
-                <div class="planet-text"><h4>Neptune</h4><p>Dreams and spirit. Imagination, ideals, the subconscious, and the long-term or hidden dimensions of life.</p></div>
-              </div>
-            </div>
-
-            <div class="sync-list-section">The Crown</div>
-            <div class="planet-list">
-              <div class="planet-row">
-                <span class="planet-glyph">♛</span>
-                <div class="planet-text"><h4>Crown</h4><p>The master cards above the Sun Line (the Jack, Queen and King of Spades), representing spiritual mastery and the higher influences that preside over the whole spread.</p></div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Inline panel: Info -->
-      <div class="tool-panel" id="infoPanel" role="region" aria-labelledby="infoToolBtn">
-        <div class="cal-modal tool-modal">
-          <div class="sync-list info-text">
-            <p>Every playing card corresponds to a day of the year, turning the familiar 52-card deck into a map of time and personality. Each person carries a single Birth Card, set by their date of birth.</p>
+            <p>Coincidence stacked this high starts to look like architecture. Each person carries the card of the day they were born, and the whole system unfolds from that single card.</p>
 
             <div class="sync-list-section">Your Birth Card</div>
-            <p>Your Birth Card comes from your birthday through the Solar Value: <span class="sv-inline">sv = 55 − (2 × month + day)</span>. That number points to one of the 52 cards. December 31 is the exception, belonging to the Joker, which stands outside the system. Look yours up with the Finder.</p>
+            <p>Your birthday counts into the deck through the Solar Value: <span class="sv-inline">sv = 55 − (2 × month + day)</span>. The number lands on one of the 52 cards, and that card is yours: its days, its planets, its company. December 31 alone falls outside the count and belongs to the Joker. The Finder at the top of the page looks it up for you.</p>
 
             <div class="sync-list-section">Spreads and Quadrations</div>
-            <p>The deck can be laid out in a grid of seven planetary rows, crowned by three master cards. Reshuffling that layout by a fixed rule called a Quadration moves every card to a new seat. Ninety Quadrations bring the deck back to where it began, so each age from 0 to 89 has its own spread. The age selector steps through them, showing how your influences shift across a lifetime.</p>
+            <p>Laid out in full, the deck forms a spread: seven planetary rows of seven cards beneath a crown of three masters. A fixed reshuffle called a Quadration reseats every card, and ninety Quadrations bring the deck home again, so each age from 0 to 89 has a spread of its own. Step through them with the age selector and watch your influences move across a lifetime.</p>
 
             <div class="sync-list-section">The Life Script</div>
-            <p>Reading across the seven planetary columns, from Mercury through to Neptune, gives your Life Script: the cards that govern your mind, love, drive, fortune, lessons, freedom and dreams. See Planets for what each one represents.</p>
+            <p>Each column of the spread belongs to a planet. Reading across the seven columns, Mercury through to Neptune, gives your Life Script: the cards that govern your quickness, your loves, your strength, your fortune, your trials, your labour and your far horizons. The Planets tool gives each its full portrait.</p>
+
+            <div class="sync-list-section">Spirit and Life</div>
+            <p>The deck has two master seatings. The Spirit spread is its perfect original order; the Life spread is the worldly order it settles into. Crossing between them, every card displaces the card whose seat it takes and is displaced from its own in turn, while three hold fast in both: the Jack of Hearts, the Eight of Clubs and the King of Spades, the fixed cards. Flip the spread above between Annual, Spirit and Life to watch the exchange.</p>
 
             <div class="sync-list-section">Relationships</div>
-            <p>Add a second birthday in the Finder to see how two people connect. Their Solar Values are combined to reveal the card that describes the bond between them.</p>
+            <p>Add a second birthday in the Finder and the two Solar Values combine into a third card: the card of the relationship itself, with its own character, gifts and lessons.</p>
           </div>
         </div>
       </div>
 
-      <!-- Inline panel: Spirit & Life Chart -->
-      <div class="tool-panel" id="comparePanel" role="region" aria-labelledby="compareToolBtn">
-        <div class="compare-modal tool-modal">
-          <div class="cmp-sbs" id="cmpSbs"></div>
-        </div>
-      </div>
-
-      <!-- Inline panel: Year Calendar -->
-      <div class="tool-panel" id="calendarPanel" role="region" aria-labelledby="calendarToolBtn">
+      <!-- Inline panel: All Cards -->
+      <div class="tool-panel" id="browsePanel" role="region" aria-labelledby="browseToolBtn">
         <div class="cal-modal tool-modal">
-          <div class="cal-scroll-wrap">
-            <div class="cal-grid-main" id="calGrid"></div>
+          <div class="browse-filter-row">
+            <button class="suit-filter-btn hearts"   id="sf-hearts"   onclick="setBrowseSuit('hearts')">♥</button>
+            <button class="suit-filter-btn clubs"    id="sf-clubs"    onclick="setBrowseSuit('clubs')">♣</button>
+            <button class="suit-filter-btn diamonds" id="sf-diamonds" onclick="setBrowseSuit('diamonds')">♦</button>
+            <button class="suit-filter-btn spades"   id="sf-spades"   onclick="setBrowseSuit('spades')">♠</button>
+          </div>
+          <div class="spread-wrap">
+            <div class="spread-grid" id="browseGrid"></div>
           </div>
         </div>
       </div>
@@ -1985,6 +1953,7 @@
 </div>
 
 <script src="js/cardsdata.js"></script>
+<script src="js/planetdata.js"></script>
 <script>
 
 // ── Constants ────────────────────────────────────────────────────
@@ -2065,13 +2034,16 @@ let secondVisible = false;
 let _browseVisible = false;
 let _browseBuilt   = false;
 
-function toggleBrowse() {
-  _browseVisible = !_browseVisible;
-  document.getElementById('browseSection').classList.toggle('visible', _browseVisible);
-  document.getElementById('browseToggleBtn').classList.toggle('open', _browseVisible);
-  if (_browseVisible && !_browseBuilt) {
-    _buildBrowseGrid();
-    _browseBuilt = true;
+// Year Calendar — top-level toggle section (under the Finder).
+let _calVisible = false;
+let _calBuilt   = false;
+function toggleCalendar() {
+  _calVisible = !_calVisible;
+  document.getElementById('calTopSection').classList.toggle('visible', _calVisible);
+  document.getElementById('calToggleBtn').classList.toggle('open', _calVisible);
+  if (_calVisible && !_calBuilt) {
+    buildCalendar();
+    _calBuilt = true;
   }
 }
 
@@ -2393,33 +2365,20 @@ document.addEventListener('keydown', e => {
 // Card chosen in the Birth Card Finder; its quadration seat is highlighted gold across every age.
 let _finderPick = null; // { rank, suit } or null
 
-function spreadCardCell(c, position, cardsIdx) {
-  const pick = _finderPick && _finderPick.rank === c.rank && _finderPick.suit === c.suit ? ' finder-pick' : '';
-  return `<div class="spread-card ${c.suit}${pick}" title="${position}" onclick="openCompareCard(${cardsIdx})">
-    ${spreadCardPips(c)}
-  </div>`;
+// Single FLIP grid shared by Annual / Spirit / Life (built lazily).
+let _spreadCtl = null;
+function ensureSpreadCtl() {
+  if (!_spreadCtl) _spreadCtl = buildSpreadGrid(document.getElementById('annualGrid'));
+  return _spreadCtl;
 }
 
+// Render the Annual spread for a quadration index (age + 1). Re-seats the
+// shared cards (FLIP), turns rings off, and re-applies the finder pick.
 function buildAnnualGrid(age) {
-  const deck = deckAtAge(age);
-  let html = '';
-  // Crown row
-  html += `<div class="crown-row">`;
-  html += `<div></div><div></div>`;
-  for (let i = 51; i >= 49; i--) html += spreadCardCell(SPREAD_CARDS[deck[i]], `Crown · ${52-i}`, deck[i]);
-  html += `<div></div><div></div>`;
-  html += `</div>`;
-  // 7 planetary rows RTL
-  for (let row = 0; row < 7; row++) {
-    const planet = SPREAD_PLANETS[row];
-    const base = row * 7;
-    for (let col = 6; col >= 0; col--) html += spreadCardCell(SPREAD_CARDS[deck[base+col]], `${planet} · ${SPREAD_PLANETS[col]}`, deck[base+col]);
-  }
-  // Planet column label row (Neptune … Mercury, left → right)
-  [6,5,4,3,2,1,0].forEach(col => {
-    html += `<div class="planet-col-label">${SPREAD_PLANET_SYM[SPREAD_PLANETS[col]]}</div>`;
-  });
-  document.getElementById('annualGrid').innerHTML = html;
+  const ctl = ensureSpreadCtl();
+  ctl.showRings(false);
+  ctl.setDeck(deckAtAge(age));
+  ctl.setPick(_finderPick ? _finderPick.rank : null, _finderPick ? _finderPick.suit : null);
 }
 
 let currentAge = 0;
@@ -2441,6 +2400,31 @@ function toggleSpreads() {
   const btn = document.getElementById('spreadsToggle');
   btn.setAttribute('title', collapsed ? 'Show grid' : 'Minimise grid');
   btn.setAttribute('aria-label', collapsed ? 'Show grid' : 'Minimise grid');
+}
+
+// ── Quadration view mode: Annual (age-driven) · Spirit · Life ──────
+// All three views share one FLIP grid (#annualGrid), so every change —
+// stepping ages, or switching to a master spread — animates. Spirit =
+// deckAtAge(90), Life = deckAtAge(1); both show the fixed/semi rings and
+// dim the (irrelevant) age selector. Clicking a card opens the compare
+// popup; the per-card displacement note is queued for the popup.
+let _qMode = 'annual';
+function qSetMode(m) {
+  _qMode = m;
+  document.getElementById('qAnnualBtn').classList.toggle('active', m === 'annual');
+  document.getElementById('qSpiritBtn').classList.toggle('active', m === 'spirit');
+  document.getElementById('qLifeBtn').classList.toggle('active', m === 'life');
+  const ageSel = document.querySelector('#spreads .age-selector');
+  const ctl = ensureSpreadCtl();
+  if (m === 'annual') {
+    if (ageSel) ageSel.classList.remove('sl-off');
+    buildAnnualGrid(currentAge + 1);   // rings off + finder pick re-applied
+  } else {
+    if (ageSel) ageSel.classList.add('sl-off');
+    ctl.showRings(true);
+    ctl.setPick(null, null);
+    ctl.setDeck(m === 'spirit' ? deckAtAge(90) : deckAtAge(1));
+  }
 }
 
 // Collapse/expand the whole Tools section.
@@ -2847,63 +2831,6 @@ document.getElementById('ageInput').addEventListener('keydown', function(e) {
 buildAnnualGrid(1); // render Life Spread on load
 renderPersonalCards();
 
-// ── Compare Modal ────────────────────────────────────────────────
-function cmpChip(c, idx) {
-  const inner = c.suit === 'joker'
-    ? `<span class="cal-chip-rank">✦</span>`
-    : `<span class="cal-chip-rank">${c.rank}</span><span class="cal-chip-sym">${c.sym}</span>`;
-  return `<div class="cal-chip ${c.suit}" onclick="openCompareCard(${idx})">${inner}</div>`;
-}
-
-function buildSideBySide() {
-  const lifeDeck = deckAtAge(1);   // Life Spread  (age 0)
-  const spirDeck = deckAtAge(90);  // Spiritual Spread (age 89)
-  let html = '';
-
-  // Title row: Spirit (left) | blank center | Life (right)
-  html += `<div class="cmp-side-title" style="grid-column:span 7">Spirit</div>`;
-  html += `<div></div>`;
-  html += `<div class="cmp-side-title" style="grid-column:span 7">Life</div>`;
-
-  // Crown row: Spirit on left, Life on right
-  const crownSlots = [null, null, 51, 50, 49, null, null];
-  crownSlots.forEach(i => {
-    if (i === null) html += `<div class="cmp-blank"></div>`;
-    else { const c = SPREAD_CARDS[spirDeck[i]]; html += cmpChip(c, spirDeck[i]); }
-  });
-  html += `<div class="cmp-center-label">${SPREAD_PLANET_SYM.Crown}</div>`;
-  crownSlots.forEach(i => {
-    if (i === null) html += `<div class="cmp-blank"></div>`;
-    else { const c = SPREAD_CARDS[lifeDeck[i]]; html += cmpChip(c, lifeDeck[i]); }
-  });
-
-  // 7 planetary rows: Spirit on left, Life on right
-  for (let row = 0; row < 7; row++) {
-    const planet = SPREAD_PLANETS[row];
-    const base = row * 7;
-    for (let col = 6; col >= 0; col--) {
-      const c = SPREAD_CARDS[spirDeck[base + col]];
-      html += cmpChip(c, spirDeck[base + col]);
-    }
-    html += `<div class="cmp-center-label">${SPREAD_PLANET_SYM[planet]}</div>`;
-    for (let col = 6; col >= 0; col--) {
-      const c = SPREAD_CARDS[lifeDeck[base + col]];
-      html += cmpChip(c, lifeDeck[base + col]);
-    }
-  }
-
-  // Planet column labels at the bottom (Neptune → Mercury, left → right)
-  for (let col = 6; col >= 0; col--) {
-    html += `<div class="cmp-col-label">${SPREAD_PLANET_SYM[SPREAD_PLANETS[col]]}</div>`;
-  }
-  html += `<div></div>`; // blank center cell
-  for (let col = 6; col >= 0; col--) {
-    html += `<div class="cmp-col-label">${SPREAD_PLANET_SYM[SPREAD_PLANETS[col]]}</div>`;
-  }
-
-  document.getElementById('cmpSbs').innerHTML = html;
-}
-
 let _ccardIdx = -1;
 
 
@@ -3028,9 +2955,9 @@ function openModalFromCalendar(idx) {
 var _toolBuilt = {};
 function _buildToolPanel(key) {
   if (_toolBuilt[key]) return;
-  if (key === 'compare')  buildSideBySide();
-  else if (key === 'calendar') buildCalendar();
-  else if (key === 'sv')       buildSVChart();
+  if (key === 'browse')   _buildBrowseGrid();
+  else if (key === 'sv')  buildSVChart();
+  else if (key === 'planets') buildPlanets();
   _toolBuilt[key] = true;
 }
 function toggleToolPanel(key) {
@@ -3038,14 +2965,14 @@ function toggleToolPanel(key) {
   var btn   = document.getElementById(key + 'ToolBtn');
   if (!panel || !btn) return;
   var willOpen = !panel.classList.contains('open');
-  if (willOpen) {
-    _buildToolPanel(key);
-    // Float the most recently pressed tool's panel above any other open panels.
-    // Buttons stay put; only the panel moves to the top of the panel stack.
-    var grid = btn.parentNode;
-    var firstPanel = grid.querySelector('.tool-panel');
-    if (firstPanel && firstPanel !== panel) grid.insertBefore(panel, firstPanel);
-  }
+  // Accordion: at most one panel open — close any other before opening
+  document.querySelectorAll('.tool-panel.open').forEach(function (p) {
+    if (p === panel) return;
+    p.classList.remove('open');
+    var otherBtn = document.getElementById(p.id.replace(/Panel$/, 'ToolBtn'));
+    if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+  });
+  if (willOpen) _buildToolPanel(key);
   panel.classList.toggle('open', willOpen);
   btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
   if (willOpen) {
@@ -3055,6 +2982,29 @@ function toggleToolPanel(key) {
       btn.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 120);
   }
+}
+
+// ── Planets panel (from js/planetdata.js) ────────────────────────
+function buildPlanets() {
+  const order = PLANET_ORDER.concat(['Crown']);
+  let html = '<div class="sync-list-section">The Seven Planets</div><div class="planet-list">';
+  order.forEach(name => {
+    if (name === 'Crown') html += '</div><div class="sync-list-section">The Crown</div><div class="planet-list">';
+    const p = PLANET_DATA[name];
+    html += `<div class="planet-row">
+      <span class="planet-glyph">${p.glyph}</span>
+      <div class="planet-text">
+        <h4>${name} <span class="planet-epithet">${p.epithet}</span></h4>
+        <div class="planet-kws">${p.keywords.join(' · ')}</div>
+        <p class="planet-syn">${p.synopsis}</p>
+        ${p.text.map(t => `<p class="planet-para">${t}</p>`).join('')}
+        <div class="planet-attr pa-light"><span class="pa-label">Light</span><span>${p.light.join(' · ')}</span></div>
+        <div class="planet-attr pa-shadow"><span class="pa-label">Shadow</span><span>${p.shadow.join(' · ')}</span></div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('planetsList').innerHTML = html;
 }
 
 // ── Solar Values Chart ───────────────────────────────────────────

@@ -28,6 +28,7 @@ const PRECACHE = [
   'js/astronomy.js',
   'js/tzcoords.js',
   'js/cardsdata.js',
+  'js/planetdata.js',
   'js/dozenal.js',
   'js/ichingdata.js',
   'js/linedata.js',
