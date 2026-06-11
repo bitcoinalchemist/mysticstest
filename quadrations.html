@@ -98,73 +98,14 @@
 
     /* Spread grid */
     .spread-wrap { overflow-x: auto; padding-bottom: 1rem; -webkit-overflow-scrolling: touch; flex: 1; min-width: 0; display: flex; justify-content: center; }
-    .spread-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: .45rem .35rem;
-      align-items: center;
-      width: 100%;
-      max-width: 560px;
-      margin: 0 auto;
-    }
-    .planet-col-label {
-      text-align: center; font-size: 1.5rem;
-      color: var(--text-muted); padding-top: .4rem; line-height: 1;
-    }
-    .crown-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(7, 1fr); gap: .45rem .35rem; }
-
-    /* Pip cards */
+    /* Card faces + spread grid: shared base lives in css/site.css.
+       Pip cards — interactivity on top of the shared base: */
     .spread-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--r-md); cursor: pointer;
+      cursor: pointer;
       transition: box-shadow var(--ease), transform var(--ease), border-color var(--ease);
-      position: relative; overflow: hidden;
-      container-type: inline-size;
-      min-width: 0; min-height: 0; aspect-ratio: 5 / 7;
+      min-width: 0; min-height: 0;
     }
-    .spread-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 2;
-    }
-    .spread-card.hearts::before,  .spread-card.diamonds::before { background: var(--red); }
-    .spread-card.clubs::before    { background: var(--green); }
-    .spread-card.spades::before   { background: var(--navy); }
-    .spread-card.joker::before    { background: var(--gold); }
     .spread-card:hover { box-shadow: var(--sh-md); transform: translateY(-2px); border-color: var(--border-strong); }
-    .spread-card.hearts,  .spread-card.diamonds { color: var(--red); }
-    .spread-card.clubs    { color: var(--green); }
-    .spread-card.spades   { color: var(--navy); }
-    .spread-card.joker    { color: var(--gold); }
-    /* Court / joker SVGs have a white inner card-body rect — match the card
-       background so the parchment surface doesn't peek through at the edges. */
-    .spread-card:has(.court-art) { background: #ffffff; }
-
-    .card-corner {
-      position: absolute; z-index: 1;
-      display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1;
-    }
-    .card-tl { top: 2.5%; left: 4%; }
-    .card-br { bottom: 2.5%; right: 4%; transform: rotate(180deg); }
-    .cc-rank { font-family: var(--serif); font-size: 22cqw; font-weight: 500; line-height: 1; }
-    .cc-suit { font-size: 14cqw; line-height: 1; }
-    .card-pips { position: absolute; top: 18%; bottom: 18%; left: 12%; right: 12%; }
-    .pip {
-      position: absolute; transform: translate(-50%, -50%);
-      font-size: 20cqw; line-height: 1; user-select: none; pointer-events: none;
-    }
-    .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
-    .pip.ace { font-size: 44cqw; }
-    .pip-svg { width: 1em; height: 1em; fill: currentColor; display: block; }
-    .court-art {
-      position: absolute; inset: 8% 5%;
-      width: 90%; height: 84%;
-      object-fit: contain; object-position: center;
-    }
-    .card-face {
-      position: absolute; inset: 5%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-    }
-    .card-face-letter { font-family: var(--serif); font-size: 42cqw; font-weight: 400; line-height: 1; }
-    .card-face-sym    { font-size: 24cqw; opacity: .75; }
 
     /* ── Compare Card Popup ── */
     @keyframes cardFlip {

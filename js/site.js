@@ -76,4 +76,58 @@
       navigator.serviceWorker.register('sw.js').catch(function () { /* no-op */ });
     });
   }
+
+  // ── Backup: export / import the site's saved data ─────────────────
+  // One backup file covers every store (saved charts + saved readings),
+  // whichever page it is exported from. Import MERGES by entry id, so
+  // restoring an old file never deletes newer saves.
+  var BACKUP_KEYS = ['astro_births_v1', 'iching_readings'];
+
+  window.MCBackup = {
+    export: function () {
+      var out = { site: 'mysticscards.space', version: 1, exported: new Date().toISOString(), data: {} };
+      BACKUP_KEYS.forEach(function (k) {
+        try {
+          var v = JSON.parse(localStorage.getItem(k));
+          if (v) out.data[k] = v;
+        } catch (e) {}
+      });
+      var stamp = out.exported.slice(0, 10).replace(/-/g, '');
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }));
+      a.download = 'mysticscards-backup-' + stamp + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    },
+
+    // import(file, done) → done(addedCount) or done(-1) on a bad file
+    import: function (file, done) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var added = 0;
+        try {
+          var parsed = JSON.parse(reader.result);
+          var data = parsed && parsed.data ? parsed.data : null;
+          if (!data) { done(-1); return; }
+          BACKUP_KEYS.forEach(function (k) {
+            var incoming = data[k];
+            if (!Array.isArray(incoming)) return;
+            var current = [];
+            try { current = JSON.parse(localStorage.getItem(k)) || []; } catch (e) {}
+            var have = {};
+            current.forEach(function (x) { have[x.id] = true; });
+            incoming.forEach(function (x) {
+              if (x && x.id != null && !have[x.id]) { current.push(x); added++; }
+            });
+            try { localStorage.setItem(k, JSON.stringify(current)); } catch (e) {}
+          });
+          done(added);
+        } catch (e) { done(-1); }
+      };
+      reader.onerror = function () { done(-1); };
+      reader.readAsText(file);
+    }
+  };
 })();

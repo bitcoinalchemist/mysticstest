@@ -208,47 +208,8 @@
     }
     .bcard-name { font-family: var(--serif); font-size: 1.05rem; }
 
-    /* ── Card face (duplicated set — keep in sync with quadrations/cardsoflife) ── */
-    .spread-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--r-md);
-      position: relative; overflow: hidden;
-      container-type: inline-size;
-      width: 120px; aspect-ratio: 5 / 7;
-    }
-    .spread-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 2;
-    }
-    .spread-card.hearts::before,  .spread-card.diamonds::before { background: var(--red); }
-    .spread-card.clubs::before    { background: var(--green); }
-    .spread-card.spades::before   { background: var(--navy); }
-    .spread-card.joker::before    { background: var(--gold); }
-    .spread-card.hearts,  .spread-card.diamonds { color: var(--red); }
-    .spread-card.clubs    { color: var(--green); }
-    .spread-card.spades   { color: var(--navy); }
-    .spread-card.joker    { color: var(--gold); }
-    .spread-card:has(.court-art) { background: #ffffff; }
-    .card-corner {
-      position: absolute; z-index: 1;
-      display: flex; flex-direction: column; align-items: center; gap: 1px; line-height: 1;
-    }
-    .card-tl { top: 2.5%; left: 4%; }
-    .card-br { bottom: 2.5%; right: 4%; transform: rotate(180deg); }
-    .cc-rank { font-family: var(--serif); font-size: 22cqw; font-weight: 500; line-height: 1; }
-    .cc-suit { font-size: 14cqw; line-height: 1; }
-    .card-pips { position: absolute; top: 18%; bottom: 18%; left: 12%; right: 12%; }
-    .pip {
-      position: absolute; transform: translate(-50%, -50%);
-      font-size: 20cqw; line-height: 1; user-select: none; pointer-events: none;
-    }
-    .pip.inv { transform: translate(-50%, -50%) rotate(180deg); }
-    .pip.ace { font-size: 44cqw; }
-    .pip-svg { width: 1em; height: 1em; fill: currentColor; display: block; }
-    .court-art {
-      position: absolute; inset: 8% 5%;
-      width: 90%; height: 84%;
-      object-fit: contain; object-position: center;
-    }
+    /* Card faces: shared base lives in css/site.css. This page only sizes them. */
+    .spread-card { width: 120px; }
 
     /* ── Gates (Human Design mandala) ── */
     .gates-intro {
@@ -291,11 +252,13 @@
       .gate-detail { padding-left: 1rem; }
     }
 
-    /* ── Chart dark band ── */
+    /* ── Chart dark band — full viewport width, like the quadrations and
+       hexagrams bands. The section sits OUTSIDE .page-content; .chart-inner
+       re-caps the content at the shared max width so the section label still
+       lines up with the labels above and below. ── */
     .chart-dark {
       background: #252a4a;
-      margin: 0 -2rem;
-      padding: 1.5rem 2rem 2rem;
+      padding: 1.5rem 0 2rem;
       --surface: #2e3560;
       --bg: #252a4a;
       --rule-strong: rgba(255,255,255,.25);
@@ -314,6 +277,11 @@
     .chart-dark .zodiac-bar button.active { background: var(--gold); color: #fff; }
     .chart-dark .ayan-note { color: rgba(255,255,255,.5); }
     .chart-dark .wheel-wrap svg { filter: drop-shadow(0 14px 34px rgba(8,10,28,.45)); }
+    .chart-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
 
     /* ── Save / Load birth info buttons ── */
     .finder-actions {
@@ -375,6 +343,12 @@
     }
     .bdel:hover { color: var(--red); background: var(--gold-light); }
     .bempty { padding: .8rem; text-align: center; color: var(--muted); font-size: .78rem; font-style: italic; }
+    .bfoot {
+      display: flex; gap: .4rem; align-items: center;
+      padding: .45rem .55rem; border-top: 1px solid var(--rule);
+    }
+    .bfoot .bp-btn { flex: 0 0 auto; padding: 0 .7rem; }
+    .bfoot-msg { font-size: .68rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
 
     /* ── Life Script header ── */
     .ls-header {
@@ -469,6 +443,7 @@
             <button type="button" class="birth-btn" id="loadBtn" disabled title="Saved charts" aria-label="Saved charts" aria-expanded="false"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 2h8v12l-4-3-4 3V2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
             <div class="bpanel" id="histPanel"></div>
           </div>
+          <button type="button" class="birth-btn" id="shareBtn" disabled title="Copy link to this chart" aria-label="Copy link to this chart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
         </div>
       </div>
       <div class="f-error" id="fError"></div>
@@ -476,9 +451,11 @@
       <div class="f-note" id="fNote" style="display:none">Birth time not set — houses need it, and the Moon can drift up to six degrees across a day.</div>
     </div>
   </section>
+</div>
 
-  <div id="results">
-    <section class="chart-dark">
+<div id="results">
+  <section class="chart-dark">
+    <div class="chart-inner">
       <span class="section-label">Chart</span>
       <div class="zodiac-bar style-bar" id="traditionBar" role="group" aria-label="Tradition">
         <button type="button" data-trad="western" class="active">Western</button>
@@ -511,8 +488,10 @@
           <div class="angles" id="anglesBox" style="display:none"></div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
+  <div class="page-content" style="max-width: var(--max-w); padding: 2px 2rem 12px">
     <section id="aspectsSection">
       <span class="section-label">Aspects</span>
       <div class="aspect-list" id="aspectList"></div>
@@ -530,7 +509,7 @@
         <div class="cards-row" id="lifeScriptRow" style="display:none"></div>
       </div>
       <div class="asp-empty" id="solHint" style="display:none">
-        The solar day needs a longitude — pick a birthplace from the list, or enter one under Manual settings.
+        The solar day needs a longitude — pick a birthplace from the list, or enter one under Manual entry.
       </div>
     </section>
 
@@ -544,7 +523,9 @@
       <div class="gate-list" id="gateList"></div>
     </section>
   </div>
+</div>
 
+<div class="page-content" style="max-width: var(--max-w); padding: 2px 2rem 12px">
   <details class="method-details">
     <summary>Method &amp; precision</summary>
     <p class="method-note">
@@ -552,7 +533,6 @@
       computed in your browser with <a href="https://github.com/cosinekitty/astronomy" style="color:var(--gold)">Astronomy Engine</a> (MIT) — accurate to about one arcminute.
     </p>
   </details>
-
 </div>
 
 <script src="js/astronomy.js"></script>
@@ -695,6 +675,10 @@
     if (s.month) $('bMonth').value = s.month;
     if (s.year)  $('bYear').value  = s.year;
     if (s.time)  $('bTime').value  = s.time;
+    // Clear first: a previously loaded entry's manual coordinates must not
+    // silently override this entry's birthplace (manual fields win in draw()).
+    $('bLat').value = '';
+    $('bLon').value = '';
     if (s.lat != null && s.lat !== '') $('bLat').value = s.lat;
     if (s.lon != null && s.lon !== '') {
       // Back-compat: old saves stored a 0–180 magnitude plus an `ew` sign (−1 = W)
@@ -769,20 +753,19 @@
   // Zodiac sign symbols as vector stroke paths (0..100 box, centred ~50,50),
   // so they render identically on every device instead of depending on a
   // system symbol font. Index 0 = Aries … 11 = Pisces.
-  // NOTE: first-pass shapes — slated for a nicer redraw later.
   var SIGN_PATHS = [
-    'M50 74 L50 44 M50 44 C50 30 39 26 32 32 C26 37 29 45 37 45 M50 44 C50 30 61 26 68 32 C74 37 71 45 63 45',
-    'M34 64 A16 16 0 1 0 66 64 A16 16 0 1 0 34 64 M28 42 A24 24 0 0 0 72 42',
-    'M37 32 L37 68 M63 32 L63 68 M31 32 C44 26 56 26 69 32 M31 68 C44 74 56 74 69 68',
-    'M30 46 C34 39 47 38 57 43 M70 54 C66 61 53 62 43 57 M61 44 a4 4 0 1 0 0.1 0 M39 56 a4 4 0 1 0 0.1 0',
-    'M34 60 a9 9 0 1 0 9 -9 C50 40 66 44 64 58 C63 67 52 69 48 62',
-    'M28 36 L28 66 M28 40 C28 33 37 33 37 40 L37 66 M37 40 C37 33 46 33 46 40 L46 62 C46 70 56 69 60 62 C64 55 56 50 49 55',
-    'M28 66 H72 M28 54 H42 M58 54 H72 M42 54 A14 12 0 0 1 58 54',
-    'M28 38 L28 64 M28 42 C28 35 37 35 37 42 L37 64 M37 42 C37 35 46 35 46 42 L46 64 M46 42 C46 35 55 35 55 42 L55 68 L66 57 M66 68 L66 57 L55 57',
-    'M32 68 L68 32 M68 32 L54 33 M68 32 L67 46 M41 50 L52 61',
-    'M30 40 C31 33 39 33 41 41 L42 56 M42 44 C46 36 55 37 57 46 C58 53 52 56 48 51 C49 60 60 61 63 53 A8 8 0 1 0 52 50',
-    'M28 46 L38 40 L48 46 L58 40 L68 46 M28 58 L38 52 L48 58 L58 52 L68 58',
-    'M36 30 C26 41 26 59 36 70 M64 30 C74 41 74 59 64 70 M30 50 H70'
+    'M50 78 L50 44 C50 30 41 23 33 26 C26 29 25 38 31 42 M50 44 C50 30 59 23 67 26 C74 29 75 38 69 42',
+    'M36 63 A14 14 0 1 0 64 63 A14 14 0 1 0 36 63 M30 34 A26 26 0 0 0 70 34',
+    'M38 34 C36 45 36 55 38 66 M62 34 C64 45 64 55 62 66 M29 29 C43 35 57 35 71 29 M29 71 C43 65 57 65 71 71',
+    'M68 36 C62 27 46 26 36 34 M30 42 A8 8 0 1 0 46 42 A8 8 0 1 0 30 42 M32 64 C38 73 54 74 64 66 M54 58 A8 8 0 1 0 70 58 A8 8 0 1 0 54 58',
+    'M34 54 A8 8 0 1 0 34.1 54 M34 54 C32 36 48 28 56 36 C62 42 60 50 56 56 C52 62 52 68 58 68 C63 68 66 64 66 58',
+    'M26 42 C26 35 33 34 33 41 L33 64 M33 41 C33 34 41 34 41 41 L41 64 M41 41 C41 34 49 34 49 41 L49 58 C49 68 60 70 64 62 C67 55 60 49 53 54',
+    'M28 66 H72 M28 54 H40 M40 54 A10 10 0 0 1 60 54 M60 54 H72',
+    'M26 42 C26 35 33 34 33 41 L33 64 M33 41 C33 34 41 34 41 41 L41 64 M41 41 C41 34 49 34 49 41 L49 58 C49 66 56 68 62 64 L68 58 M68 58 L61 59 M68 58 L66 65',
+    'M31 69 L67 33 M67 33 L52 35 M67 33 L65 48 M40 48 L52 60',
+    'M28 40 C28 33 36 32 38 39 L43 55 C45 61 50 61 52 55 L58 36 C60 30 67 31 67 38 L67 50 A9 9 0 1 1 58 59',
+    'M27 44 L37 37 L47 44 L57 37 L67 44 M27 58 L37 51 L47 58 L57 51 L67 58',
+    'M38 28 C25 40 25 60 38 72 M62 28 C75 40 75 60 62 72 M31 50 H69'
   ];
   // Map sign / constellation names (both spellings) to a path index.
   var SIGN_GLYPH_IDX = {
@@ -800,7 +783,7 @@
     }
     var S = fsz * 1.7, sc = S / 100;
     return '<g transform="translate(' + n2(gx - S / 2) + ' ' + n2(gy - S / 2) + ') scale(' + n2(sc) + ')">' +
-      '<path d="' + SIGN_PATHS[idx] + '" fill="none" stroke="var(--gold)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/></g>';
+      '<path d="' + SIGN_PATHS[idx] + '" fill="none" stroke="var(--gold)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>';
   }
 
   function wheelSVG(chart, aspects, sectors, houses) {
@@ -817,6 +800,9 @@
          '<radialGradient id="wzWell" cx="50%" cy="48%" r="62%">' +
            '<stop offset="0%" stop-color="#272c50"/><stop offset="100%" stop-color="#1e2240"/>' +
          '</radialGradient>' +
+         '<radialGradient id="wzMed" cx="42%" cy="36%" r="80%">' +
+           '<stop offset="0%" stop-color="#323965"/><stop offset="100%" stop-color="#1c2038"/>' +
+         '</radialGradient>' +
          '<filter id="wzGlow" x="-25%" y="-25%" width="150%" height="150%">' +
            '<feGaussianBlur stdDeviation="3"/>' +
          '</filter>' +
@@ -824,8 +810,9 @@
 
     // Rim halo (blurred gold ring beneath the crisp rim)
     s += '<circle cx="210" cy="210" r="200" fill="none" stroke="var(--gold)" stroke-width="2.5" opacity="0.3" filter="url(#wzGlow)"/>';
-    // Zodiac band disc
-    s += '<circle cx="210" cy="210" r="200" fill="url(#wzBand)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>';
+    // Zodiac band disc with a crisp gold rim + outer hairline
+    s += '<circle cx="210" cy="210" r="200" fill="url(#wzBand)" stroke="var(--gold)" stroke-width="1.3" stroke-opacity="0.7"/>';
+    s += '<circle cx="210" cy="210" r="205" fill="none" stroke="var(--gold)" stroke-width="0.6" opacity="0.35"/>';
 
     // Alternating sector shading inside the band (handles unequal sectors)
     for (var sh = 0; sh < sectors.length; sh++) {
@@ -855,6 +842,14 @@
                  [144,174,0.5,.14],[252,272,0.5,.16],[196,250,0.6,.18],[270,170,0.5,.14]];
     stars.forEach(function (st) {
       s += '<circle cx="' + st[0] + '" cy="' + st[1] + '" r="' + st[2] + '" fill="#fff" opacity="' + st[3] + '"/>';
+    });
+    // ...plus a few four-point sparkles
+    [[243,158,3.2,.5],[164,222,2.6,.4],[222,255,2.2,.34],[182,148,2.0,.3]].forEach(function (sp) {
+      var x = sp[0], y = sp[1], r = sp[2], q = r * 0.28;
+      s += '<path d="M' + x + ' ' + (y - r) + ' Q' + (x + q) + ' ' + (y - q) + ' ' + (x + r) + ' ' + y +
+           ' Q' + (x + q) + ' ' + (y + q) + ' ' + x + ' ' + (y + r) +
+           ' Q' + (x - q) + ' ' + (y + q) + ' ' + (x - r) + ' ' + y +
+           ' Q' + (x - q) + ' ' + (y - q) + ' ' + x + ' ' + (y - r) + ' Z" fill="#fff" opacity="' + sp[3] + '"/>';
     });
 
     // House cusps: number each house at its arc midpoint, just inside the inner
@@ -899,12 +894,15 @@
       var p1 = pt(asp.a.lon, 104), p2 = pt(asp.b.lon, 104);
       var col = asp.tone === 'harm' ? 'var(--gold)' : asp.tone === 'tense' ? 'var(--red)' : 'var(--accent)';
       var op = Math.max(0.22, 0.72 - asp.orb * 0.08);
+      var aw = Math.max(0.7, 1.5 - asp.orb * 0.12);
       s += '<line x1="' + n2(p1[0]) + '" y1="' + n2(p1[1]) + '" x2="' + n2(p2[0]) + '" y2="' + n2(p2[1]) +
-           '" stroke="' + col + '" stroke-width="1" stroke-linecap="round" opacity="' + n2(op) + '"/>';
+           '" stroke="' + col + '" stroke-width="' + n2(aw) + '" stroke-linecap="round" opacity="' + n2(op) + '"/>';
     });
 
-    // Centre ornament: small four-pointed gold star
-    s += '<path d="M210 202.6 Q211.7 208.3 217.4 210 Q211.7 211.7 210 217.4 Q208.3 211.7 202.6 210 Q208.3 208.3 210 202.6 Z" fill="var(--gold)" opacity="0.85"/>';
+    // Centre ornament: four-pointed gold star in a fine double halo
+    s += '<circle cx="210" cy="210" r="13" fill="none" stroke="var(--gold)" stroke-width="0.6" opacity="0.4"/>';
+    s += '<circle cx="210" cy="210" r="16.5" fill="none" stroke="var(--gold)" stroke-width="0.4" opacity="0.22"/>';
+    s += '<path d="M210 201.4 Q212 208 218.6 210 Q212 212 210 218.6 Q208 212 201.4 210 Q208 208 210 201.4 Z" fill="var(--gold)" opacity="0.9"/>';
 
     // Planet markers: tick on the inner ring + glyph on a dark medallion,
     // nudged apart when crowded
@@ -921,7 +919,7 @@
       var tA = pt(p.lon, 104), tB = pt(p.lon, 110);
       s += '<line x1="' + n2(tA[0]) + '" y1="' + n2(tA[1]) + '" x2="' + n2(tB[0]) + '" y2="' + n2(tB[1]) + '" stroke="var(--accent)" stroke-width="1.3"/>';
       var g2 = pt(p.lon, radii[p.name]);
-      s += '<circle cx="' + n2(g2[0]) + '" cy="' + n2(g2[1]) + '" r="11" fill="rgba(30,34,64,.88)" stroke="rgba(255,255,255,.22)" stroke-width="0.8"/>';
+      s += '<circle cx="' + n2(g2[0]) + '" cy="' + n2(g2[1]) + '" r="11" fill="url(#wzMed)" stroke="var(--gold)" stroke-width="0.8" stroke-opacity="0.55"/>';
       s += '<text x="' + n2(g2[0]) + '" y="' + n2(g2[1]) + '" font-size="16" fill="var(--accent)" text-anchor="middle" dominant-baseline="central">' + p.glyph +
            (p.retro ? '<tspan font-size="9" fill="var(--red)" dy="-7">℞</tspan>' : '') + '</text>';
     });
@@ -1217,8 +1215,9 @@
   // ── Houses (Ascendant, Midheaven, house cusps) ───────────
   // All computed in the tropical equinox-of-date frame, matching the planet
   // longitudes (verified: Astronomy.Ecliptic returns true ecliptic of date).
-  // The Ascendant/Midheaven formulas use apparent sidereal time and the true
-  // obliquity, so everything lands in the same frame. House assignment is
+  // The Ascendant/Midheaven formulas use apparent sidereal time and the MEAN
+  // obliquity (nutation in obliquity ≤ ~9″ is ignored — far below the
+  // displayed precision), so everything lands in the same frame. House assignment is
   // zodiac-invariant: a sidereal toggle shifts the Ascendant and the planets
   // together, so the relative house never changes.
   var DEG = Math.PI / 180;
@@ -1678,6 +1677,10 @@
       // Reveal the manual row so the longitude field the hint mentions is visible
       setAdvOpen(true);
     }
+
+    $('shareBtn').disabled = false;
+    // A manually drawn chart supersedes any shared-link hash in the URL
+    if (!_fromHash && location.hash) history.replaceState(null, '', location.pathname + location.search);
   }
 
   // Zodiac toggle — repaint from the stored tropical chart
@@ -1794,24 +1797,55 @@
     if (e.key === 'Escape') closePanels();
   });
 
-  // Bookmark: history panel listing every saved chart
-  function renderHistPanel() {
+  // Bookmark: history panel listing every saved chart, plus backup tools.
+  // Export/Import live here even when the list is empty — importing a backup
+  // on a fresh device is exactly the empty-list case.
+  function histFootHTML(msg) {
+    return '<div class="bfoot">' +
+      '<button type="button" class="bp-btn" id="bExport">Export</button>' +
+      '<button type="button" class="bp-btn" id="bImport">Import</button>' +
+      '<input type="file" id="bImportFile" accept=".json,application/json" style="display:none">' +
+      '<span class="bfoot-msg">' + (msg || '') + '</span>' +
+    '</div>';
+  }
+
+  function wireHistFoot(panel, msgText) {
+    $('bExport').addEventListener('click', function (e) {
+      e.stopPropagation();
+      window.MCBackup.export();
+    });
+    $('bImport').addEventListener('click', function (e) {
+      e.stopPropagation();
+      $('bImportFile').click();
+    });
+    $('bImportFile').addEventListener('change', function () {
+      var f = this.files[0];
+      if (!f) return;
+      window.MCBackup.import(f, function (added) {
+        renderHistPanel(added < 0 ? 'could not read that file' :
+          added === 0 ? 'nothing new to add' : '✓ ' + added + ' added');
+        $('loadBtn').disabled = loadBirths().length === 0 && added <= 0;
+      });
+    });
+  }
+
+  function renderHistPanel(msg) {
     var panel = $('histPanel');
     var list = loadBirths();
-    if (!list.length) {
-      panel.innerHTML = '<div class="bempty">No saved charts yet.</div>';
-      return;
-    }
-    panel.innerHTML = list.slice().reverse().map(function (s) {
-      var sub = birthLabel(s) + (s.time ? ' · ' + s.time : '');
-      return '<div class="bitem" data-id="' + s.id + '">' +
-        '<div class="bitem-body">' +
-          '<div class="bitem-name">' + esc(s.name || birthLabel(s)) + '</div>' +
-          '<div class="bitem-sub">' + esc(sub) + '</div>' +
-        '</div>' +
-        '<button type="button" class="bdel" data-del="' + s.id + '" title="Delete" aria-label="Delete saved chart">✕</button>' +
-      '</div>';
-    }).join('');
+    var items = list.length
+      ? list.slice().reverse().map(function (s) {
+          var sub = birthLabel(s) + (s.time ? ' · ' + s.time : '');
+          return '<div class="bitem" data-id="' + s.id + '">' +
+            '<div class="bitem-body">' +
+              '<div class="bitem-name">' + esc(s.name || birthLabel(s)) + '</div>' +
+              '<div class="bitem-sub">' + esc(sub) + '</div>' +
+            '</div>' +
+            '<button type="button" class="bdel" data-del="' + s.id + '" title="Delete" aria-label="Delete saved chart">✕</button>' +
+          '</div>';
+        }).join('')
+      : '<div class="bempty">No saved charts yet.</div>';
+    panel.innerHTML = items + histFootHTML(msg);
+    wireHistFoot(panel, msg);
 
     panel.querySelectorAll('.bitem').forEach(function (item) {
       item.addEventListener('click', function (e) {
@@ -1852,12 +1886,110 @@
 
   $('loadBtn').disabled = loadBirths().length === 0;
 
+  // ── Shareable chart links ─────────────────────────────────
+  // The hash encodes the birth data plus the active view, so the link
+  // reproduces exactly what's on screen:
+  //   #c=15.6.1990.1430&p=Europe%2FLondon&z=lahiri&v=south&h=placidus
+  // (c = day.month.year.time, x = no time; o = manual offset when no place;
+  //  la/lo = manual coords; z/v/h omitted at their defaults)
+  var _fromHash = false;
+
+  function chartHash() {
+    var t = $('bTime').value;
+    var parts = ['c=' + dSel.value + '.' + mSel.value + '.' + $('bYear').value + '.' + (t ? t.replace(':', '') : 'x')];
+    var pl = TZ_OK ? placeEl.value.trim() : '';
+    if (pl) parts.push('p=' + encodeURIComponent(pl));
+    else parts.push('o=' + oSel.value);
+    if ($('bLat').value !== '') parts.push('la=' + $('bLat').value);
+    if ($('bLon').value !== '') parts.push('lo=' + $('bLon').value);
+    if (_zodiac !== 'tropical') parts.push('z=' + _zodiac);
+    if (_chartStyle !== 'western') parts.push('v=' + _chartStyle);
+    if (_houseSystem !== 'whole') parts.push('h=' + _houseSystem);
+    return '#' + parts.join('&');
+  }
+
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  $('shareBtn').addEventListener('click', function () {
+    var url = location.origin + location.pathname + chartHash();
+    var btn = this;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () { btnFlash(btn); },
+        function () { legacyCopy(url); btnFlash(btn); });
+    } else {
+      legacyCopy(url); btnFlash(btn);
+    }
+  });
+
+  // Restore a shared chart from the URL hash, if present.
+  // (Explicitly shared links only — normal page loads still start clean.)
+  function restoreFromHash() {
+    var h = location.hash.slice(1);
+    if (!h) return;
+    var P = {};
+    h.split('&').forEach(function (kv) {
+      var i = kv.indexOf('=');
+      if (i > 0) P[kv.slice(0, i)] = kv.slice(i + 1);
+    });
+    var m = P.c && /^(\d{1,2})\.(\d{1,2})\.(\d{4})\.(\d{3,4}|x)$/.exec(P.c);
+    if (!m) return;
+    dSel.value = +m[1]; mSel.value = +m[2]; $('bYear').value = +m[3];
+    if (m[4] === 'x') {
+      $('bTime').value = '';
+    } else {
+      var hm4 = m[4].padStart(4, '0');
+      $('bTime').value = hm4.slice(0, 2) + ':' + hm4.slice(2);
+    }
+    $('bLat').value = ''; $('bLon').value = '';
+    if (P.p) {
+      try { placeEl.value = decodeURIComponent(P.p); } catch (e) {}
+      oSel.disabled = !!placeEl.value;
+    } else {
+      placeEl.value = '';
+      oSel.disabled = false;
+      if (P.o !== undefined) oSel.value = P.o;
+    }
+    if (P.la !== undefined) $('bLat').value = P.la;
+    if (P.lo !== undefined) $('bLon').value = P.lo;
+    if ((P.la !== undefined || P.lo !== undefined) && !P.p) setAdvOpen(true);
+    if (P.z === 'lahiri' || P.z === 'fagan' || P.z === 'truesky') _zodiac = P.z;
+    if (P.v === 'south' || P.v === 'north') { _chartStyle = P.v; _vedicStyle = P.v; }
+    if (P.h && HOUSE_SYSTEMS[P.h]) _houseSystem = P.h;
+
+    // Sync the toggle bars to the restored view
+    document.querySelectorAll('#zodiacBar button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.z === _zodiac);
+    });
+    var indian = (_chartStyle === 'south' || _chartStyle === 'north');
+    document.querySelectorAll('#traditionBar button').forEach(function (b) {
+      b.classList.toggle('active', (b.dataset.trad === 'indian') === indian);
+    });
+    document.querySelectorAll('#vedicBar button').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.vstyle === _vedicStyle);
+    });
+    $('houseSelect').value = _houseSystem;
+
+    _fromHash = true;
+    draw();
+    _fromHash = false;
+  }
+
   $('drawBtn').addEventListener('click', draw);
-  ['bDay','bMonth','bYear','bTime','bOffset'].forEach(function (id) {
+  ['bDay','bMonth','bYear','bTime','bOffset','bPlace','bLat','bLon'].forEach(function (id) {
     $(id).addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); draw(); }
     });
   });
+
+  restoreFromHash();
 })();
 </script>
 
